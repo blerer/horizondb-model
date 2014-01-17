@@ -19,11 +19,12 @@ import io.horizondb.io.ByteReader;
 import io.horizondb.io.ByteWriter;
 import io.horizondb.io.serialization.Parser;
 import io.horizondb.io.serialization.Serializable;
-import io.horizondb.model.fields.ByteField;
-import io.horizondb.model.fields.DecimalField;
-import io.horizondb.model.fields.IntegerField;
-import io.horizondb.model.fields.LongField;
-import io.horizondb.model.fields.TimestampField;
+import io.horizondb.model.core.Field;
+import io.horizondb.model.core.fields.ByteField;
+import io.horizondb.model.core.fields.DecimalField;
+import io.horizondb.model.core.fields.IntegerField;
+import io.horizondb.model.core.fields.LongField;
+import io.horizondb.model.core.fields.TimestampField;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;

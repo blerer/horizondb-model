@@ -16,7 +16,7 @@
 package io.horizondb.model;
 
 import io.horizondb.model.RecordIterator.Builder;
-import io.horizondb.model.records.TimeSeriesRecord;
+import io.horizondb.model.core.records.TimeSeriesRecord;
 
 import static org.apache.commons.lang.Validate.notNull;
 

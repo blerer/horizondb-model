@@ -18,7 +18,8 @@ package io.horizondb.model;
 import io.horizondb.io.ByteWriter;
 import io.horizondb.io.encoding.VarInts;
 import io.horizondb.io.serialization.Serializable;
-import io.horizondb.model.records.TimeSeriesRecord;
+import io.horizondb.model.core.Record;
+import io.horizondb.model.core.records.TimeSeriesRecord;
 
 import java.io.IOException;
 import java.util.ArrayList;

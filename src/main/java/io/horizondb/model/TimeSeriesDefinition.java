@@ -21,8 +21,8 @@ import io.horizondb.io.encoding.VarInts;
 import io.horizondb.io.serialization.Parser;
 import io.horizondb.io.serialization.Serializable;
 import io.horizondb.io.serialization.Serializables;
-import io.horizondb.model.records.BinaryTimeSeriesRecord;
-import io.horizondb.model.records.TimeSeriesRecord;
+import io.horizondb.model.core.records.BinaryTimeSeriesRecord;
+import io.horizondb.model.core.records.TimeSeriesRecord;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -186,7 +186,7 @@ public final class TimeSeriesDefinition implements Serializable {
      * @param type the name of the record type.
      * @return a new record instances of the specified type.
      */
-    TimeSeriesRecord newRecord(int index) {
+    public TimeSeriesRecord newRecord(int index) {
 
         Validate.isTrue(index >= 0 && index <= this.recordTypes.size(), "No record has been defined for the index: "
                 + index);
@@ -200,7 +200,7 @@ public final class TimeSeriesDefinition implements Serializable {
      * @param type the record type.
      * @return the index of the specified record type.
      */
-    int getRecordTypeIndex(String type) {
+    public int getRecordTypeIndex(String type) {
 
         for (int i = 0, m = this.recordTypes.size(); i < m; i++) {
 

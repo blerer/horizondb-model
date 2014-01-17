@@ -18,7 +18,7 @@ package io.horizondb.model;
 import io.horizondb.io.ByteReader;
 import io.horizondb.io.ReadableBuffer;
 import io.horizondb.io.encoding.VarInts;
-import io.horizondb.model.records.BinaryTimeSeriesRecord;
+import io.horizondb.model.core.records.BinaryTimeSeriesRecord;
 
 import java.io.Closeable;
 import java.io.IOException;

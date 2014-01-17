@@ -15,6 +15,8 @@
  */
 package io.horizondb.model;
 
+import io.horizondb.model.core.Record;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.NoSuchElementException;

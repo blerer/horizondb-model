@@ -15,7 +15,7 @@
  */
 package io.horizondb.model;
 
-import io.horizondb.model.records.TimeSeriesRecord;
+import io.horizondb.model.core.records.TimeSeriesRecord;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
