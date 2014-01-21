@@ -17,8 +17,6 @@ package io.horizondb.model.core.records;
 
 import io.horizondb.io.Buffer;
 import io.horizondb.io.buffers.Buffers;
-import io.horizondb.model.RecordBuilder;
-import io.horizondb.model.core.records.TimeSeriesRecord;
 import io.horizondb.model.schema.FieldType;
 
 import java.io.IOException;
@@ -41,19 +39,17 @@ public class TimeseriesRecordTest {
     @Test
     public void testSubtract() throws IOException {
 
-        RecordBuilder builder = new RecordBuilder(TYPE, TimeUnit.MILLISECONDS, FieldType.INTEGER);
+        TimeSeriesRecord first = new TimeSeriesRecord(TYPE, TimeUnit.MILLISECONDS, FieldType.INTEGER);
+        first.setTimestampInMillis(0, 1001L);
+        first.setInt(1, 3);
 
-        builder.setTimestampInMillis(0, 1001L).setInt(1, 3);
+        TimeSeriesRecord second = new TimeSeriesRecord(TYPE, TimeUnit.MILLISECONDS, FieldType.INTEGER);
+        second.setTimestampInMillis(0, 1002L);
+        second.setInt(1, 1);
 
-        TimeSeriesRecord first = builder.build();
-
-        builder.setTimestampInMillis(0, 1002L).setInt(1, 1);
-
-        TimeSeriesRecord second = builder.build();
-
-        builder.setTimestampInMillis(0, 1003L).setInt(1, 1);
-
-        TimeSeriesRecord third = builder.build();
+        TimeSeriesRecord third = new TimeSeriesRecord(TYPE, TimeUnit.MILLISECONDS, FieldType.INTEGER);
+        third.setTimestampInMillis(0, 1003L);
+        third.setInt(1, 1);
 
         TimeSeriesRecord delta = second.newInstance();
 
@@ -222,21 +218,19 @@ public class TimeseriesRecordTest {
 
         TimeSeriesRecord sum = new TimeSeriesRecord(TYPE, TimeUnit.MILLISECONDS, FieldType.INTEGER);
 
-        RecordBuilder builder = new RecordBuilder(TYPE, TimeUnit.MILLISECONDS, FieldType.INTEGER);
+        TimeSeriesRecord empty = new TimeSeriesRecord(TYPE, TimeUnit.MILLISECONDS, FieldType.INTEGER);
 
-        TimeSeriesRecord empty = builder.build();
+        TimeSeriesRecord first = new TimeSeriesRecord(TYPE, TimeUnit.MILLISECONDS, FieldType.INTEGER);
+        first.setTimestampInMillis(0, 1001L);
+        first.setInt(1, 3);
 
-        builder.setTimestampInMillis(0, 1001L).setInt(1, 3);
+        TimeSeriesRecord second = new TimeSeriesRecord(TYPE, TimeUnit.MILLISECONDS, FieldType.INTEGER);
+        second.setTimestampInMillis(0, 1002L);
+        second.setInt(1, 1);
 
-        TimeSeriesRecord first = builder.build();
-
-        builder.setTimestampInMillis(0, 1002L).setInt(1, 1);
-
-        TimeSeriesRecord second = builder.build();
-
-        builder.setTimestampInMillis(0, 1003L).setInt(1, 1);
-
-        TimeSeriesRecord third = builder.build();
+        TimeSeriesRecord third = new TimeSeriesRecord(TYPE, TimeUnit.MILLISECONDS, FieldType.INTEGER);
+        third.setTimestampInMillis(0, 1003L);
+        third.setInt(1, 1);
 
         TimeSeriesRecord toAdd = first.newInstance();
         toAdd.subtract(empty);
@@ -279,21 +273,19 @@ public class TimeseriesRecordTest {
         TimeSeriesRecord sum = new TimeSeriesRecord(TYPE, TimeUnit.MILLISECONDS, FieldType.INTEGER);
         sum.setDelta(true);
 
-        RecordBuilder builder = new RecordBuilder(TYPE, TimeUnit.MILLISECONDS, FieldType.INTEGER);
+        TimeSeriesRecord empty = new TimeSeriesRecord(TYPE, TimeUnit.MILLISECONDS, FieldType.INTEGER);
 
-        TimeSeriesRecord empty = builder.build();
+        TimeSeriesRecord first = new TimeSeriesRecord(TYPE, TimeUnit.MILLISECONDS, FieldType.INTEGER);
+        first.setTimestampInMillis(0, 1001L);
+        first.setInt(1, 3);
 
-        builder.setTimestampInMillis(0, 1001L).setInt(1, 3);
+        TimeSeriesRecord second = new TimeSeriesRecord(TYPE, TimeUnit.MILLISECONDS, FieldType.INTEGER);
+        second.setTimestampInMillis(0, 1002L);
+        second.setInt(1, 1);
 
-        TimeSeriesRecord first = builder.build();
-
-        builder.setTimestampInMillis(0, 1002L).setInt(1, 1);
-
-        TimeSeriesRecord second = builder.build();
-
-        builder.setTimestampInMillis(0, 1003L).setInt(1, 1);
-
-        TimeSeriesRecord third = builder.build();
+        TimeSeriesRecord third = new TimeSeriesRecord(TYPE, TimeUnit.MILLISECONDS, FieldType.INTEGER);
+        third.setTimestampInMillis(0, 1003L);
+        third.setInt(1, 1);
 
         TimeSeriesRecord toAdd = first.newInstance();
         toAdd.subtract(empty);
@@ -419,17 +411,17 @@ public class TimeseriesRecordTest {
 
         TimeSeriesRecord empty = new TimeSeriesRecord(TYPE, TimeUnit.MILLISECONDS, FieldType.INTEGER);
 
-        RecordBuilder builder = new RecordBuilder(TYPE, TimeUnit.MILLISECONDS, FieldType.INTEGER);
+        TimeSeriesRecord first = new TimeSeriesRecord(TYPE, TimeUnit.MILLISECONDS, FieldType.INTEGER);
+        first.setTimestampInMillis(0, 1001L);
+        first.setInt(1, 3);
 
-        builder.setTimestampInMillis(0, 1001L).setInt(1, 3);
+        TimeSeriesRecord second = new TimeSeriesRecord(TYPE, TimeUnit.MILLISECONDS, FieldType.INTEGER);
+        second.setTimestampInMillis(0, 1002L);
+        second.setInt(1, 1);
 
-        TimeSeriesRecord first = builder.build();
-
-        builder.setTimestampInMillis(0, 1002L).setInt(1, 1);
-
-        TimeSeriesRecord second = builder.build();
-
-        TimeSeriesRecord third = builder.build();
+        TimeSeriesRecord third = new TimeSeriesRecord(TYPE, TimeUnit.MILLISECONDS, FieldType.INTEGER);
+        third.setTimestampInMillis(0, 1002L);
+        third.setInt(1, 1);
 
         TimeSeriesRecord toAdd = first.newInstance();
         toAdd.subtract(empty);
