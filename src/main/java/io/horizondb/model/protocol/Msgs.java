@@ -15,7 +15,11 @@
  */
 package io.horizondb.model.protocol;
 
+import java.util.List;
+
 import io.horizondb.io.serialization.Serializable;
+import io.horizondb.model.TimeRange;
+import io.horizondb.model.core.Record;
 import io.horizondb.model.schema.DatabaseDefinition;
 import io.horizondb.model.schema.TimeSeriesDefinition;
 
@@ -142,6 +146,51 @@ public final class Msgs {
     public static Msg<?> newGetTimeSeriesResponse(Msg<?> request, TimeSeriesDefinition definition) {
         
         return Msg.newResponseMsg(request.getHeader(), new GetTimeSeriesResponsePayload(definition));
+    }
+        
+    /**
+     * Creates a new message to request the write of the specified records.
+     * 
+     * @param databaseName the name of the database 
+     * @param seriesName the name of the time series 
+     * @param partitionTimeRange the time range identifying the partition
+     * @param records the records to write
+     * @return a new message to request the creation of the specified time series in the specified database.
+     */
+    public static Msg<BulkWritePayload> newBulkWriteRequest(String databaseName, 
+                                                            String seriesName,
+                                                            TimeRange partitionTimeRange,
+                                                            List<? extends Record> records) {
+        
+        return Msg.newRequestMsg(OpCode.BULK_WRITE, 
+                                 new BulkWritePayload(databaseName, seriesName, partitionTimeRange, records));
+    }
+    
+    /**
+     * Creates a response to specified write request.
+     * 
+     * @param request the write request
+     * @return a response to specified write request
+     */
+    public static Msg<?> newBulkWriteResponse(Msg<?> request) {
+        
+        return Msg.emptyMsg(MsgHeader.newResponseHeader(request.getHeader(), 0, 0));
+    }
+    
+    /**
+     * Creates a new message to request a set of records.
+     * 
+     * @param databaseName the name of the database 
+     * @param seriesName the name of the time series 
+     * @param timeRange the time range for which the records must be returned
+     * @return a new message to request a set of records.
+     */
+    public static Msg<QueryPayload> newQueryRequest(String databaseName, 
+                                                            String seriesName,
+                                                            TimeRange timeRange) {
+        
+        return Msg.newRequestMsg(OpCode.QUERY, 
+                                 new QueryPayload(databaseName, seriesName, timeRange));
     }
     
     /**

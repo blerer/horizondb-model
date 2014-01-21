@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.horizondb.model;
+package io.horizondb.model.protocol;
 
 import io.horizondb.io.ByteWriter;
+import io.horizondb.model.TimeRange;
 import io.horizondb.model.core.Record;
 import io.horizondb.model.core.RecordUtils;
 
@@ -26,21 +27,32 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
 /**
- * Batch of records to be inserted within a time series.
+ * <code>Payload</code> used to request the write of a bulk of records.
  * 
  * @author Benjamin
- * 
+ *
  */
-public class RecordBatch extends AbstractRecordBatch {
+public final class BulkWritePayload extends AbstractBulkWritePayload {
 
     /**
      * The records that must be inserted.
      */
     private final List<? extends Record> records;
 
-    public RecordBatch(String databaseName, String seriesName, long partition, List<? extends Record> records) {
+    /**
+     * Creates a new <code>BulkWritePayload</code> for writing the specified data.
+     * 
+     * @param databaseName the database name
+     * @param seriesName the time series name
+     * @param partitionTimeRange the partition time range
+     * @param records the records to write
+     */
+    public BulkWritePayload(String databaseName, 
+                            String seriesName, 
+                            TimeRange partitionTimeRange, 
+                            List<? extends Record> records) {
 
-        super(databaseName, seriesName, partition);
+        super(databaseName, seriesName, partitionTimeRange);
         this.records = records;
     }
 

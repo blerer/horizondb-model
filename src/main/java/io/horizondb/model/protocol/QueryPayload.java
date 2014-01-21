@@ -13,16 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.horizondb.model;
+package io.horizondb.model.protocol;
+
+import io.horizondb.io.ByteReader;
+import io.horizondb.io.ByteWriter;
+import io.horizondb.io.encoding.VarInts;
+import io.horizondb.io.serialization.Parser;
+import io.horizondb.model.TimeRange;
 
 import java.io.IOException;
 
 import javax.annotation.concurrent.Immutable;
-
-import io.horizondb.io.ByteReader;
-import io.horizondb.io.ByteWriter;
-import io.horizondb.io.serialization.Parser;
-import io.horizondb.io.serialization.Serializable;
 
 /**
  * A query used to request data from the server.
@@ -31,30 +32,36 @@ import io.horizondb.io.serialization.Serializable;
  * 
  */
 @Immutable
-public final class Query implements Serializable {
+public final class QueryPayload implements Payload {
 
     /**
      * The parser instance.
      */
-    private static final Parser<Query> PARSER = new Parser<Query>() {
+    private static final Parser<QueryPayload> PARSER = new Parser<QueryPayload>() {
 
         /**
          * {@inheritDoc}
          */
         @Override
-        public Query parseFrom(ByteReader reader) throws IOException {
+        public QueryPayload parseFrom(ByteReader reader) throws IOException {
 
-            PartitionId partitionId = PartitionId.parseFrom(reader);
+            String databaseName = VarInts.readString(reader);
+            String seriesName = VarInts.readString(reader);
             TimeRange range = TimeRange.parseFrom(reader);
 
-            return new Query(partitionId, range);
+            return new QueryPayload(databaseName, seriesName, range);
         }
     };
 
     /**
-     * The partition targeted by the query.
+     * The database from which the records must be read.
      */
-    private final PartitionId partitionId;
+    private final String databaseName;
+    
+    /**
+     * The time series from which the records must be read.
+     */
+    private final String seriesName;
 
     /**
      * The time range for which data must be returned from the partition.
@@ -64,9 +71,10 @@ public final class Query implements Serializable {
     /**
      * @param timeRange
      */
-    public Query(PartitionId partitionId, TimeRange timeRange) {
+    public QueryPayload(String databaseName, String seriesName, TimeRange timeRange) {
 
-        this.partitionId = partitionId;
+        this.databaseName = databaseName;
+        this.seriesName = seriesName;
         this.timeRange = timeRange;
     }
 
@@ -76,7 +84,7 @@ public final class Query implements Serializable {
      * @return the database name.
      */
     public String getDatabaseName() {
-        return this.partitionId.getDatabaseName();
+        return this.databaseName;
     }
 
     /**
@@ -85,16 +93,7 @@ public final class Query implements Serializable {
      * @return the time series name.
      */
     public String getSeriesName() {
-        return this.partitionId.getSeriesName();
-    }
-
-    /**
-     * Returns the partition identifier.
-     * 
-     * @return the partition identifier.
-     */
-    public long getPartition() {
-        return this.partitionId.getId();
+        return this.seriesName;
     }
 
     /**
@@ -107,29 +106,22 @@ public final class Query implements Serializable {
     }
 
     /**
-     * @return
-     */
-    public PartitionId getPartitionId() {
-        return this.partitionId;
-    }
-
-    /**
-     * Creates a new <code>Query</code> by reading the data from the specified reader.
+     * Creates a new <code>QueryPayload</code> by reading the data from the specified reader.
      * 
      * @param reader the reader to read from.
      * @throws IOException if an I/O problem occurs
      */
-    public static Query parseFrom(ByteReader reader) throws IOException {
+    public static QueryPayload parseFrom(ByteReader reader) throws IOException {
 
         return getParser().parseFrom(reader);
     }
 
     /**
-     * Returns the parser that can be used to deserialize <code>Query</code> instances.
+     * Returns the parser that can be used to deserialize <code>QueryPayload</code> instances.
      * 
-     * @return the parser that can be used to deserialize <code>Query</code> instances.
+     * @return the parser that can be used to deserialize <code>QueryPayload</code> instances.
      */
-    public static Parser<Query> getParser() {
+    public static Parser<QueryPayload> getParser() {
 
         return PARSER;
     }
@@ -139,7 +131,9 @@ public final class Query implements Serializable {
      */
     @Override
     public int computeSerializedSize() {
-        return this.partitionId.computeSerializedSize() + this.timeRange.computeSerializedSize();
+        return VarInts.computeStringSize(this.databaseName) 
+                + VarInts.computeStringSize(this.seriesName) 
+                + this.timeRange.computeSerializedSize();
     }
 
     /**
@@ -147,7 +141,9 @@ public final class Query implements Serializable {
      */
     @Override
     public void writeTo(ByteWriter writer) throws IOException {
-        this.partitionId.writeTo(writer);
+        
+        VarInts.writeString(writer, this.databaseName);
+        VarInts.writeString(writer, this.seriesName);
         this.timeRange.writeTo(writer);
     }
 }

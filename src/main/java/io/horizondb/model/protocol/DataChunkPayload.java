@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.horizondb.model;
+package io.horizondb.model.protocol;
 
 import io.horizondb.io.ByteReader;
 import io.horizondb.io.ByteWriter;
 import io.horizondb.io.ReadableBuffer;
 import io.horizondb.io.serialization.Parser;
-import io.horizondb.io.serialization.Serializable;
 
 import java.io.IOException;
 
@@ -32,22 +31,22 @@ import org.apache.commons.lang.builder.ToStringStyle;
  * @author Benjamin
  * 
  */
-public final class DataChunk implements Serializable {
+public final class DataChunkPayload implements Payload {
 
     /**
      * The parser instance.
      */
-    private static final Parser<DataChunk> PARSER = new Parser<DataChunk>() {
+    private static final Parser<DataChunkPayload> PARSER = new Parser<DataChunkPayload>() {
 
         /**
          * {@inheritDoc}
          */
         @Override
-        public DataChunk parseFrom(ByteReader reader) throws IOException {
+        public DataChunkPayload parseFrom(ByteReader reader) throws IOException {
 
             ReadableBuffer buffer = (ReadableBuffer) reader;
 
-            return new DataChunk(buffer);
+            return new DataChunkPayload(buffer);
         }
     };
 
@@ -61,27 +60,27 @@ public final class DataChunk implements Serializable {
      * 
      * @param buffer the buffer
      */
-    public DataChunk(ReadableBuffer buffer) {
+    public DataChunkPayload(ReadableBuffer buffer) {
         this.buffer = buffer;
     }
 
     /**
-     * Creates a new <code>DataChunk</code> by reading the data from the specified reader.
+     * Creates a new <code>DataChunkPayload</code> by reading the data from the specified reader.
      * 
      * @param reader the reader to read from.
      * @throws IOException if an I/O problem occurs
      */
-    public static DataChunk parseFrom(ByteReader reader) throws IOException {
+    public static DataChunkPayload parseFrom(ByteReader reader) throws IOException {
 
         return getParser().parseFrom(reader);
     }
 
     /**
-     * Returns the parser that can be used to deserialize <code>DataChunk</code> instances.
+     * Returns the parser that can be used to deserialize <code>DataChunkPayload</code> instances.
      * 
-     * @return the parser that can be used to deserialize <code>DataChunk</code> instances.
+     * @return the parser that can be used to deserialize <code>DataChunkPayload</code> instances.
      */
-    public static Parser<DataChunk> getParser() {
+    public static Parser<DataChunkPayload> getParser() {
 
         return PARSER;
     }
@@ -115,10 +114,10 @@ public final class DataChunk implements Serializable {
         if (object == this) {
             return true;
         }
-        if (!(object instanceof DataChunk)) {
+        if (!(object instanceof DataChunkPayload)) {
             return false;
         }
-        DataChunk rhs = (DataChunk) object;
+        DataChunkPayload rhs = (DataChunkPayload) object;
         return new EqualsBuilder().append(this.buffer, rhs.buffer).isEquals();
     }
 

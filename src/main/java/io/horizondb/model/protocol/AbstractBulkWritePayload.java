@@ -13,15 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.horizondb.model;
-
-import java.io.IOException;
+package io.horizondb.model.protocol;
 
 import io.horizondb.io.ByteReader;
 import io.horizondb.io.ByteWriter;
 import io.horizondb.io.encoding.VarInts;
 import io.horizondb.io.serialization.Parser;
-import io.horizondb.io.serialization.Serializable;
+import io.horizondb.model.TimeRange;
+
+import java.io.IOException;
+
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
@@ -31,7 +32,7 @@ import org.apache.commons.lang.builder.ToStringStyle;
  * @author Benjamin
  * 
  */
-public abstract class AbstractRecordBatch implements Serializable {
+abstract class AbstractBulkWritePayload implements Payload {
 
     /**
      * The database in which the records must be inserted.
@@ -43,22 +44,22 @@ public abstract class AbstractRecordBatch implements Serializable {
     private final String seriesName;
 
     /**
-     * The partition ID.
+     * The partition time range.
      */
-    private final long partition;
+    private final TimeRange partitionTimeRange;
 
     /**
-     * Creates a new <code>AbstractRecordBatch</code> for the specified database and the specified series.
+     * Creates a new <code>AbstractBulkWritePayload</code> for the specified database and the specified series.
      * 
      * @param databaseName the database name
      * @param seriesName the time series name
-     * @param partition the partition ID
+     * @param partitionTimeRange the partition time range
      */
-    public AbstractRecordBatch(String databaseName, String seriesName, long partition) {
+    public AbstractBulkWritePayload(String databaseName, String seriesName, TimeRange partitionTimeRange) {
 
         this.databaseName = databaseName;
         this.seriesName = seriesName;
-        this.partition = partition;
+        this.partitionTimeRange = partitionTimeRange;
     }
 
     /**
@@ -80,12 +81,12 @@ public abstract class AbstractRecordBatch implements Serializable {
     }
 
     /**
-     * Returns the partition ID.
+     * Returns the partition time range.
      * 
-     * @return the partition ID.
+     * @return the partition time range.
      */
-    public long getPartition() {
-        return this.partition;
+    public TimeRange getPartitionTimeRange() {
+        return this.partitionTimeRange;
     }
 
     /**
@@ -94,7 +95,7 @@ public abstract class AbstractRecordBatch implements Serializable {
     @Override
     public final int computeSerializedSize() {
         return VarInts.computeStringSize(this.databaseName) + VarInts.computeStringSize(this.seriesName)
-                + VarInts.computeUnsignedLongSize(this.partition) + computeRecordSetSerializedSize();
+                + this.partitionTimeRange.computeSerializedSize() + computeRecordSetSerializedSize();
     }
 
     /**
@@ -105,7 +106,7 @@ public abstract class AbstractRecordBatch implements Serializable {
 
         VarInts.writeString(writer, this.databaseName);
         VarInts.writeString(writer, this.seriesName);
-        VarInts.writeUnsignedLong(writer, this.partition);
+        this.partitionTimeRange.writeTo(writer);
         writeRecordSetTo(writer);
     }
 
@@ -131,11 +132,12 @@ public abstract class AbstractRecordBatch implements Serializable {
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).append("databaseName", this.databaseName)
                                                                           .append("seriesName", this.seriesName)
-                                                                          .append("partition", this.partition)
+                                                                          .append("partitionTimeRange", 
+                                                                                  this.partitionTimeRange)
                                                                           .toString();
     }
 
-    protected static abstract class AbstractParser<T extends AbstractRecordBatch, S> implements Parser<T> {
+    protected static abstract class AbstractParser<T extends AbstractBulkWritePayload, S> implements Parser<T> {
 
         /**
          * {@inheritDoc}
@@ -145,11 +147,11 @@ public abstract class AbstractRecordBatch implements Serializable {
 
             String databaseName = VarInts.readString(reader);
             String seriesName = VarInts.readString(reader);
-            long partition = VarInts.readUnsignedLong(reader);
+            TimeRange partitionTimeRange = TimeRange.parseFrom(reader);
 
             S recordSet = parseRecordSetFrom(reader);
 
-            return newRecordBatch(databaseName, seriesName, partition, recordSet);
+            return newBulkWritePayload(databaseName, seriesName, partitionTimeRange, recordSet);
         }
 
         /**
@@ -166,10 +168,13 @@ public abstract class AbstractRecordBatch implements Serializable {
          * @param databaseName the database name
          * @param seriesName the series name
          * @param recordSet the record set.
-         * @param partition the partition ID
+         * @param partitionTimeRange the partition time range
          * @return a new record batch instance.
          */
-        protected abstract T newRecordBatch(String databaseName, String seriesName, long partition, S recordSet);
+        protected abstract T newBulkWritePayload(String databaseName, 
+                                                 String seriesName, 
+                                                 TimeRange partitionTimeRange, 
+                                                 S recordSet);
 
     }
 }

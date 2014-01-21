@@ -19,13 +19,12 @@ import io.horizondb.io.ByteReader;
 import io.horizondb.io.ByteWriter;
 import io.horizondb.io.serialization.Parser;
 import io.horizondb.io.serialization.Serializable;
-import io.horizondb.model.BinaryRecordBatch;
-import io.horizondb.model.DataChunk;
-import io.horizondb.model.Query;
 
 import java.io.IOException;
 
 /**
+ * The messages operation codes. 
+ * 
  * @author Benjamin
  * 
  */
@@ -156,16 +155,16 @@ public enum OpCode implements Serializable {
     },
 
     /**
-     * The operation code to request a time series.
+     * The operation code to perform a bulk write.
      */
-    BATCH_INSERT(5) {
+    BULK_WRITE(5) {
 
         @Override
         public Parser<?> getPayloadParser(boolean request) {
 
             if (request) {
 
-                return BinaryRecordBatch.getParser();
+                return BinaryBulkWritePayload.getParser();
             }
 
             return Parser.NOOP_PARSER;
@@ -190,10 +189,10 @@ public enum OpCode implements Serializable {
 
             if (request) {
 
-                return Query.getParser();
+                return QueryPayload.getParser();
             }
 
-            return DataChunk.getParser();
+            return DataChunkPayload.getParser();
         }
 
         /**

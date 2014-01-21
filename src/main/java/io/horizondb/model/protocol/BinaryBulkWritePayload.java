@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.horizondb.model;
+package io.horizondb.model.protocol;
 
 import io.horizondb.io.ByteReader;
 import io.horizondb.io.ByteWriter;
 import io.horizondb.io.ReadableBuffer;
 import io.horizondb.io.serialization.Parser;
+import io.horizondb.model.TimeRange;
 
 import java.io.IOException;
 
@@ -26,10 +27,16 @@ import java.io.IOException;
  * @author Benjamin
  * 
  */
-public class BinaryRecordBatch extends AbstractRecordBatch {
+public class BinaryBulkWritePayload extends AbstractBulkWritePayload {
 
-    private static final Parser<BinaryRecordBatch> PARSER = new AbstractRecordBatch.AbstractParser<BinaryRecordBatch, ReadableBuffer>() {
+    /**
+     * The parser instance.
+     */
+    private static final Parser<BinaryBulkWritePayload> PARSER = new AbstractBulkWritePayload.AbstractParser<BinaryBulkWritePayload, ReadableBuffer>() {
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         protected ReadableBuffer parseRecordSetFrom(ByteReader reader) throws IOException {
 
@@ -38,37 +45,55 @@ public class BinaryRecordBatch extends AbstractRecordBatch {
             return readableBuffer.slice(readableBuffer.readableBytes());
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
-        protected BinaryRecordBatch newRecordBatch(String databaseName,
+        protected BinaryBulkWritePayload newBulkWritePayload(String databaseName,
                                                    String seriesName,
-                                                   long partition,
+                                                   TimeRange partitionTimeRange,
                                                    ReadableBuffer buffer) {
 
-            return new BinaryRecordBatch(databaseName, seriesName, partition, buffer);
+            return new BinaryBulkWritePayload(databaseName, seriesName, partitionTimeRange, buffer);
         }
     };
 
+    /**
+     * The buffer containing the serialized record data.
+     */
     private final ReadableBuffer buffer;
 
     /**
-     * @param databaseName
-     * @param seriesName
-     * @param partition
-     * @param buffer
+     * Creates a new <code>BinaryBulkWritePayload</code> for the specified database and the specified series.
+     * 
+     * @param databaseName the database name
+     * @param seriesName the time series name
+     * @param partitionTimeRange the partition time range
+     * @param buffer the readable buffer
      */
-    public BinaryRecordBatch(String databaseName, String seriesName, long partition, ReadableBuffer buffer) {
-        super(databaseName, seriesName, partition);
+    private BinaryBulkWritePayload(String databaseName, String seriesName, TimeRange partitionTimeRange, ReadableBuffer buffer) {
+        super(databaseName, seriesName, partitionTimeRange);
         this.buffer = buffer;
     }
 
-    public static Parser<BinaryRecordBatch> getParser() {
-
-        return PARSER;
-    }
-
-    public static BinaryRecordBatch parseFrom(ByteReader reader) throws IOException {
+    /**
+     * Creates a new <code>BinaryBulkWritePayload</code> by reading the data from the specified reader.
+     * 
+     * @param reader the reader to read from.
+     * @throws IOException if an I/O problem occurs
+     */
+    public static BinaryBulkWritePayload parseFrom(ByteReader reader) throws IOException {
 
         return getParser().parseFrom(reader);
+    }
+
+    /**
+     * Returns the parser that can be used to deserialize <code>BinaryBulkWritePayload</code> instances.
+     * @return the parser that can be used to deserialize <code>BinaryBulkWritePayload</code> instances.
+     */
+    public static Parser<BinaryBulkWritePayload> getParser() {
+
+        return PARSER;
     }
 
     /**
