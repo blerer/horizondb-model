@@ -18,7 +18,7 @@ package io.horizondb.model.protocol;
 import io.horizondb.io.ByteReader;
 import io.horizondb.io.ByteWriter;
 import io.horizondb.io.serialization.Parser;
-import io.horizondb.model.DatabaseDefinition;
+import io.horizondb.model.schema.DatabaseDefinition;
 
 import java.io.IOException;
 

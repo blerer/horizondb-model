@@ -16,8 +16,11 @@
 package io.horizondb.model;
 
 import io.horizondb.io.ByteWriter;
+import io.horizondb.model.core.Record;
+import io.horizondb.model.core.RecordUtils;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
@@ -33,15 +36,12 @@ public class RecordBatch extends AbstractRecordBatch {
     /**
      * The records that must be inserted.
      */
-    private final TimeSeriesRecordIterator timeSeriesRecordIterator;
+    private final List<? extends Record> records;
 
-    public RecordBatch(String databaseName,
-            String seriesName,
-            long partition,
-            TimeSeriesRecordIterator timeSeriesRecordIterator) {
+    public RecordBatch(String databaseName, String seriesName, long partition, List<? extends Record> records) {
 
         super(databaseName, seriesName, partition);
-        this.timeSeriesRecordIterator = timeSeriesRecordIterator;
+        this.records = records;
     }
 
     /**
@@ -49,7 +49,7 @@ public class RecordBatch extends AbstractRecordBatch {
      */
     @Override
     protected int computeRecordSetSerializedSize() {
-        return this.timeSeriesRecordIterator.computeSerializedSize();
+        return RecordUtils.computeSerializedSize(this.records);
     }
 
     /**
@@ -57,7 +57,7 @@ public class RecordBatch extends AbstractRecordBatch {
      */
     @Override
     protected void writeRecordSetTo(ByteWriter writer) throws IOException {
-        this.timeSeriesRecordIterator.writeTo(writer);
+        RecordUtils.writeRecords(writer, this.records);
     }
 
     /**
@@ -66,8 +66,7 @@ public class RecordBatch extends AbstractRecordBatch {
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).appendSuper(super.toString())
-                                                                          .append("timeSeriesRecordIterator",
-                                                                                  this.timeSeriesRecordIterator)
+                                                                          .append("records", this.records)
                                                                           .toString();
     }
 

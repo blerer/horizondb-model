@@ -17,9 +17,9 @@ package io.horizondb.model.core.records;
 
 import io.horizondb.io.Buffer;
 import io.horizondb.io.buffers.Buffers;
-import io.horizondb.model.FieldType;
 import io.horizondb.model.core.records.BinaryTimeSeriesRecord;
 import io.horizondb.model.core.records.TimeSeriesRecord;
+import io.horizondb.model.schema.FieldType;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;

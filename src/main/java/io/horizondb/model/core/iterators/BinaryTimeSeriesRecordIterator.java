@@ -13,19 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.horizondb.model;
+package io.horizondb.model.core.iterators;
 
 import io.horizondb.io.ByteReader;
 import io.horizondb.io.ReadableBuffer;
 import io.horizondb.io.encoding.VarInts;
+import io.horizondb.model.core.RecordIterator;
 import io.horizondb.model.core.records.BinaryTimeSeriesRecord;
+import io.horizondb.model.schema.TimeSeriesDefinition;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.NoSuchElementException;
 
 /**
- * <code>RecordIterator</code> for <code>BinaryTimeSeriesRecords</code>
+ * <code>RecordIterator</code> for <code>BinaryTimeSeriesRecord</code>s.
  * 
  * @author Benjamin
  * 

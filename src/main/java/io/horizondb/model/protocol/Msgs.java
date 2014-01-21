@@ -16,8 +16,8 @@
 package io.horizondb.model.protocol;
 
 import io.horizondb.io.serialization.Serializable;
-import io.horizondb.model.DatabaseDefinition;
-import io.horizondb.model.TimeSeriesDefinition;
+import io.horizondb.model.schema.DatabaseDefinition;
+import io.horizondb.model.schema.TimeSeriesDefinition;
 
 /**
  * Messages factory methods.

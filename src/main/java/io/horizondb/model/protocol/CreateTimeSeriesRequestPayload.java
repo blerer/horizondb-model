@@ -19,7 +19,7 @@ import io.horizondb.io.ByteReader;
 import io.horizondb.io.ByteWriter;
 import io.horizondb.io.encoding.VarInts;
 import io.horizondb.io.serialization.Parser;
-import io.horizondb.model.TimeSeriesDefinition;
+import io.horizondb.model.schema.TimeSeriesDefinition;
 
 import java.io.IOException;
 

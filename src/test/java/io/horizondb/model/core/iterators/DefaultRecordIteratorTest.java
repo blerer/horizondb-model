@@ -13,9 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.horizondb.model;
+package io.horizondb.model.core.iterators;
 
 import io.horizondb.model.core.records.TimeSeriesRecord;
+import io.horizondb.model.schema.FieldType;
+import io.horizondb.model.schema.RecordTypeDefinition;
+import io.horizondb.model.schema.TimeSeriesDefinition;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -27,11 +30,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class TimeSeriesRecordIteratorTest {
+public class DefaultRecordIteratorTest {
 
     @Test
-    public void testWithOnlyOneRecord() {
+    public void testWithOnlyOneRecord() throws ParseException {
 
+        long time = getReferenceTime();
+        
         RecordTypeDefinition trade = RecordTypeDefinition.newBuilder("Trade")
                                                          .addDecimalField("price")
                                                          .addLongField("volume")
@@ -42,15 +47,15 @@ public class TimeSeriesRecordIteratorTest {
                                                               .addRecordType(trade)
                                                               .build();
 
-        TimeSeriesRecordIterator iterator = TimeSeriesRecordIterator.newBuilder(definition)
-                                                                    .newRecord("Trade")
-                                                                    .setTimestampInMillis(0, 1000000)
-                                                                    .setDecimal(1, 125, 1)
-                                                                    .setLong(2, 10)
-                                                                    .build();
+        DefaultRecordIterator iterator = DefaultRecordIterator.newBuilder(definition)
+                                                              .newRecord("Trade")
+                                                              .setTimestampInMillis(0, time + 1000000)
+                                                              .setDecimal(1, 125, 1)
+                                                              .setLong(2, 10)
+                                                              .build();
 
         TimeSeriesRecord expected = new TimeSeriesRecord(0, TimeUnit.MILLISECONDS, FieldType.DECIMAL, FieldType.LONG);
-        expected.setTimestampInMillis(0, 1000000);
+        expected.setTimestampInMillis(0, time + 1000000);
         expected.setDecimal(1, 125, 1);
         expected.setLong(2, 10);
 
@@ -82,18 +87,18 @@ public class TimeSeriesRecordIteratorTest {
                                                               .addRecordType(trade)
                                                               .build();
 
-        TimeSeriesRecordIterator iterator = TimeSeriesRecordIterator.newBuilder(definition)
-                                                                    .newRecord("Quote")
-                                                                    .setTimestampInMillis(0, time)
-                                                                    .setDecimal(1, 123, 1)
-                                                                    .setDecimal(2, 125, 1)
-                                                                    .setLong(3, 6)
-                                                                    .setLong(4, 14)
-                                                                    .newRecord("Trade")
-                                                                    .setTimestampInMillis(0, time + 100)
-                                                                    .setDecimal(1, 125, 1)
-                                                                    .setLong(2, 10)
-                                                                    .build();
+        DefaultRecordIterator iterator = DefaultRecordIterator.newBuilder(definition)
+                                                              .newRecord("Quote")
+                                                              .setTimestampInMillis(0, time)
+                                                              .setDecimal(1, 123, 1)
+                                                              .setDecimal(2, 125, 1)
+                                                              .setLong(3, 6)
+                                                              .setLong(4, 14)
+                                                              .newRecord("Trade")
+                                                              .setTimestampInMillis(0, time + 100)
+                                                              .setDecimal(1, 125, 1)
+                                                              .setLong(2, 10)
+                                                              .build();
 
         TimeSeriesRecord expectedQuote = new TimeSeriesRecord(0,
                                                               TimeUnit.MILLISECONDS,
@@ -138,16 +143,16 @@ public class TimeSeriesRecordIteratorTest {
                                                               .addRecordType(trade)
                                                               .build();
 
-        TimeSeriesRecordIterator iterator = TimeSeriesRecordIterator.newBuilder(definition)
-                                                                    .newRecord("Trade")
-                                                                    .setTimestampInMillis(0, time)
-                                                                    .setDecimal(1, 125, 1)
-                                                                    .setLong(2, 10)
-                                                                    .newRecord("Trade")
-                                                                    .setTimestampInMillis(0, time + 50)
-                                                                    .setDecimal(1, 124, 1)
-                                                                    .setLong(2, 5)
-                                                                    .build();
+        DefaultRecordIterator iterator = DefaultRecordIterator.newBuilder(definition)
+                                                              .newRecord("Trade")
+                                                              .setTimestampInMillis(0, time)
+                                                              .setDecimal(1, 125, 1)
+                                                              .setLong(2, 10)
+                                                              .newRecord("Trade")
+                                                              .setTimestampInMillis(0, time + 50)
+                                                              .setDecimal(1, 124, 1)
+                                                              .setLong(2, 5)
+                                                              .build();
 
         TimeSeriesRecord expected = new TimeSeriesRecord(0, TimeUnit.MILLISECONDS, FieldType.DECIMAL, FieldType.LONG);
         expected.setTimestampInMillis(0, time);
@@ -183,20 +188,20 @@ public class TimeSeriesRecordIteratorTest {
                                                               .addRecordType(trade)
                                                               .build();
 
-        TimeSeriesRecordIterator iterator = TimeSeriesRecordIterator.newBuilder(definition)
-                                                                    .newRecord("Trade")
-                                                                    .setTimestampInMillis(0, time)
-                                                                    .setDecimal(1, 125, -1)
-                                                                    .setLong(2, 10)
-                                                                    .newRecord("Trade")
-                                                                    .setTimestampInMillis(0, time + 50)
-                                                                    .setDecimal(1, 124, -1)
-                                                                    .setLong(2, 5)
-                                                                    .newRecord("Trade")
-                                                                    .setTimestampInMillis(0, time + 120)
-                                                                    .setDecimal(1, 13, 0)
-                                                                    .setLong(2, 6)
-                                                                    .build();
+        DefaultRecordIterator iterator = DefaultRecordIterator.newBuilder(definition)
+                                                              .newRecord("Trade")
+                                                              .setTimestampInMillis(0, time)
+                                                              .setDecimal(1, 125, -1)
+                                                              .setLong(2, 10)
+                                                              .newRecord("Trade")
+                                                              .setTimestampInMillis(0, time + 50)
+                                                              .setDecimal(1, 124, -1)
+                                                              .setLong(2, 5)
+                                                              .newRecord("Trade")
+                                                              .setTimestampInMillis(0, time + 120)
+                                                              .setDecimal(1, 13, 0)
+                                                              .setLong(2, 6)
+                                                              .build();
 
         TimeSeriesRecord expected = new TimeSeriesRecord(0, TimeUnit.MILLISECONDS, FieldType.DECIMAL, FieldType.LONG);
         expected.setTimestampInMillis(0, time);
@@ -242,20 +247,20 @@ public class TimeSeriesRecordIteratorTest {
                                                               .addRecordType(trade)
                                                               .build();
 
-        TimeSeriesRecordIterator iterator = TimeSeriesRecordIterator.newBuilder(definition)
-                                                                    .newRecord("Trade")
-                                                                    .setTimestampInMillis(0, time + 50)
-                                                                    .setDecimal(1, 124, -1)
-                                                                    .setLong(2, 5)
-                                                                    .newRecord("Trade")
-                                                                    .setTimestampInMillis(0, time + 120)
-                                                                    .setDecimal(1, 13, 0)
-                                                                    .setLong(2, 6)
-                                                                    .newRecord("Trade")
-                                                                    .setTimestampInMillis(0, time)
-                                                                    .setDecimal(1, 125, -1)
-                                                                    .setLong(2, 10)
-                                                                    .build();
+        DefaultRecordIterator iterator = DefaultRecordIterator.newBuilder(definition)
+                                                              .newRecord("Trade")
+                                                              .setTimestampInMillis(0, time + 50)
+                                                              .setDecimal(1, 124, -1)
+                                                              .setLong(2, 5)
+                                                              .newRecord("Trade")
+                                                              .setTimestampInMillis(0, time + 120)
+                                                              .setDecimal(1, 13, 0)
+                                                              .setLong(2, 6)
+                                                              .newRecord("Trade")
+                                                              .setTimestampInMillis(0, time)
+                                                              .setDecimal(1, 125, -1)
+                                                              .setLong(2, 10)
+                                                              .build();
 
         TimeSeriesRecord expected = new TimeSeriesRecord(0, TimeUnit.MILLISECONDS, FieldType.DECIMAL, FieldType.LONG);
         expected.setTimestampInMillis(0, time);
@@ -314,41 +319,41 @@ public class TimeSeriesRecordIteratorTest {
                                                               .addRecordType(exchangeState)
                                                               .build();
 
-        TimeSeriesRecordIterator iterator = TimeSeriesRecordIterator.newBuilder(definition)
-                                                                    .newRecord("ExchangeState")
-                                                                    .setTimestampInMillis(0, time)
-                                                                    .setByte(1, 1)
-                                                                    .newRecord("Quote")
-                                                                    .setTimestampInMillis(0, time)
-                                                                    .setDecimal(1, 123, -1)
-                                                                    .setDecimal(2, 125, -1)
-                                                                    .setLong(3, 6)
-                                                                    .setLong(4, 14)
-                                                                    .newRecord("Trade")
-                                                                    .setTimestampInMillis(0, time + 5)
-                                                                    .setDecimal(1, 125, -1)
-                                                                    .setLong(2, 10)
-                                                                    .newRecord("Quote")
-                                                                    .setTimestampInMillis(0, time + 15)
-                                                                    .setDecimal(1, 123, -1)
-                                                                    .setDecimal(2, 125, -1)
-                                                                    .setLong(3, 6)
-                                                                    .setLong(4, 4)
-                                                                    .newRecord("Trade")
-                                                                    .setTimestampInMillis(0, time + 50)
-                                                                    .setDecimal(1, 124, -1)
-                                                                    .setLong(2, 5)
-                                                                    .newRecord("Trade")
-                                                                    .setTimestampInMillis(0, time + 120)
-                                                                    .setDecimal(1, 13, 0)
-                                                                    .setLong(2, 6)
-                                                                    .newRecord("Quote")
-                                                                    .setTimestampInMillis(0, time + 150)
-                                                                    .setDecimal(1, 123, -1)
-                                                                    .setDecimal(2, 125, -1)
-                                                                    .setLong(3, 6)
-                                                                    .setLong(4, 4)
-                                                                    .build();
+        DefaultRecordIterator iterator = DefaultRecordIterator.newBuilder(definition)
+                                                              .newRecord("ExchangeState")
+                                                              .setTimestampInMillis(0, time)
+                                                              .setByte(1, 1)
+                                                              .newRecord("Quote")
+                                                              .setTimestampInMillis(0, time)
+                                                              .setDecimal(1, 123, -1)
+                                                              .setDecimal(2, 125, -1)
+                                                              .setLong(3, 6)
+                                                              .setLong(4, 14)
+                                                              .newRecord("Trade")
+                                                              .setTimestampInMillis(0, time + 5)
+                                                              .setDecimal(1, 125, -1)
+                                                              .setLong(2, 10)
+                                                              .newRecord("Quote")
+                                                              .setTimestampInMillis(0, time + 15)
+                                                              .setDecimal(1, 123, -1)
+                                                              .setDecimal(2, 125, -1)
+                                                              .setLong(3, 6)
+                                                              .setLong(4, 4)
+                                                              .newRecord("Trade")
+                                                              .setTimestampInMillis(0, time + 50)
+                                                              .setDecimal(1, 124, -1)
+                                                              .setLong(2, 5)
+                                                              .newRecord("Trade")
+                                                              .setTimestampInMillis(0, time + 120)
+                                                              .setDecimal(1, 13, 0)
+                                                              .setLong(2, 6)
+                                                              .newRecord("Quote")
+                                                              .setTimestampInMillis(0, time + 150)
+                                                              .setDecimal(1, 123, -1)
+                                                              .setDecimal(2, 125, -1)
+                                                              .setLong(3, 6)
+                                                              .setLong(4, 4)
+                                                              .build();
 
         TimeSeriesRecord expectedES = new TimeSeriesRecord(2, TimeUnit.MILLISECONDS, FieldType.BYTE);
         expectedES.setTimestampInMillis(0, time);

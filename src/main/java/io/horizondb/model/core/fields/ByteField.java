@@ -17,8 +17,8 @@ package io.horizondb.model.core.fields;
 
 import io.horizondb.io.ByteReader;
 import io.horizondb.io.ByteWriter;
-import io.horizondb.model.FieldType;
 import io.horizondb.model.core.Field;
+import io.horizondb.model.schema.FieldType;
 
 import java.io.IOException;
 

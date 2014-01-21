@@ -18,9 +18,9 @@ package io.horizondb.model.core.records;
 import io.horizondb.io.BitSet;
 import io.horizondb.io.ByteWriter;
 import io.horizondb.io.encoding.VarInts;
-import io.horizondb.model.FieldType;
 import io.horizondb.model.core.Field;
 import io.horizondb.model.core.Record;
+import io.horizondb.model.schema.FieldType;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -88,6 +88,97 @@ public class TimeSeriesRecord extends AbstractTimeSeriesRecord implements Compar
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int getByte(int index) {
+
+        return getField(index).getByte();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int getInt(int index) {
+
+        return getField(index).getInt();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public long getLong(int index) {
+
+        return getField(index).getLong();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public double getDouble(int index) {
+
+        return getField(index).getDouble();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public long getTimestampInNanos(int index) {
+
+        return getField(index).getTimestampInNanos();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public long getTimestampInMicros(int index) {
+
+        return getField(index).getTimestampInMicros();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public long getTimestampInMillis(int index) {
+
+        return getField(index).getTimestampInMillis();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public long getTimestampInSeconds(int index) {
+
+        return getField(index).getTimestampInSeconds();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public long getDecimalMantissa(int index) {
+
+        return getField(index).getDecimalMantissa();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public byte getDecimalExponent(int index) {
+
+        return getField(index).getDecimalExponent();
+    }
+
+    
+    /**
      * Specify if this record is a delta or a full one.
      * 
      * @param delta the new delta value
@@ -108,36 +199,78 @@ public class TimeSeriesRecord extends AbstractTimeSeriesRecord implements Compar
         return this.bitSet;
     }
 
+    /**
+     * Sets the specified field to the specified <code>int</code> value. 
+     * 
+     * @param index the field index
+     * @param i the <code>int</code> value
+     */
     public void setInt(int index, int i) {
 
         getField(index).setInt(i);
     }
 
+    /**
+     * Sets the specified field to the specified <code>long</code> value. 
+     * 
+     * @param index the field index
+     * @param l the <code>long</code> value
+     */
     public void setLong(int index, long l) {
 
         getField(index).setLong(l);
     }
 
+    /**
+     * Sets the specified field to the specified timestamp value. 
+     * 
+     * @param index the field index
+     * @param timestamp the timestamp value in nanoseconds.
+     */
     public void setTimestampInNanos(int index, long timestamp) {
 
         getField(index).setTimestampInNanos(timestamp);
     }
 
+    /**
+     * Sets the specified field to the specified timestamp value. 
+     * 
+     * @param index the field index
+     * @param timestamp the timestamp value in microseconds.
+     */
     public void setTimestampInMicros(int index, long timestamp) {
 
         getField(index).setTimestampInMicros(timestamp);
     }
 
+    /**
+     * Sets the specified field to the specified timestamp value. 
+     * 
+     * @param index the field index
+     * @param timestamp the timestamp value in milliseconds.
+     */
     public void setTimestampInMillis(int index, long timestamp) {
 
         getField(index).setTimestampInMillis(timestamp);
     }
 
+    /**
+     * Sets the specified field to the specified timestamp value. 
+     * 
+     * @param index the field index
+     * @param timestamp the timestamp value in seconds.
+     */
     public void setTimestampInSeconds(int index, long timestamp) {
 
         getField(index).setTimestampInSeconds(timestamp);
     }
 
+    /**
+     * Sets the specified field to the specified <code>byte</code> value. 
+     * 
+     * @param index the field index
+     * @param b the <code>byte</code> value
+     */
     public void setByte(int index, int b) {
 
         getField(index).setByte(b);
@@ -149,9 +282,10 @@ public class TimeSeriesRecord extends AbstractTimeSeriesRecord implements Compar
     }
 
     /**
-     * @param first
-     * @param second
-     * @throws IOException
+     * Substracts the field values of the specified record from the field values of this record.
+     * 
+     * @param other the record from which the field values must be substracted from the field values of this record.
+     * @throws IOException if an I/O problem occurs
      */
     public void subtract(Record other) throws IOException {
 
@@ -307,13 +441,6 @@ public class TimeSeriesRecord extends AbstractTimeSeriesRecord implements Compar
      */
     @Override
     public int compareTo(TimeSeriesRecord o) {
-
-        try {
-
-            return Long.compare(this.getTimestampInNanos(0), o.getTimestampInNanos(0));
-
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
+        return Long.compare(this.getTimestampInNanos(0), o.getTimestampInNanos(0));
     }
 }

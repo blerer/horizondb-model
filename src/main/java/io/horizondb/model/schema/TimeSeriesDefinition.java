@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.horizondb.model;
+package io.horizondb.model.schema;
 
 import io.horizondb.io.ByteReader;
 import io.horizondb.io.ByteWriter;
@@ -21,6 +21,7 @@ import io.horizondb.io.encoding.VarInts;
 import io.horizondb.io.serialization.Parser;
 import io.horizondb.io.serialization.Serializable;
 import io.horizondb.io.serialization.Serializables;
+import io.horizondb.model.TimeRange;
 import io.horizondb.model.core.records.BinaryTimeSeriesRecord;
 import io.horizondb.model.core.records.TimeSeriesRecord;
 
@@ -347,7 +348,7 @@ public final class TimeSeriesDefinition implements Serializable {
      * @param seriesName the time series seriesName
      * @return a new <code>Builder</code> instance.
      */
-    static Builder newBuilder(String databaseName, String name) {
+    public static Builder newBuilder(String databaseName, String name) {
 
         return new Builder(databaseName, name);
     }

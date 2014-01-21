@@ -16,10 +16,10 @@
 package io.horizondb.model.core.records;
 
 import io.horizondb.io.BitSet;
-import io.horizondb.model.FieldType;
 import io.horizondb.model.core.Field;
 import io.horizondb.model.core.Record;
 import io.horizondb.model.core.fields.TimestampField;
+import io.horizondb.model.schema.FieldType;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -75,7 +75,7 @@ abstract class AbstractTimeSeriesRecord implements Record {
      * {@inheritDoc}
      */
     @Override
-    public final int getByte(int index) throws IOException {
+    public int getByte(int index) throws IOException {
 
         return getField(index).getByte();
     }
@@ -84,7 +84,7 @@ abstract class AbstractTimeSeriesRecord implements Record {
      * {@inheritDoc}
      */
     @Override
-    public final int getInt(int index) throws IOException {
+    public int getInt(int index) throws IOException {
 
         return getField(index).getInt();
     }
@@ -93,7 +93,7 @@ abstract class AbstractTimeSeriesRecord implements Record {
      * {@inheritDoc}
      */
     @Override
-    public final long getLong(int index) throws IOException {
+    public long getLong(int index) throws IOException {
 
         return getField(index).getLong();
     }
@@ -102,7 +102,7 @@ abstract class AbstractTimeSeriesRecord implements Record {
      * {@inheritDoc}
      */
     @Override
-    public final double getDouble(int index) throws IOException {
+    public double getDouble(int index) throws IOException {
 
         return getField(index).getDouble();
     }
@@ -111,7 +111,7 @@ abstract class AbstractTimeSeriesRecord implements Record {
      * {@inheritDoc}
      */
     @Override
-    public final long getTimestampInNanos(int index) throws IOException {
+    public long getTimestampInNanos(int index) throws IOException {
 
         return getField(index).getTimestampInNanos();
     }
@@ -120,7 +120,7 @@ abstract class AbstractTimeSeriesRecord implements Record {
      * {@inheritDoc}
      */
     @Override
-    public final long getTimestampInMicros(int index) throws IOException {
+    public long getTimestampInMicros(int index) throws IOException {
 
         return getField(index).getTimestampInMicros();
     }
@@ -129,7 +129,7 @@ abstract class AbstractTimeSeriesRecord implements Record {
      * {@inheritDoc}
      */
     @Override
-    public final long getTimestampInMillis(int index) throws IOException {
+    public long getTimestampInMillis(int index) throws IOException {
 
         return getField(index).getTimestampInMillis();
     }
@@ -138,7 +138,7 @@ abstract class AbstractTimeSeriesRecord implements Record {
      * {@inheritDoc}
      */
     @Override
-    public final long getTimestampInSeconds(int index) throws IOException {
+    public long getTimestampInSeconds(int index) throws IOException {
 
         return getField(index).getTimestampInSeconds();
     }
@@ -147,7 +147,7 @@ abstract class AbstractTimeSeriesRecord implements Record {
      * {@inheritDoc}
      */
     @Override
-    public final long getDecimalMantissa(int index) throws IOException {
+    public long getDecimalMantissa(int index) throws IOException {
 
         return getField(index).getDecimalMantissa();
     }
@@ -156,7 +156,7 @@ abstract class AbstractTimeSeriesRecord implements Record {
      * {@inheritDoc}
      */
     @Override
-    public final byte getDecimalExponent(int index) throws IOException {
+    public byte getDecimalExponent(int index) throws IOException {
 
         return getField(index).getDecimalExponent();
     }

@@ -15,8 +15,8 @@
  */
 package io.horizondb.model;
 
-import io.horizondb.model.FieldType;
 import io.horizondb.model.core.records.TimeSeriesRecord;
+import io.horizondb.model.schema.FieldType;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;

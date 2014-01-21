@@ -19,6 +19,8 @@ import java.io.IOException;
 
 import io.horizondb.io.Buffer;
 import io.horizondb.io.buffers.Buffers;
+import io.horizondb.model.schema.FieldDefinition;
+import io.horizondb.model.schema.FieldType;
 
 import org.junit.Test;
 

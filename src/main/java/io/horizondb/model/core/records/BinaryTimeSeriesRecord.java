@@ -18,9 +18,9 @@ package io.horizondb.model.core.records;
 import io.horizondb.io.ByteWriter;
 import io.horizondb.io.ReadableBuffer;
 import io.horizondb.io.encoding.VarInts;
-import io.horizondb.model.FieldType;
 import io.horizondb.model.core.Field;
 import io.horizondb.model.core.Record;
+import io.horizondb.model.schema.FieldType;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;

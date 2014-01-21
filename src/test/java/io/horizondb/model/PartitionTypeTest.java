@@ -15,6 +15,8 @@
  */
 package io.horizondb.model;
 
+import io.horizondb.model.schema.PartitionType;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
