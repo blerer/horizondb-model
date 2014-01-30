@@ -51,7 +51,7 @@ public class TimeSeriesDefinitionTest {
                                                          .addField("aggressorSide", FieldType.BYTE)
                                                          .build();
 
-        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("test", "DAX")
+        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("DAX")
                                                               .timeUnit(TimeUnit.NANOSECONDS)
                                                               .addRecordType(quote)
                                                               .addRecordType(trade)
@@ -80,7 +80,7 @@ public class TimeSeriesDefinitionTest {
                                                          .addField("aggressorSide", FieldType.BYTE)
                                                          .build();
 
-        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("test", "DAX")
+        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("DAX")
                                                               .timeUnit(TimeUnit.NANOSECONDS)
                                                               .addRecordType(quote)
                                                               .addRecordType(trade)
@@ -102,7 +102,7 @@ public class TimeSeriesDefinitionTest {
                                                          .addLongField("volume")
                                                          .build();
 
-        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("test", "DAX")
+        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("DAX")
                                                               .timeUnit(TimeUnit.MILLISECONDS)
                                                               .addRecordType(trade)
                                                               .build();

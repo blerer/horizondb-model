@@ -108,7 +108,7 @@ public class DatabaseDefinition implements Serializable {
      */
     public TimeSeriesDefinition.Builder newTimeSeriesDefinitionBuilder(String seriesName) {
 
-        return TimeSeriesDefinition.newBuilder(this.getName(), seriesName);
+        return TimeSeriesDefinition.newBuilder(seriesName);
     }
 
     /**

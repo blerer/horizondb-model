@@ -42,7 +42,7 @@ public class DefaultRecordIteratorTest {
                                                          .addLongField("volume")
                                                          .build();
 
-        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("test", "DAX")
+        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("DAX")
                                                               .timeUnit(TimeUnit.MILLISECONDS)
                                                               .addRecordType(trade)
                                                               .build();
@@ -81,7 +81,7 @@ public class DefaultRecordIteratorTest {
                                                          .addLongField("askVolume")
                                                          .build();
 
-        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("test", "DAX")
+        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("DAX")
                                                               .timeUnit(TimeUnit.MILLISECONDS)
                                                               .addRecordType(quote)
                                                               .addRecordType(trade)
@@ -138,7 +138,7 @@ public class DefaultRecordIteratorTest {
                                                          .addLongField("volume")
                                                          .build();
 
-        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("test", "DAX")
+        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("DAX")
                                                               .timeUnit(TimeUnit.MILLISECONDS)
                                                               .addRecordType(trade)
                                                               .build();
@@ -183,7 +183,7 @@ public class DefaultRecordIteratorTest {
                                                          .addLongField("volume")
                                                          .build();
 
-        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("test", "DAX")
+        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("DAX")
                                                               .timeUnit(TimeUnit.MILLISECONDS)
                                                               .addRecordType(trade)
                                                               .build();
@@ -242,7 +242,7 @@ public class DefaultRecordIteratorTest {
                                                          .addLongField("volume")
                                                          .build();
 
-        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("test", "DAX")
+        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("DAX")
                                                               .timeUnit(TimeUnit.MILLISECONDS)
                                                               .addRecordType(trade)
                                                               .build();
@@ -312,7 +312,7 @@ public class DefaultRecordIteratorTest {
                                                                  .addByteField("status")
                                                                  .build();
 
-        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("test", "DAX")
+        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("DAX")
                                                               .timeUnit(TimeUnit.MILLISECONDS)
                                                               .addRecordType(trade)
                                                               .addRecordType(quote)

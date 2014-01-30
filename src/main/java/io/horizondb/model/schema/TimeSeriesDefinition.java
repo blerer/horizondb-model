@@ -61,7 +61,6 @@ public final class TimeSeriesDefinition implements Serializable {
         @Override
         public TimeSeriesDefinition parseFrom(ByteReader reader) throws IOException {
 
-            String databaseName = VarInts.readString(reader);
             String name = VarInts.readString(reader);
             TimeUnit timestampUnit = TimeUnit.values()[reader.readByte()];
             TimeZone timeZone = TimeZone.getTimeZone(VarInts.readString(reader));
@@ -69,19 +68,14 @@ public final class TimeSeriesDefinition implements Serializable {
             Serializables<RecordTypeDefinition> recordTypes = Serializables.parseFrom(RecordTypeDefinition.getParser(),
                                                                                       reader);
 
-            return new TimeSeriesDefinition(databaseName, name, timestampUnit, timeZone, partitionType, recordTypes);
+            return new TimeSeriesDefinition(name, timestampUnit, timeZone, partitionType, recordTypes);
         }
     };
 
     /**
-     * The seriesName of the time series'databaseName.
+     * The name of the time series.
      */
-    private final String databaseName;
-
-    /**
-     * The seriesName of the time series.
-     */
-    private final String seriesName;
+    private final String name;
 
     /**
      * The unit of time of the series.
@@ -109,7 +103,7 @@ public final class TimeSeriesDefinition implements Serializable {
     @Override
     public int computeSerializedSize() {
 
-        return VarInts.computeStringSize(this.databaseName) + VarInts.computeStringSize(this.seriesName)
+        return VarInts.computeStringSize(this.name)
                 + 1 // TimeUnit
                 + VarInts.computeStringSize(this.timeZone.getID()) + this.partitionType.computeSerializedSize()
                 + this.recordTypes.computeSerializedSize();
@@ -121,8 +115,7 @@ public final class TimeSeriesDefinition implements Serializable {
     @Override
     public void writeTo(ByteWriter writer) throws IOException {
 
-        VarInts.writeString(writer, this.databaseName);
-        VarInts.writeString(writer, this.seriesName);
+        VarInts.writeString(writer, this.name);
         VarInts.writeByte(writer, this.timeUnit.ordinal());
         VarInts.writeString(writer, this.timeZone.getID());
         this.partitionType.writeTo(writer);
@@ -214,7 +207,7 @@ public final class TimeSeriesDefinition implements Serializable {
         }
 
         throw new IllegalArgumentException("No " + type + " records have not been defined within the "
-                + this.seriesName + " time series.");
+                + this.name + " time series.");
     }
 
     /**
@@ -231,8 +224,7 @@ public final class TimeSeriesDefinition implements Serializable {
         TimeSeriesDefinition rhs = (TimeSeriesDefinition) object;
         return new EqualsBuilder().append(this.recordTypes, rhs.recordTypes)
                                   .append(this.timeUnit, rhs.timeUnit)
-                                  .append(this.databaseName, rhs.databaseName)
-                                  .append(this.seriesName, rhs.seriesName)
+                                  .append(this.name, rhs.name)
                                   .append(this.timeZone, rhs.timeZone)
                                   .append(this.partitionType, rhs.partitionType)
                                   .isEquals();
@@ -245,8 +237,7 @@ public final class TimeSeriesDefinition implements Serializable {
     public int hashCode() {
         return new HashCodeBuilder(510479313, 1641137635).append(this.recordTypes)
                                                          .append(this.timeUnit)
-                                                         .append(this.seriesName)
-                                                         .append(this.databaseName)
+                                                         .append(this.name)
                                                          .append(this.timeZone)
                                                          .append(this.partitionType)
                                                          .toHashCode();
@@ -257,8 +248,7 @@ public final class TimeSeriesDefinition implements Serializable {
      */
     @Override
     public String toString() {
-        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).append("databaseName", this.databaseName)
-                                                                          .append("seriesName", this.seriesName)
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).append("name", this.name)
                                                                           .append("timestampUnit", this.timeUnit)
                                                                           .append("timeZone", this.timeZone)
                                                                           .append("partitionType", this.partitionType)
@@ -288,21 +278,12 @@ public final class TimeSeriesDefinition implements Serializable {
     }
 
     /**
-     * Returns the database seriesName.
+     * Returns the time series name.
      * 
-     * @return the database seriesName.
+     * @return the time series name.
      */
-    public String getDatabaseName() {
-        return this.databaseName;
-    }
-
-    /**
-     * Returns the time series seriesName.
-     * 
-     * @return the time series seriesName.
-     */
-    public String getSeriesName() {
-        return this.seriesName;
+    public String getName() {
+        return this.name;
     }
 
     /**
@@ -345,12 +326,12 @@ public final class TimeSeriesDefinition implements Serializable {
     /**
      * Creates a new <code>Builder</code> instance.
      * 
-     * @param seriesName the time series seriesName
+     * @param name the time series name
      * @return a new <code>Builder</code> instance.
      */
-    public static Builder newBuilder(String databaseName, String name) {
+    public static Builder newBuilder(String name) {
 
-        return new Builder(databaseName, name);
+        return new Builder(name);
     }
 
     /**
@@ -360,23 +341,20 @@ public final class TimeSeriesDefinition implements Serializable {
      */
     private TimeSeriesDefinition(Builder builder) {
 
-        this(builder.databaseName,
-             builder.name,
+        this(builder.name,
              builder.timeUnit,
              builder.timeZone,
              builder.partitionType,
              new Serializables<>(builder.recordTypes));
     }
 
-    private TimeSeriesDefinition(String database,
-            String name,
+    private TimeSeriesDefinition(String name,
             TimeUnit timeUnit,
             TimeZone timeZone,
             PartitionType partitionType,
             Serializables<RecordTypeDefinition> recordTypes) {
 
-        this.databaseName = database;
-        this.seriesName = name;
+        this.name = name;
         this.timeUnit = timeUnit;
         this.timeZone = timeZone;
         this.partitionType = partitionType;
@@ -389,12 +367,7 @@ public final class TimeSeriesDefinition implements Serializable {
     public static class Builder {
 
         /**
-         * The seriesName of the timeseries'databaseName.
-         */
-        private final String databaseName;
-
-        /**
-         * The time series seriesName.
+         * The time series name.
          */
         private final String name;
 
@@ -421,12 +394,10 @@ public final class TimeSeriesDefinition implements Serializable {
         /**
          * Must not be called from outside the enclosing class.
          */
-        private Builder(String database, String name) {
+        private Builder(String name) {
 
-            Validate.notEmpty(database, "the databaseName seriesName must not be empty.");
-            Validate.notEmpty(name, "the time series seriesName must not be empty.");
+            Validate.notEmpty(name, "the time series name must not be empty.");
 
-            this.databaseName = database;
             this.name = name;
         }
 

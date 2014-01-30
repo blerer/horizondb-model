@@ -51,7 +51,7 @@ public class RecordListBuilderTest {
                                                          .addLongField("volume")
                                                          .build();
 
-        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("test", "DAX")
+        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("DAX")
                                                               .timeUnit(TimeUnit.MILLISECONDS)
                                                               .timeZone(TIMEZONE)
                                                               .partitionType(PartitionType.BY_DAY)
@@ -71,7 +71,7 @@ public class RecordListBuilderTest {
                                                          .addLongField("volume")
                                                          .build();
 
-        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("test", "DAX")
+        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("DAX")
                                                               .timeUnit(TimeUnit.MILLISECONDS)
                                                               .timeZone(TIMEZONE)
                                                               .partitionType(PartitionType.BY_DAY)
@@ -107,7 +107,7 @@ public class RecordListBuilderTest {
                                                          .addLongField("volume")
                                                          .build();
 
-        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("test", "DAX")
+        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("DAX")
                                                               .timeUnit(TimeUnit.MILLISECONDS)
                                                               .timeZone(TIMEZONE)
                                                               .partitionType(PartitionType.BY_DAY)
@@ -152,7 +152,7 @@ public class RecordListBuilderTest {
                                                          .addLongField("volume")
                                                          .build();
 
-        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("test", "DAX")
+        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("DAX")
                                                               .timeUnit(TimeUnit.MILLISECONDS)
                                                               .timeZone(TIMEZONE)
                                                               .partitionType(PartitionType.BY_DAY)
@@ -196,7 +196,7 @@ public class RecordListBuilderTest {
                                                          .addLongField("volume")
                                                          .build();
 
-        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("test", "DAX")
+        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("DAX")
                                                               .timeUnit(TimeUnit.MILLISECONDS)
                                                               .timeZone(TIMEZONE)
                                                               .partitionType(PartitionType.BY_DAY)
@@ -252,7 +252,7 @@ public class RecordListBuilderTest {
                                                          .addLongField("volume")
                                                          .build();
 
-        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("test", "DAX")
+        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("DAX")
                                                               .timeUnit(TimeUnit.MILLISECONDS)
                                                               .timeZone(TIMEZONE)
                                                               .partitionType(PartitionType.BY_DAY)
@@ -311,7 +311,7 @@ public class RecordListBuilderTest {
                                                          .addLongField("volume")
                                                          .build();
 
-        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("test", "DAX")
+        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("DAX")
                                                               .timeUnit(TimeUnit.MILLISECONDS)
                                                               .timeZone(TIMEZONE)
                                                               .partitionType(PartitionType.BY_DAY)
@@ -367,7 +367,7 @@ public class RecordListBuilderTest {
                                                          .addLongField("volume")
                                                          .build();
 
-        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("test", "DAX")
+        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("DAX")
                                                               .timeUnit(TimeUnit.MILLISECONDS)
                                                               .timeZone(TIMEZONE)
                                                               .partitionType(PartitionType.BY_DAY)
@@ -433,7 +433,7 @@ public class RecordListBuilderTest {
                                                          .addLongField("askVolume")
                                                          .build();
 
-        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("test", "DAX")
+        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("DAX")
                                                               .timeUnit(TimeUnit.MILLISECONDS)
                                                               .timeZone(TIMEZONE)
                                                               .partitionType(PartitionType.BY_DAY)
@@ -500,7 +500,7 @@ public class RecordListBuilderTest {
                                                                  .addByteField("status")
                                                                  .build();
 
-        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("test", "DAX")
+        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("DAX")
                                                               .timeUnit(TimeUnit.MILLISECONDS)
                                                               .timeZone(TIMEZONE)
                                                               .partitionType(PartitionType.BY_DAY)
@@ -643,7 +643,7 @@ public class RecordListBuilderTest {
                                                                  .addByteField("status")
                                                                  .build();
 
-        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("test", "DAX")
+        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("DAX")
                                                               .timeUnit(TimeUnit.MILLISECONDS)
                                                               .timeZone(TIMEZONE)
                                                               .partitionType(PartitionType.BY_DAY)
