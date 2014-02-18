@@ -198,6 +198,19 @@ public class RecordListMultimapBuilder {
     }
 
 
+    /**
+     * Sets the specified field to the specified double value. 
+     * 
+     * @param index the field index
+     * @param d the double value
+     * @return this <code>RecordListMultimapBuilder</code>
+     */
+    public final RecordListMultimapBuilder setDouble(int index, double d) {
+
+        this.current.setDouble(index, d);
+        return this;
+    }
+    
     public final LinkedListMultimap<TimeRange, TimeSeriesRecord> buildMultimap() {
 
         addCurrentToRecords();

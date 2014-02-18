@@ -282,6 +282,17 @@ public class TimeSeriesRecord extends AbstractTimeSeriesRecord implements Compar
     }
 
     /**
+     * Sets the specified field to the specified <code>double</code> value. 
+     * 
+     * @param index the field index
+     * @param d the <code>double</code> value
+     */
+    public void setDouble(int index, double d) {
+
+        getField(index).setDouble(d);
+    }
+    
+    /**
      * Substracts the field values of the specified record from the field values of this record.
      * 
      * @param other the record from which the field values must be substracted from the field values of this record.
