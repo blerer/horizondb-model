@@ -27,6 +27,7 @@ import io.horizondb.model.core.records.TimeSeriesRecord;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.concurrent.Immutable;
@@ -35,6 +36,8 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
+
+import com.google.common.collect.ImmutableMap;
 
 /**
  * Definition of a record type.
@@ -73,6 +76,11 @@ public class RecordTypeDefinition implements Serializable {
      * The fields.
      */
     private final Serializables<FieldDefinition> fields;
+    
+    /**
+     * The field type index per name.
+     */
+    private final Map<String, Integer> fieldIndices; 
 
     /**
      * Creates a new <code>Builder</code> instance.
@@ -138,6 +146,25 @@ public class RecordTypeDefinition implements Serializable {
     }
 
     /**
+     * Return the index of the field with the specified name.
+     *  
+     * @param fieldName the field name
+     * @return the index of the field with the specified name
+     */
+    public int getFieldIndex(String fieldName) {
+        
+        Integer index = this.fieldIndices.get(fieldName);
+        
+        if (index == null) {
+            
+            throw new IllegalArgumentException("No field have not been defined with the name " + fieldName 
+                                               + " within the record type " + this.name + ".");
+        }
+        
+        return index.intValue();
+    }
+    
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -200,8 +227,31 @@ public class RecordTypeDefinition implements Serializable {
 
         this.name = name;
         this.fields = fields;
+        this.fieldIndices = buildFieldIndices(fields);
     }
 
+    /**
+     * Builds the mapping between the field names and indices.
+     * 
+     * @param fields the fields
+     * @return the mapping between the field names and indices.
+     */
+    private static Map<String, Integer> buildFieldIndices(Serializables<FieldDefinition> fields) {
+        
+        ImmutableMap.Builder<String, Integer> builder = ImmutableMap.builder();         
+                
+        builder.put("timestamp", Integer.valueOf(0));
+        
+        for (int i = 0, m = fields.size(); i < m; i++) {
+
+            FieldDefinition field = fields.get(i);
+            
+            builder.put(field.getName(), Integer.valueOf(i + 1));
+        }
+        
+        return builder.build();
+    }
+    
     /**
      * Returns the types of the fields in order.
      * 

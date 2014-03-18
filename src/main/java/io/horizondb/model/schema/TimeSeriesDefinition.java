@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
@@ -39,6 +40,8 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
+
+import com.google.common.collect.ImmutableMap;
 
 import static org.apache.commons.lang.Validate.notNull;
 
@@ -96,6 +99,11 @@ public final class TimeSeriesDefinition implements Serializable {
      * The type of records composing this time series.
      */
     private final Serializables<RecordTypeDefinition> recordTypes;
+    
+    /**
+     * The record type index per name.
+     */
+    private final Map<String, Integer> recordTypeIndices; 
 
     /**
      * {@inheritDoc}
@@ -196,20 +204,37 @@ public final class TimeSeriesDefinition implements Serializable {
      */
     public int getRecordTypeIndex(String type) {
 
-        for (int i = 0, m = this.recordTypes.size(); i < m; i++) {
+        Integer index = this.recordTypeIndices.get(type);
 
-            RecordTypeDefinition recordType = this.recordTypes.get(i);
-
-            if (recordType.getName() == type) {
-
-                return i;
-            }
+        if (index == null) {
+        
+            throw new IllegalArgumentException("No " + type + " records have not been defined within the "
+                    + this.name + " time series.");
         }
-
-        throw new IllegalArgumentException("No " + type + " records have not been defined within the "
-                + this.name + " time series.");
+        
+        return index.intValue();
     }
 
+    /**
+     * Returns the index of the field belonging to the specified record type with the specified name.  
+     * 
+     * @param type the record type index
+     * @param name the field name
+     */
+    public int getFieldIndex(int type, String name) {
+                
+        if (type >= this.recordTypes.size()) {
+            
+            throw new IllegalArgumentException("No records have not been defined with the index " + type 
+                                               + " within the " + this.name + " time series.");
+        }
+        
+        RecordTypeDefinition recordType = this.recordTypes.get(type);
+ 
+        
+        return recordType.getFieldIndex(name);
+    }
+    
     /**
      * {@inheritDoc}
      */
@@ -359,6 +384,27 @@ public final class TimeSeriesDefinition implements Serializable {
         this.timeZone = timeZone;
         this.partitionType = partitionType;
         this.recordTypes = recordTypes;
+        this.recordTypeIndices = buildRecordTypeIndices(recordTypes);
+    }
+
+    /**
+     * Builds the mapping between the record type names and indices.
+     * 
+     * @param recordTypes the record types
+     * @return the mapping between the record type names and indices.
+     */
+    private static Map<String, Integer> buildRecordTypeIndices(Serializables<RecordTypeDefinition> recordTypes) {
+        
+        ImmutableMap.Builder<String, Integer> builder = ImmutableMap.builder();         
+                
+        for (int i = 0, m = recordTypes.size(); i < m; i++) {
+
+            RecordTypeDefinition recordType = recordTypes.get(i);
+            
+            builder.put(recordType.getName(), Integer.valueOf(i));
+        }
+        
+        return builder.build();
     }
 
     /**

@@ -95,6 +95,18 @@ public class RecordListMultimapBuilder {
     /**
      * Sets the specified field to the specified <code>long</code> value. 
      * 
+     * @param name the field name
+     * @param l the <code>long</code> value
+     * @return this <code>RecordListMultimapBuilder</code>
+     */
+    public final RecordListMultimapBuilder setLong(String name, long l) {
+
+        return setLong(fieldIndex(name), l);
+    }
+    
+    /**
+     * Sets the specified field to the specified <code>long</code> value. 
+     * 
      * @param index the field index
      * @param l the <code>long</code> value
      * @return this <code>RecordListMultimapBuilder</code>
@@ -105,6 +117,18 @@ public class RecordListMultimapBuilder {
         return this;
     }
 
+    /**
+     * Sets the specified field to the specified <code>int</code> value. 
+     * 
+     * @param name the field name
+     * @param i the <code>int</code> value
+     * @return this <code>RecordListMultimapBuilder</code>
+     */
+    public final RecordListMultimapBuilder setInt(String name, int i) {
+
+        return setInt(fieldIndex(name), i);
+    }
+    
     /**
      * Sets the specified field to the specified <code>int</code> value. 
      * 
@@ -121,6 +145,18 @@ public class RecordListMultimapBuilder {
     /**
      * Sets the specified field to the specified timestamp value. 
      * 
+     * @param name the field name
+     * @param l the timestamp value in nanoseconds.
+     * @return this <code>RecordListMultimapBuilder</code>
+     */
+    public final RecordListMultimapBuilder setTimestampInNanos(String name, long l) {
+
+        return setTimestampInNanos(fieldIndex(name), l);
+    }
+    
+    /**
+     * Sets the specified field to the specified timestamp value. 
+     * 
      * @param index the field index
      * @param l the timestamp value in nanoseconds.
      * @return this <code>RecordListMultimapBuilder</code>
@@ -131,6 +167,18 @@ public class RecordListMultimapBuilder {
         return this;
     }
 
+    /**
+     * Sets the specified field to the specified timestamp value. 
+     * 
+     * @param name the field name
+     * @param l the timestamp value in microseconds.
+     * @return this <code>RecordListMultimapBuilder</code>
+     */
+    public final RecordListMultimapBuilder setTimestampInMicros(String name, long l) {
+
+        return setTimestampInMicros(fieldIndex(name), l);
+    }
+    
     /**
      * Sets the specified field to the specified timestamp value. 
      * 
@@ -147,6 +195,18 @@ public class RecordListMultimapBuilder {
     /**
      * Sets the specified field to the specified timestamp value. 
      * 
+     * @param name the field name
+     * @param l the timestamp value in milliseconds.
+     * @return this <code>RecordListMultimapBuilder</code>
+     */
+    public final RecordListMultimapBuilder setTimestampInMillis(String name, long l) {
+
+        return setTimestampInMillis(fieldIndex(name), l);
+    }
+    
+    /**
+     * Sets the specified field to the specified timestamp value. 
+     * 
      * @param index the field index
      * @param l the timestamp value in milliseconds.
      * @return this <code>RecordListMultimapBuilder</code>
@@ -155,6 +215,18 @@ public class RecordListMultimapBuilder {
 
         this.current.setTimestampInMillis(index, l);
         return this;
+    }
+    
+    /**
+     * Sets the specified field to the specified timestamp value. 
+     * 
+     * @param name the field name
+     * @param l the timestamp value in seconds.
+     * @return this <code>RecordListMultimapBuilder</code>
+     */
+    public final RecordListMultimapBuilder setTimestampInSeconds(String name, long l) {
+
+        return setTimestampInSeconds(fieldIndex(name), l);
     }
 
     /**
@@ -173,6 +245,18 @@ public class RecordListMultimapBuilder {
     /**
      * Sets the specified field to the specified <code>byte</code> value. 
      * 
+     * @param name the field name
+     * @param b the <code>byte</code> value
+     * @return this <code>RecordListMultimapBuilder</code>
+     */
+    public final RecordListMultimapBuilder setByte(String name, int b) {
+
+        return setByte(fieldIndex(name), b);
+    }
+    
+    /**
+     * Sets the specified field to the specified <code>byte</code> value. 
+     * 
      * @param index the field index
      * @param b the <code>byte</code> value
      * @return this <code>RecordListMultimapBuilder</code>
@@ -183,6 +267,19 @@ public class RecordListMultimapBuilder {
         return this;
     }
 
+    /**
+     * Sets the specified field to the specified decimal value. 
+     * 
+     * @param name the field name
+     * @param mantissa the decimal mantissa
+     * @param exponent the decimal exponent
+     * @return this <code>RecordListMultimapBuilder</code>
+     */
+    public final RecordListMultimapBuilder setDecimal(String name, long mantissa, int exponent) {
+
+        return setDecimal(fieldIndex(name), mantissa, exponent);
+    }
+    
     /**
      * Sets the specified field to the specified decimal value. 
      * 
@@ -197,7 +294,18 @@ public class RecordListMultimapBuilder {
         return this;
     }
 
+    /**
+     * Sets the specified field to the specified double value. 
+     * 
+     * @param String the field name
+     * @param d the double value
+     * @return this <code>RecordListMultimapBuilder</code>
+     */
+    public final RecordListMultimapBuilder setDouble(String name, double d) {
 
+        return setDouble(fieldIndex(name), d);
+    }
+    
     /**
      * Sets the specified field to the specified double value. 
      * 
@@ -266,8 +374,6 @@ public class RecordListMultimapBuilder {
             }
         }
         
-//        this.records.clear();
-        
         return map;
     }
     
@@ -293,5 +399,15 @@ public class RecordListMultimapBuilder {
         if (this.current != null) {
             this.records.add(this.current);
         }
+    }
+    
+    /**
+     * Returns the index of the field with the specified name.
+     * 
+     * @param name the field name
+     * @return the index of the field with the specified name. 
+     */
+    private int fieldIndex(String name) {
+        return this.definition.getFieldIndex(this.current.getType(), name);
     }
 }

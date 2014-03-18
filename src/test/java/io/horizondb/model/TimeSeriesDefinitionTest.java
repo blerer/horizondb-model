@@ -27,6 +27,10 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Assert;
 import org.junit.Test;
 
+import static org.junit.Assert.assertTrue;
+
+import static org.junit.Assert.fail;
+
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -64,6 +68,88 @@ public class TimeSeriesDefinitionTest {
         Assert.assertEquals(buffer.readableBytes(), definition.computeSerializedSize());
     }
 
+    @Test
+    public void testGetRecordTypeIndex() {
+
+        RecordTypeDefinition quote = RecordTypeDefinition.newBuilder("Quote")
+                                                         .addField("bestBid", FieldType.DECIMAL)
+                                                         .addField("bestAsk", FieldType.DECIMAL)
+                                                         .addField("bidVolume", FieldType.INTEGER)
+                                                         .addField("askVolume", FieldType.INTEGER)
+                                                         .build();
+
+        RecordTypeDefinition trade = RecordTypeDefinition.newBuilder("Trade")
+                                                         .addField("price", FieldType.DECIMAL)
+                                                         .addField("volume", FieldType.DECIMAL)
+                                                         .addField("aggressorSide", FieldType.BYTE)
+                                                         .build();
+
+        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("DAX")
+                                                              .timeUnit(TimeUnit.NANOSECONDS)
+                                                              .addRecordType(quote)
+                                                              .addRecordType(trade)
+                                                              .build();
+
+        assertEquals(0, definition.getRecordTypeIndex("Quote"));
+        assertEquals(1, definition.getRecordTypeIndex("Trade"));
+        
+        try {
+            
+            definition.getRecordTypeIndex("Unknown");
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertTrue(true);
+        }
+        
+    }
+    
+    @Test
+    public void testGetFieldIndex() {
+
+        RecordTypeDefinition quote = RecordTypeDefinition.newBuilder("Quote")
+                                                         .addField("bestBid", FieldType.DECIMAL)
+                                                         .addField("bestAsk", FieldType.DECIMAL)
+                                                         .addField("bidVolume", FieldType.INTEGER)
+                                                         .addField("askVolume", FieldType.INTEGER)
+                                                         .build();
+
+        RecordTypeDefinition trade = RecordTypeDefinition.newBuilder("Trade")
+                                                         .addField("price", FieldType.DECIMAL)
+                                                         .addField("volume", FieldType.DECIMAL)
+                                                         .addField("aggressorSide", FieldType.BYTE)
+                                                         .build();
+
+        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("DAX")
+                                                              .timeUnit(TimeUnit.NANOSECONDS)
+                                                              .addRecordType(quote)
+                                                              .addRecordType(trade)
+                                                              .build();
+
+        assertEquals(0, definition.getFieldIndex(0, "timestamp"));
+        assertEquals(1, definition.getFieldIndex(0, "bestBid"));
+        assertEquals(4, definition.getFieldIndex(0, "askVolume"));
+        
+        assertEquals(0, definition.getFieldIndex(1, "timestamp"));
+        assertEquals(1, definition.getFieldIndex(1, "price"));
+        assertEquals(2, definition.getFieldIndex(1, "volume"));
+        
+        try {
+            
+            definition.getFieldIndex(2, "bestBid");
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertTrue(true);
+        }
+        
+        try {
+            
+            definition.getFieldIndex(0, "unknown");
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertTrue(true);
+        }
+    }
+    
     @Test
     public void testGetParser() throws IOException {
 

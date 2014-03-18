@@ -98,6 +98,15 @@ public final class FieldDefinition implements Serializable {
 
         return PARSER;
     }
+        
+    /**
+     * Returns the field name.
+     * 
+     * @return the field name.
+     */
+    public String getName() {
+        return this.name;
+    }
 
     /**
      * Returns the type of this field.
