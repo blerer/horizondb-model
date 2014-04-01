@@ -22,6 +22,7 @@ import io.horizondb.model.core.Field;
 import io.horizondb.model.schema.FieldType;
 
 import java.io.IOException;
+import java.io.PrintStream;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
@@ -214,6 +215,14 @@ public final class LongField extends AbstractField {
         }
         LongField rhs = (LongField) object;
         return new EqualsBuilder().append(this.value, rhs.value).isEquals();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void writePrettyPrint(PrintStream stream) {
+        stream.print(this.value);
     }
 
     /**

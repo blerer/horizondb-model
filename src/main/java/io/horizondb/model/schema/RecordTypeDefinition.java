@@ -27,7 +27,6 @@ import io.horizondb.model.core.records.TimeSeriesRecord;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.concurrent.Immutable;
@@ -37,7 +36,8 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.ImmutableBiMap;
 
 /**
  * Definition of a record type.
@@ -80,7 +80,7 @@ public class RecordTypeDefinition implements Serializable {
     /**
      * The field type index per name.
      */
-    private final Map<String, Integer> fieldIndices; 
+    private final BiMap<String, Integer> fieldIndices; 
 
     /**
      * Creates a new <code>Builder</code> instance.
@@ -163,6 +163,17 @@ public class RecordTypeDefinition implements Serializable {
         
         return index.intValue();
     }
+   
+    /**
+     * Returns the name of the field with the specified index.
+     * 
+     * @param index the field index
+     * @return the name of the field with the specified index
+     */
+    public String fieldName(int index) {
+
+        return this.fieldIndices.inverse().get(Integer.valueOf(index));
+    }
     
     /**
      * {@inheritDoc}
@@ -236,9 +247,9 @@ public class RecordTypeDefinition implements Serializable {
      * @param fields the fields
      * @return the mapping between the field names and indices.
      */
-    private static Map<String, Integer> buildFieldIndices(Serializables<FieldDefinition> fields) {
+    private static BiMap<String, Integer> buildFieldIndices(Serializables<FieldDefinition> fields) {
         
-        ImmutableMap.Builder<String, Integer> builder = ImmutableMap.builder();         
+        ImmutableBiMap.Builder<String, Integer> builder = ImmutableBiMap.builder();         
                 
         builder.put("timestamp", Integer.valueOf(0));
         

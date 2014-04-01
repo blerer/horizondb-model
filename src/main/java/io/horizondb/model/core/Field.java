@@ -21,6 +21,7 @@ import io.horizondb.model.core.fields.TypeConversionException;
 import io.horizondb.model.schema.FieldType;
 
 import java.io.IOException;
+import java.io.PrintStream;
 
 /**
  * Represents a field from a <code>Record</code> of a time series.
@@ -242,4 +243,12 @@ public interface Field {
      * Sets the value of the field to zero.
      */
     void setValueToZero();
+
+    /**
+     * Writes the content of this <code>Field</code> in a readable format into the specified stream.
+     * 
+     * @param stream the stream into which the field representation must be written
+     * @throws IOException if an I/O problem occurs
+     */
+    void writePrettyPrint(PrintStream stream);
 }

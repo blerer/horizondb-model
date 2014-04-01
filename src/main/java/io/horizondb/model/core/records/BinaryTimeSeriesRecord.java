@@ -15,6 +15,7 @@
  */
 package io.horizondb.model.core.records;
 
+import io.horizondb.io.BitSet;
 import io.horizondb.io.ByteWriter;
 import io.horizondb.io.ReadableBuffer;
 import io.horizondb.io.encoding.VarInts;
@@ -144,6 +145,8 @@ public class BinaryTimeSeriesRecord extends AbstractTimeSeriesRecord {
         this.deserializationIndex = 0;
 
         this.buffer.readerIndex(0);
+        
+        System.out.println(this.buffer);
 
         // TODO: Optimize with bulk move.
         while (this.buffer.isReadable()) {
@@ -159,7 +162,7 @@ public class BinaryTimeSeriesRecord extends AbstractTimeSeriesRecord {
     @Override
     public TimeSeriesRecord toTimeSeriesRecord() throws IOException {
 
-        return new TimeSeriesRecord(getType(), getFields());
+        return new TimeSeriesRecord(getType(), deepCopy(getFields()));
     }
 
     /**
@@ -169,6 +172,16 @@ public class BinaryTimeSeriesRecord extends AbstractTimeSeriesRecord {
     public int computeSerializedSize() {
 
         return this.bufferSize;
+    }
+    
+    /**    
+     * {@inheritDoc}
+     */
+    @Override
+    protected BitSet getBitSet() throws IOException {   
+        
+        deserializedBitSetIfNeeded();
+        return this.bitSet;
     }
 
     /**

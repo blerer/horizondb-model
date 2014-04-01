@@ -16,7 +16,10 @@
 package io.horizondb.model.core.records;
 
 import io.horizondb.io.BitSet;
+import io.horizondb.io.Buffer;
 import io.horizondb.io.ByteWriter;
+import io.horizondb.io.ReadableBuffer;
+import io.horizondb.io.buffers.Buffers;
 import io.horizondb.io.encoding.VarInts;
 import io.horizondb.model.core.Field;
 import io.horizondb.model.core.Record;
@@ -187,6 +190,10 @@ public class TimeSeriesRecord extends AbstractTimeSeriesRecord implements Compar
         this.delta = delta;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public BitSet getBitSet() {
 
         this.bitSet.reset();

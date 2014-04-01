@@ -22,6 +22,7 @@ import io.horizondb.model.core.Field;
 import io.horizondb.model.schema.FieldType;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
@@ -229,6 +230,35 @@ public final class TimestampField extends AbstractField {
     public void setTimestampInSeconds(long timestamp) {
 
         setTimestamp(timestamp, TimeUnit.SECONDS);
+    }
+
+    /**    
+     * {@inheritDoc}
+     */
+    @Override
+    public void writePrettyPrint(PrintStream stream) {
+               
+        stream.print(this.timestamp);
+        stream.print(' ');
+        stream.print(getTimeUnitSymbol(this.unit));
+    }
+
+    /**
+     * Returns the symbol for the specified unit of time.
+     * 
+     * @param timeUnit the time unit
+     * @return the symbol for the specified unit of time
+     */
+    private static String getTimeUnitSymbol(TimeUnit timeUnit) {
+        
+        switch (timeUnit) {
+            
+            case NANOSECONDS: return "ns";
+            case MICROSECONDS: return "µs";
+            case MILLISECONDS: return "ms";
+            case SECONDS: return "s";
+            default: return timeUnit.toString().toLowerCase();
+        }
     }
 
     /**

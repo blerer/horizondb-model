@@ -15,10 +15,13 @@
  */
 package io.horizondb.model.core;
 
+import io.horizondb.io.ReadableBuffer;
 import io.horizondb.io.serialization.Serializable;
 import io.horizondb.model.core.records.TimeSeriesRecord;
+import io.horizondb.model.schema.TimeSeriesDefinition;
 
 import java.io.IOException;
+import java.io.PrintStream;
 
 /**
  * Represents a record from a time series.
@@ -172,4 +175,13 @@ public interface Record extends Serializable {
      * @throws IOException if an I/O problem occurs.
      */
     TimeSeriesRecord toTimeSeriesRecord() throws IOException;
+    
+    /**
+     * Writes the content of this <code>Record</code> in a readable format into the specified stream.
+     * 
+     * @param definition the time series definition
+     * @param stream the stream into which the record representation must be written
+     * @throws IOException if an I/O problem occurs
+     */
+    void writePrettyPrint(TimeSeriesDefinition definition, PrintStream stream) throws IOException;
 }

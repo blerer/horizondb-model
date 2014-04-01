@@ -21,6 +21,7 @@ import io.horizondb.model.core.Field;
 import io.horizondb.model.schema.FieldType;
 
 import java.io.IOException;
+import java.io.PrintStream;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
@@ -202,5 +203,13 @@ public class ByteField extends AbstractField {
     @Override
     public int hashCode() {
         return new HashCodeBuilder(1633523303, -473857531).append(this.value).toHashCode();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void writePrettyPrint(PrintStream stream) {
+        stream.print(this.value);
     }
 }

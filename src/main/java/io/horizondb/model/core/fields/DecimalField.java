@@ -22,6 +22,7 @@ import io.horizondb.model.core.Field;
 import io.horizondb.model.schema.FieldType;
 
 import java.io.IOException;
+import java.io.PrintStream;
 
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.builder.EqualsBuilder;
@@ -298,6 +299,17 @@ public class DecimalField extends AbstractField {
     @Override
     public int hashCode() {
         return new HashCodeBuilder(-857079051, 1637524317).append(getDouble()).toHashCode();
+    }
+
+    /**    
+     * {@inheritDoc}
+     */
+    @Override
+    public void writePrettyPrint(PrintStream stream) {
+        
+        stream.print(this.mantissa);
+        stream.print(" * 10E");
+        stream.print(this.exponent);
     }
 
     /**

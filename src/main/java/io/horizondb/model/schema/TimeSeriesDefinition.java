@@ -29,7 +29,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
@@ -41,7 +40,8 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.ImmutableBiMap;
 
 import static org.apache.commons.lang.Validate.notNull;
 
@@ -103,7 +103,7 @@ public final class TimeSeriesDefinition implements Serializable {
     /**
      * The record type index per name.
      */
-    private final Map<String, Integer> recordTypeIndices; 
+    private final BiMap<String, Integer> recordTypeIndices; 
 
     /**
      * {@inheritDoc}
@@ -393,9 +393,9 @@ public final class TimeSeriesDefinition implements Serializable {
      * @param recordTypes the record types
      * @return the mapping between the record type names and indices.
      */
-    private static Map<String, Integer> buildRecordTypeIndices(Serializables<RecordTypeDefinition> recordTypes) {
+    private static BiMap<String, Integer> buildRecordTypeIndices(Serializables<RecordTypeDefinition> recordTypes) {
         
-        ImmutableMap.Builder<String, Integer> builder = ImmutableMap.builder();         
+        ImmutableBiMap.Builder<String, Integer> builder = ImmutableBiMap.builder();         
                 
         for (int i = 0, m = recordTypes.size(); i < m; i++) {
 
@@ -523,5 +523,26 @@ public final class TimeSeriesDefinition implements Serializable {
 
             return new TimeSeriesDefinition(this);
         }
+    }
+
+    /**
+     * Returns the name of the record type with the specified index.
+     * 
+     * @param index the record type index
+     * @return the name of the record type with the specified index
+     */
+    public String getRecordName(int index) {
+        return this.recordTypeIndices.inverse().get(Integer.valueOf(index));
+    }
+
+    /**
+     * Returns the name of the specified field of the specified record type.
+     * 
+     * @param recordTypeIndex the index of the record type
+     * @param fieldIndex the index of the field
+     * @return the name of the specified field of the specified record type
+     */
+    public String getFieldName(int recordTypeIndex, int fieldIndex) {
+        return this.recordTypes.get(recordTypeIndex).fieldName(fieldIndex);
     }
 }

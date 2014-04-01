@@ -20,8 +20,10 @@ import io.horizondb.model.core.Field;
 import io.horizondb.model.core.Record;
 import io.horizondb.model.core.fields.TimestampField;
 import io.horizondb.model.schema.FieldType;
+import io.horizondb.model.schema.TimeSeriesDefinition;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -173,6 +175,39 @@ abstract class AbstractTimeSeriesRecord implements Record {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final void writePrettyPrint(TimeSeriesDefinition definition, PrintStream stream) throws IOException {
+
+        stream.append('[').append(definition.getRecordName(getType())).append(']');
+        stream.append('[').append(Integer.toString(computeSerializedSize())).append(']');
+        
+        BitSet bitSet = getBitSet().duplicate();
+        bitSet.readerIndex(1);    
+        
+        stream.append('[').append(bitSet.toString()).append(']');
+        
+        for (int i = 0, m = this.fields.length; i < m; i++) {
+            
+            Field field = getField(i);
+            
+            if (bitSet.readBit()) {
+                                
+                stream.append('[')
+                      .append(definition.getFieldName(getType(), i))
+                      .append(" = ");
+                
+                field.writePrettyPrint(stream);
+                
+                stream.append(']');
+            }
+        }
+    }
+    
+    protected abstract BitSet getBitSet() throws IOException;
+    
     /**
      * Creates a deep copy of the specified fields.
      * 

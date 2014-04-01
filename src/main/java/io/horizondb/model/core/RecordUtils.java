@@ -62,7 +62,7 @@ public final class RecordUtils {
             record.writeTo(writer);
         }
     }
-    
+
     /**
      * Must not be instantiated.
      */
