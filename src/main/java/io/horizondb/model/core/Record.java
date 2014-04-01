@@ -15,7 +15,6 @@
  */
 package io.horizondb.model.core;
 
-import io.horizondb.io.ReadableBuffer;
 import io.horizondb.io.serialization.Serializable;
 import io.horizondb.model.core.records.TimeSeriesRecord;
 import io.horizondb.model.schema.TimeSeriesDefinition;
