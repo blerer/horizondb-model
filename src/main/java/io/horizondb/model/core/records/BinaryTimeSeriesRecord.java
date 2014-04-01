@@ -145,8 +145,6 @@ public class BinaryTimeSeriesRecord extends AbstractTimeSeriesRecord {
         this.deserializationIndex = 0;
 
         this.buffer.readerIndex(0);
-        
-        System.out.println(this.buffer);
 
         // TODO: Optimize with bulk move.
         while (this.buffer.isReadable()) {
