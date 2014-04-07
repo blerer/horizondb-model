@@ -29,8 +29,6 @@ import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.builder.CompareToBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.apache.commons.lang.builder.ToStringStyle;
 
 import static org.apache.commons.lang.Validate.isTrue;
 
@@ -126,7 +124,7 @@ public final class TimeRange implements Comparable<TimeRange>, Serializable {
 
         return timeInMillis < this.start;
     }
-
+    
     /**
      * Return <code>true</code> if the specified time is included within this range, <code>false</code> otherwise.
      * 
@@ -194,9 +192,12 @@ public final class TimeRange implements Comparable<TimeRange>, Serializable {
      */
     @Override
     public String toString() {
-        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).append("start", this.start)
-                                                                          .append("end", this.end)
-                                                                          .toString();
+        return new StringBuilder().append('[')
+                                  .append(this.start)
+                                  .append('-')
+                                  .append(this.end)
+                                  .append(']')
+                                  .toString();
     }
 
     /**

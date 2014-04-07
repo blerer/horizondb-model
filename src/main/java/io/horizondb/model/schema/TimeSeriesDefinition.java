@@ -545,4 +545,30 @@ public final class TimeSeriesDefinition implements Serializable {
     public String getFieldName(int recordTypeIndex, int fieldIndex) {
         return this.recordTypes.get(recordTypeIndex).fieldName(fieldIndex);
     }
+
+    /**
+     * Splits the specified time range per partitions.
+     * 
+     * @param range the range to split
+     * @return the ranges resulting from the split
+     */
+    public List<TimeRange> splitRange(TimeRange range) {
+        
+        TimeRange remaining = range;
+        List<TimeRange> ranges = new ArrayList<>();
+        
+        TimeRange partition = getPartitionTimeRange(remaining.getStart());
+        
+        while (!partition.includes(remaining)) {
+            
+            TimeRange[] splittedRange = remaining.split(partition.getEnd() + 1);
+            ranges.add(splittedRange[0]);
+            remaining = splittedRange[1];
+            partition = getPartitionTimeRange(remaining.getStart());
+        }
+        
+        ranges.add(remaining);
+        
+        return ranges;
+    }
 }

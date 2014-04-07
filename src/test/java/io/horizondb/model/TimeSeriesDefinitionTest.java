@@ -18,20 +18,24 @@ package io.horizondb.model;
 import io.horizondb.io.Buffer;
 import io.horizondb.io.buffers.Buffers;
 import io.horizondb.model.schema.FieldType;
+import io.horizondb.model.schema.PartitionType;
 import io.horizondb.model.schema.RecordTypeDefinition;
 import io.horizondb.model.schema.TimeSeriesDefinition;
+import io.horizondb.test.AssertCollections;
 
 import java.io.IOException;
+import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
+import java.util.List;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.Assert;
 import org.junit.Test;
 
-import static org.junit.Assert.assertTrue;
-
-import static org.junit.Assert.fail;
-
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * @author Benjamin
@@ -151,6 +155,74 @@ public class TimeSeriesDefinitionTest {
     }
     
     @Test
+    public void testSplitRangeWithRangeIncludedWithinDailyPartition() {
+        
+        RecordTypeDefinition trade = RecordTypeDefinition.newBuilder("Trade")
+                                                         .addField("price", FieldType.DECIMAL)
+                                                         .addField("volume", FieldType.DECIMAL)
+                                                         .addField("aggressorSide", FieldType.BYTE)
+                                                         .build();
+        
+        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("DAX")
+                                                              .timeZone(TimeZone.getTimeZone("CET"))
+                                                              .partitionType(PartitionType.BY_DAY)
+                                                              .addRecordType(trade)
+                                                              .build();
+        
+        TimeRange range = timeRange("2013.11.14 12:00:00.000", "2013.11.14 13:00:00.000");
+        List<TimeRange> ranges = definition.splitRange(range);
+        
+        AssertCollections.assertListContains(ranges, range);
+    }
+    
+    @Test
+    public void testSplitRangeWithRangeIncludedWithin2DailyPartition() {
+        
+        RecordTypeDefinition trade = RecordTypeDefinition.newBuilder("Trade")
+                                                         .addField("price", FieldType.DECIMAL)
+                                                         .addField("volume", FieldType.DECIMAL)
+                                                         .addField("aggressorSide", FieldType.BYTE)
+                                                         .build();
+        
+        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("DAX")
+                                                              .timeZone(TimeZone.getTimeZone("CET"))
+                                                              .partitionType(PartitionType.BY_DAY)
+                                                              .addRecordType(trade)
+                                                              .build();
+        
+        TimeRange range = timeRange("2013.11.14 12:00:00.000", "2013.11.15 13:00:00.000");
+        List<TimeRange> ranges = definition.splitRange(range);
+        
+        AssertCollections.assertListContains(ranges, 
+                                             timeRange("2013.11.14 12:00:00.000", "2013.11.14 23:59:59.999"),
+                                             timeRange("2013.11.15 00:00:00.000", "2013.11.15 13:00:00.000"));
+    }
+    
+    @Test
+    public void testSplitRangeWithRangeIncludedWithin3DailyPartition() {
+        
+        RecordTypeDefinition trade = RecordTypeDefinition.newBuilder("Trade")
+                                                         .addField("price", FieldType.DECIMAL)
+                                                         .addField("volume", FieldType.DECIMAL)
+                                                         .addField("aggressorSide", FieldType.BYTE)
+                                                         .build();
+        
+        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("DAX")
+                                                              .timeZone(TimeZone.getTimeZone("CET"))
+                                                              .partitionType(PartitionType.BY_DAY)
+                                                              .addRecordType(trade)
+                                                              .build();
+        
+        TimeRange range = timeRange("2013.11.14 12:00:00.000", "2013.11.16 13:00:00.000");
+        List<TimeRange> ranges = definition.splitRange(range);
+        
+        AssertCollections.assertListContains(ranges, 
+                                             timeRange("2013.11.14 12:00:00.000", "2013.11.14 23:59:59.999"),
+                                             timeRange("2013.11.15 00:00:00.000", "2013.11.15 23:59:59.999"),
+                                             timeRange("2013.11.16 00:00:00.000", "2013.11.16 13:00:00.000"));
+    }
+    
+    @Test
     public void testGetParser() throws IOException {
 
         RecordTypeDefinition quote = RecordTypeDefinition.newBuilder("Quote")
@@ -199,5 +271,23 @@ public class TimeSeriesDefinitionTest {
 
         TimeSeriesDefinition deserializedDefinition = TimeSeriesDefinition.parseFrom(buffer);
         assertEquals(definition, deserializedDefinition);
+    }
+    
+    /**
+     * Returns the time in milliseconds corresponding to the specified {@link String} (format:
+     * "yyyy.MM.dd HH:mm:ss.SSS").
+     * 
+     * @param dateAsText the date/time to convert in milliseconds
+     * @return the time in milliseconds corresponding to the specified {@link String}.
+     */
+    public static long getTime(String dateAsText) {
+
+        SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss.SSS");
+        return format.parse(dateAsText, new ParsePosition(0)).getTime();
+    }
+    
+    public static TimeRange timeRange(String start, String end) {
+        
+        return new TimeRange(getTime(start), getTime(end));
     }
 }

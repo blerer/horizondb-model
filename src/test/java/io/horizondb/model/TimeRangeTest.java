@@ -15,13 +15,11 @@
  */
 package io.horizondb.model;
 
-import io.horizondb.model.TimeRange;
-
 import org.junit.Test;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertArrayEquals;
 
 public class TimeRangeTest {
 
@@ -83,6 +81,5 @@ public class TimeRangeTest {
         assertArrayEquals(range.split(300), new TimeRange[] { new TimeRange(200, 299), new TimeRange(300, 400) });
         assertArrayEquals(range.split(200), new TimeRange[] { new TimeRange(200, 400) });
         assertArrayEquals(range.split(400), new TimeRange[] { new TimeRange(200, 399), new TimeRange(400, 400) });
-    }
-
+    }    
 }
