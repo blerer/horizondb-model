@@ -417,4 +417,28 @@ public class RecordTypeDefinition implements Serializable {
             this.name = name;
         }
     }
+
+    /**
+     * Returns the HQL corresponding to this <code>RecordTypeDefinition</code>.
+     * 
+     * @return the HQL corresponding to this <code>RecordTypeDefinition</code>.
+     */
+    public String toHql() {
+
+        StringBuilder builder = new StringBuilder().append(this.name).append('(');
+
+        for (int i = 0, m = this.fields.size(); i < m; i++) {
+
+            FieldDefinition definition = this.fields.get(i);
+
+            if (i != 0) {
+                builder.append(", ");
+            }
+
+            builder.append(definition.toHql());
+        }
+
+        builder.append(')');
+        return builder.toString();
+    }  
 }

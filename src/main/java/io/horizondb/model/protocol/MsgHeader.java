@@ -97,14 +97,17 @@ public final class MsgHeader implements Serializable {
      * The magic number used to identify the protocol version (1 byte).
      */
     private byte magicNumber;
+    
     /**
      * The operation code (1 byte).
      */
     private OpCode opCode;
+    
     /**
      * The response status (2 bytes) if the message is a response.
      */
     private int status;
+    
     /**
      * The length in bytes of the payload (4 bytes). Zero if the length is unknown.
      */
@@ -145,6 +148,20 @@ public final class MsgHeader implements Serializable {
         return new MsgHeader(RESPONSE_MAGIC_NUMBER, requestHeader.opCode, status, payloadLength, requestHeader.opaque);
     }
 
+    /**
+     * Creates a new <code>MsgHeaderBean</code> for a response message to the specified request header.
+     * 
+     * @param requestHeader the request header
+     * @param opCode the operation code
+     * @param status the response status
+     * @param payloadLength the length of the payload.
+     * @return a new <code>MsgHeaderBean</code> for a response message
+     */
+    public static MsgHeader newResponseHeader(MsgHeader requestHeader, OpCode opCode, int status, int payloadLength) {
+
+        return new MsgHeader(RESPONSE_MAGIC_NUMBER, opCode, status, payloadLength, requestHeader.opaque);
+    }
+    
     /**
      * Creates a new <code>MsgHeaderBean</code> for a response message from the server when the request could not be
      * deserialized.

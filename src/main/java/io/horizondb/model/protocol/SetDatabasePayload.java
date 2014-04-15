@@ -25,28 +25,28 @@ import java.io.IOException;
 import javax.annotation.concurrent.Immutable;
 
 /**
- * <code>Payload</code> used to request a database creation.
+ * <code>Payload</code> used to notify the client that the used database has changed.
  * 
  * @author Benjamin
  *
  */
 @Immutable
-public final class CreateDatabaseRequestPayload implements Payload {
+public final class SetDatabasePayload implements Payload {
     
     /**
      * The parser instance.
      */
-    private static final Parser<CreateDatabaseRequestPayload> PARSER = new Parser<CreateDatabaseRequestPayload>() {
+    private static final Parser<SetDatabasePayload> PARSER = new Parser<SetDatabasePayload>() {
 
         /**
          * {@inheritDoc}
          */
         @Override
-        public CreateDatabaseRequestPayload parseFrom(ByteReader reader) throws IOException {
+        public SetDatabasePayload parseFrom(ByteReader reader) throws IOException {
 
             DatabaseDefinition definition = DatabaseDefinition.parseFrom(reader);
             
-            return new CreateDatabaseRequestPayload(definition);
+            return new SetDatabasePayload(definition);
         }
     };
     
@@ -56,11 +56,11 @@ public final class CreateDatabaseRequestPayload implements Payload {
     private final DatabaseDefinition definition;
         
     /**
-     * Creates a new payload for a message of type <code>CREATE_DATABASE</code>.
+     * Creates a new payload for the response to a <code>USE DATABASE</code> query.
      * 
-     * @param definition the definition of the database to create.
+     * @param definition the definition of the database.
      */
-    public CreateDatabaseRequestPayload(DatabaseDefinition definition) {
+    public SetDatabasePayload(DatabaseDefinition definition) {
         this.definition = definition;
     }
 
@@ -74,21 +74,21 @@ public final class CreateDatabaseRequestPayload implements Payload {
     }
 
     /**
-     * Creates a new <code>CreateDatabaseRequestPayload</code> by reading the data from the specified reader.
+     * Creates a new <code>SetDatabasePayload</code> by reading the data from the specified reader.
      * 
      * @param reader the reader to read from.
      * @throws IOException if an I/O problem occurs
      */
-    public static CreateDatabaseRequestPayload parseFrom(ByteReader reader) throws IOException {
+    public static SetDatabasePayload parseFrom(ByteReader reader) throws IOException {
 
         return getParser().parseFrom(reader);
     }
 
     /**
-     * Returns the parser that can be used to deserialize <code>CreateDatabaseRequestPayload</code> instances.
-     * @return the parser that can be used to deserialize <code>CreateDatabaseRequestPayload</code> instances.
+     * Returns the parser that can be used to deserialize <code>SetDatabasePayload</code> instances.
+     * @return the parser that can be used to deserialize <code>SetDatabasePayload</code> instances.
      */
-    public static Parser<CreateDatabaseRequestPayload> getParser() {
+    public static Parser<SetDatabasePayload> getParser() {
 
         return PARSER;
     }

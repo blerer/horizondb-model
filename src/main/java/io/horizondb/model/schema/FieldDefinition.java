@@ -172,6 +172,15 @@ public final class FieldDefinition implements Serializable {
     }
 
     /**
+     * Returns the HQL corresponding to this <code>FieldDefinition</code>.
+     * 
+     * @return the HQL corresponding to this <code>FieldDefinition</code>.
+     */
+    public String toHql() {
+        return new StringBuilder().append(this.name).append(' ').append(this.type).toString();
+    }
+    
+    /**
      * Creates a new <code>FieldDefinition</code>.
      * 
      * @param name the field name.

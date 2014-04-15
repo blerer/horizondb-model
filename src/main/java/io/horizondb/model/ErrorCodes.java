@@ -72,4 +72,9 @@ public final class ErrorCodes {
      * The database configuration is not valid.
      */
     public static final int INVALID_CONFIGURATION = 109;
+    
+    /**
+     * The HQL query received is not valid.
+     */
+    public static final int INVALID_QUERY = 110;
 }

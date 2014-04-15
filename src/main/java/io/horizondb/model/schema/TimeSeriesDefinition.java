@@ -43,6 +43,7 @@ import org.apache.commons.lang.builder.ToStringStyle;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 
+import static org.apache.commons.lang.SystemUtils.LINE_SEPARATOR;
 import static org.apache.commons.lang.Validate.notNull;
 
 /**
@@ -274,7 +275,7 @@ public final class TimeSeriesDefinition implements Serializable {
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).append("name", this.name)
-                                                                          .append("timestampUnit", this.timeUnit)
+                                                                          .append("timeUnit", this.timeUnit)
                                                                           .append("timeZone", this.timeZone)
                                                                           .append("partitionType", this.partitionType)
                                                                           .append("recordTypes", this.recordTypes)
@@ -570,5 +571,34 @@ public final class TimeSeriesDefinition implements Serializable {
         ranges.add(remaining);
         
         return ranges;
+    }
+    
+    /**
+     * Returns the HQL query that can be used to create this <code>TimeSeriesDefinition</code>.
+     * 
+     * @return  the HQL query that can be used to create this <code>TimeSeriesDefinition</code>.
+     */
+    public String toHql() {
+        
+        StringBuilder builder = new StringBuilder().append("CREATE TIMESERIES ")
+                                                   .append(this.name)
+                                                   .append(" (")
+                                                   .append(LINE_SEPARATOR);
+        
+        for (int i = 0, m = this.recordTypes.size(); i < m; i++) {
+            
+            RecordTypeDefinition definition = this.recordTypes.get(i);
+            
+            if (i != 0) {
+                builder.append(",")
+                       .append(LINE_SEPARATOR);
+            }
+            
+            builder.append(definition.toHql());
+        }
+        
+        builder.append(')').append(';');
+        
+        return builder.toString(); 
     }
 }

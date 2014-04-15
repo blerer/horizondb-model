@@ -15,13 +15,12 @@
  */
 package io.horizondb.model.protocol;
 
-import java.util.List;
-
 import io.horizondb.io.serialization.Serializable;
 import io.horizondb.model.TimeRange;
 import io.horizondb.model.core.Record;
-import io.horizondb.model.schema.DatabaseDefinition;
 import io.horizondb.model.schema.TimeSeriesDefinition;
+
+import java.util.List;
 
 /**
  * Messages factory methods.
@@ -53,50 +52,6 @@ public final class Msgs {
     public static Msg<ErrorPayload> newErrorMsg(MsgHeader header, int errorCode, String message) {
         
         return Msg.newErrorMsg(header, new ErrorPayload(errorCode, message));
-    }
-    
-    /**
-     * Creates a new message to request the creation of the specified database.
-     * 
-     * @param definition the database definition
-     * @return a new message to request the creation of the specified database.
-     */
-    public static Msg<CreateDatabaseRequestPayload> newCreateDatabaseRequest(DatabaseDefinition definition) {
-        
-        return Msg.newRequestMsg(OpCode.CREATE_DATABASE, new CreateDatabaseRequestPayload(definition));
-    }
-    
-    /**
-     * Creates a response to specified database creation request.
-     * 
-     * @param request the database creation request
-     * @return a response to the specified database creation request
-     */
-    public static Msg<?> newCreateDatabaseResponse(Msg<?> request) {
-        
-        return Msg.emptyMsg(MsgHeader.newResponseHeader(request.getHeader(), 0, 0));
-    }
-    
-    /**
-     * Creates a new message to request a specified database.
-     * 
-     * @param databaseName the database name
-     * @return a new message to request the creation of the specified database
-     */
-    public static Msg<GetDatabaseRequestPayload> newGetDatabaseRequest(String databaseName) {
-        
-        return Msg.newRequestMsg(OpCode.GET_DATABASE, new GetDatabaseRequestPayload(databaseName));
-    }
-    
-    /**
-     * Creates a response to specified <code>GET_DATABASE</code> request.
-     * 
-     * @param request the database request
-     * @return a response to the specified <code>GET_DATABASE</code> request
-     */
-    public static Msg<?> newGetDatabaseResponse(Msg<?> request, DatabaseDefinition definition) {
-        
-        return Msg.newResponseMsg(request.getHeader(), new GetDatabaseResponsePayload(definition));
     }
     
     /**
@@ -191,6 +146,18 @@ public final class Msgs {
         
         return Msg.newRequestMsg(OpCode.QUERY, 
                                  new QueryPayload(databaseName, seriesName, timeRange));
+    }
+    
+    /**
+     * Creates a new message to request execution of the specified HQL query.
+     * 
+     * @param database the name of the database on which the query must be executed
+     * @param query the HQL query to execute
+     * @return a new message to request execution of the specified HQL query
+     */
+    public static Msg<HqlQueryPayload> newHqlQuery(String database, String query) {
+        
+        return Msg.newRequestMsg(OpCode.HQL_QUERY, new HqlQueryPayload(database, query));
     }
     
     /**

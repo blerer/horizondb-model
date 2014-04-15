@@ -55,56 +55,6 @@ public enum OpCode implements Serializable {
     },
 
     /**
-     * The operation code to request the creation of a new database.
-     */
-    CREATE_DATABASE(1) {
-
-        @Override
-        public Parser<?> getPayloadParser(boolean request) {
-
-            if (request) {
-
-                return CreateDatabaseRequestPayload.getParser();
-            }
-
-            return Parser.NOOP_PARSER;
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public boolean isMutation() {
-            return true;
-        }
-    },
-
-    /**
-     * The operation code to request a database.
-     */
-    GET_DATABASE(2) {
-
-        @Override
-        public Parser<?> getPayloadParser(boolean request) {
-
-            if (request) {
-
-                return GetDatabaseRequestPayload.getParser();
-            }
-
-            return GetDatabaseResponsePayload.getParser();
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public boolean isMutation() {
-            return false;
-        }
-    },
-
-    /**
      * The operation code to request the creation of a new time series.
      */
     CREATE_TIMESERIES(3) {
@@ -202,7 +152,69 @@ public enum OpCode implements Serializable {
         public boolean isMutation() {
             return false;
         }
+    }, 
+    
+    /**
+     * The operation code to execute an HQL query on the server.
+     */
+    HQL_QUERY(7) {
+
+        @Override
+        public Parser<?> getPayloadParser(boolean request) {
+
+            return HqlQueryPayload.getParser();
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public boolean isMutation() {
+            return false;
+        }
+    },
+    
+    /**
+     * The operation code used when nno operation need to be performed.
+     */
+    NOOP(8) {
+
+        @Override
+        public Parser<?> getPayloadParser(boolean request) {
+
+            return Parser.NOOP_PARSER;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public boolean isMutation() {
+            return false;
+        }
+    },
+    
+    /**
+     * The operation code use to notify the client that the used database has changed.
+     */
+    SET_DATABASE(9) {
+
+        @Override
+        public Parser<?> getPayloadParser(boolean request) {
+
+            return SetDatabasePayload.getParser();
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public boolean isMutation() {
+            return false;
+        }
     };
+    
+    
 
     /**
      * The parser instance.

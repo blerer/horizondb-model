@@ -24,29 +24,32 @@ import java.io.IOException;
 
 import javax.annotation.concurrent.Immutable;
 
+import static org.apache.commons.lang.Validate.notEmpty;
+
 /**
- * <code>Payload</code> used to request a database.
+ * <code>Payload</code> used to execute an HQL query on a specified database.
  * 
  * @author Benjamin
  *
  */
 @Immutable
-public final class GetDatabaseRequestPayload implements Payload {
+public final class HqlQueryPayload implements Payload {
     
     /**
      * The parser instance.
      */
-    private static final Parser<GetDatabaseRequestPayload> PARSER = new Parser<GetDatabaseRequestPayload>() {
+    private static final Parser<HqlQueryPayload> PARSER = new Parser<HqlQueryPayload>() {
 
         /**
          * {@inheritDoc}
          */
         @Override
-        public GetDatabaseRequestPayload parseFrom(ByteReader reader) throws IOException {
+        public HqlQueryPayload parseFrom(ByteReader reader) throws IOException {
 
             String databaseName = VarInts.readString(reader);
+            String query = VarInts.readString(reader);
             
-            return new GetDatabaseRequestPayload(databaseName);
+            return new HqlQueryPayload(databaseName, query);
         }
     };
     
@@ -54,14 +57,24 @@ public final class GetDatabaseRequestPayload implements Payload {
      * The database name.
      */
     private final String databaseName;
+    
+    /**
+     * The HQL query.
+     */
+    private final String query;
         
     /**
-     * Creates a new payload for a message of type <code>GET_DATABASE</code>.
+     * Creates a new payload for a message of type <code>QUERY</code>.
      * 
-     * @param databaseName the name of the requested database
+     * @param databaseName the name of the database on which the query must be executed.
+     * @param query the HQL query to execute.
      */
-    public GetDatabaseRequestPayload(String databaseName) {
+    public HqlQueryPayload(String databaseName, String query) {
+        
+        notEmpty(query, "the query parameter must not be empty.");
+        
         this.databaseName = databaseName;
+        this.query = query;
     }
 
     /**
@@ -74,12 +87,20 @@ public final class GetDatabaseRequestPayload implements Payload {
     }
 
     /**
+     * Returns the HQL query to execute.
+     * @return the HQL query to execute.
+     */
+    public String getQuery() {
+        return this.query;
+    }
+    
+    /**
      * Creates a new <code>CreateDatabaseRequestPayload</code> by reading the data from the specified reader.
      * 
      * @param reader the reader to read from.
      * @throws IOException if an I/O problem occurs
      */
-    public static GetDatabaseRequestPayload parseFrom(ByteReader reader) throws IOException {
+    public static HqlQueryPayload parseFrom(ByteReader reader) throws IOException {
 
         return getParser().parseFrom(reader);
     }
@@ -88,7 +109,7 @@ public final class GetDatabaseRequestPayload implements Payload {
      * Returns the parser that can be used to deserialize <code>CreateDatabaseRequestPayload</code> instances.
      * @return the parser that can be used to deserialize <code>CreateDatabaseRequestPayload</code> instances.
      */
-    public static Parser<GetDatabaseRequestPayload> getParser() {
+    public static Parser<HqlQueryPayload> getParser() {
 
         return PARSER;
     }
@@ -98,7 +119,8 @@ public final class GetDatabaseRequestPayload implements Payload {
      */
     @Override
     public int computeSerializedSize() {
-        return VarInts.computeStringSize(this.databaseName);
+        return VarInts.computeStringSize(this.databaseName) 
+                + VarInts.computeStringSize(this.query);
     }
 
     /**
@@ -107,5 +129,6 @@ public final class GetDatabaseRequestPayload implements Payload {
     @Override
     public void writeTo(ByteWriter writer) throws IOException {
         VarInts.writeString(writer, this.databaseName);
+        VarInts.writeString(writer, this.query);
     }
 }
