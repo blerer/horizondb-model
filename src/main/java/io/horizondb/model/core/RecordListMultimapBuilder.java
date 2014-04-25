@@ -15,7 +15,6 @@
  */
 package io.horizondb.model.core;
 
-import io.horizondb.model.TimeRange;
 import io.horizondb.model.core.records.TimeSeriesRecord;
 import io.horizondb.model.schema.TimeSeriesDefinition;
 
@@ -26,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.google.common.collect.LinkedListMultimap;
+import com.google.common.collect.Range;
 
 import static org.apache.commons.lang.Validate.notNull;
 
@@ -319,15 +319,15 @@ public class RecordListMultimapBuilder {
         return this;
     }
     
-    public final LinkedListMultimap<TimeRange, TimeSeriesRecord> buildMultimap() {
+    public final LinkedListMultimap<Range<Long>, TimeSeriesRecord> buildMultimap() {
 
         addCurrentToRecords();
         
         Collections.sort(this.records);
 
-        LinkedListMultimap<TimeRange, TimeSeriesRecord> map = LinkedListMultimap.create();
+        LinkedListMultimap<Range<Long>, TimeSeriesRecord> map = LinkedListMultimap.create();
         
-        TimeRange range = null;
+        Range<Long> range = null;
         
         for (int i = 0, m = this.records.size(); i < m; i++) {
             
@@ -335,7 +335,7 @@ public class RecordListMultimapBuilder {
             
             long timestamp = record.getTimestampInMillis(0);
             
-            if (range == null || !range.includes(timestamp)) {
+            if (range == null || !range.contains(Long.valueOf(timestamp))) {
 
                 range = this.definition.getPartitionTimeRange(timestamp);
             }
@@ -346,7 +346,7 @@ public class RecordListMultimapBuilder {
         int numberOfRecordTypes = this.definition.getNumberOfRecordTypes();
         
 
-        for (TimeRange timeRange : map.keySet()) {
+        for (Range<Long> timeRange : map.keySet()) {
 
             TimeSeriesRecord[] nextRecords = new TimeSeriesRecord[numberOfRecordTypes];
             

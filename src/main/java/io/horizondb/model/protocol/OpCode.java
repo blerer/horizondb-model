@@ -55,31 +55,6 @@ public enum OpCode implements Serializable {
     },
 
     /**
-     * The operation code to request the creation of a new time series.
-     */
-    CREATE_TIMESERIES(3) {
-
-        @Override
-        public Parser<?> getPayloadParser(boolean request) {
-
-            if (request) {
-
-                return CreateTimeSeriesRequestPayload.getParser();
-            }
-
-            return Parser.NOOP_PARSER;
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public boolean isMutation() {
-            return true;
-        }
-    },
-
-    /**
      * The operation code to request a time series.
      */
     GET_TIMESERIES(4) {

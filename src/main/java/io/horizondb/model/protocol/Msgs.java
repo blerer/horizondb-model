@@ -16,11 +16,12 @@
 package io.horizondb.model.protocol;
 
 import io.horizondb.io.serialization.Serializable;
-import io.horizondb.model.TimeRange;
 import io.horizondb.model.core.Record;
 import io.horizondb.model.schema.TimeSeriesDefinition;
 
 import java.util.List;
+
+import com.google.common.collect.Range;
 
 /**
  * Messages factory methods.
@@ -53,21 +54,7 @@ public final class Msgs {
         
         return Msg.newErrorMsg(header, new ErrorPayload(errorCode, message));
     }
-    
-    /**
-     * Creates a new message to request the creation of the specified time series in the specified database.
-     * 
-     * @param databaseName the name of the database were the time series must be created
-     * @param definition the time series definition
-     * @return a new message to request the creation of the specified time series in the specified database.
-     */
-    public static Msg<CreateTimeSeriesRequestPayload> newCreateTimeSeriesRequest(String databaseName, 
-                                                                                 TimeSeriesDefinition definition) {
-        
-        return Msg.newRequestMsg(OpCode.CREATE_TIMESERIES, 
-                                 new CreateTimeSeriesRequestPayload(databaseName, definition));
-    }
-    
+
     /**
      * Creates a response to specified time series creation request.
      * 
@@ -114,7 +101,7 @@ public final class Msgs {
      */
     public static Msg<BulkWritePayload> newBulkWriteRequest(String databaseName, 
                                                             String seriesName,
-                                                            TimeRange partitionTimeRange,
+                                                            Range<Long> partitionTimeRange,
                                                             List<? extends Record> records) {
         
         return Msg.newRequestMsg(OpCode.BULK_WRITE, 
@@ -142,7 +129,7 @@ public final class Msgs {
      */
     public static Msg<QueryPayload> newQueryRequest(String databaseName, 
                                                             String seriesName,
-                                                            TimeRange timeRange) {
+                                                            Range<Long> timeRange) {
         
         return Msg.newRequestMsg(OpCode.QUERY, 
                                  new QueryPayload(databaseName, seriesName, timeRange));
@@ -155,7 +142,7 @@ public final class Msgs {
      * @param query the HQL query to execute
      * @return a new message to request execution of the specified HQL query
      */
-    public static Msg<HqlQueryPayload> newHqlQuery(String database, String query) {
+    public static Msg<HqlQueryPayload> newHqlQueryMsg(String database, String query) {
         
         return Msg.newRequestMsg(OpCode.HQL_QUERY, new HqlQueryPayload(database, query));
     }

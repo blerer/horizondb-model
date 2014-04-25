@@ -24,6 +24,8 @@ import java.util.TimeZone;
 
 import org.junit.Test;
 
+import com.google.common.collect.Range;
+
 import static org.junit.Assert.*;
 
 /**
@@ -39,12 +41,12 @@ public class PartitionTypeTest {
 
         Calendar calendar = toCalendar(time);
 
-        TimeRange range = PartitionType.BY_DAY.getPartitionTimeRange(calendar);
+        Range<Long> range = PartitionType.BY_DAY.getPartitionTimeRange(calendar);
 
         long start = getTime("2013.11.16 00:00:00.000");
-        long end = getTime("2013.11.16 23:59:59.999");
+        long end = getTime("2013.11.17 00:00:00.000");
 
-        TimeRange expected = new TimeRange(start, end);
+        Range<Long> expected = Range.closedOpen(Long.valueOf(start), Long.valueOf(end));
 
         assertEquals(expected, range);
     }
@@ -56,12 +58,12 @@ public class PartitionTypeTest {
 
         Calendar calendar = toCalendar(time);
 
-        TimeRange range = PartitionType.BY_DAY.getPartitionTimeRange(calendar);
+        Range<Long> range = PartitionType.BY_DAY.getPartitionTimeRange(calendar);
 
         long start = getTime("2013.11.16 00:00:00.000");
-        long end = getTime("2013.11.16 23:59:59.999");
+        long end = getTime("2013.11.17 00:00:00.000");
 
-        TimeRange expected = new TimeRange(start, end);
+        Range<Long> expected = Range.closedOpen(Long.valueOf(start), Long.valueOf(end));
 
         assertEquals(expected, range);
     }
@@ -73,12 +75,12 @@ public class PartitionTypeTest {
 
         Calendar calendar = toCalendar(time);
 
-        TimeRange range = PartitionType.BY_MONTH.getPartitionTimeRange(calendar);
+        Range<Long> range = PartitionType.BY_MONTH.getPartitionTimeRange(calendar);
 
         long start = getTime("2013.11.01 00:00:00.000");
-        long end = getTime("2013.11.30 23:59:59.999");
+        long end = getTime("2013.12.01 00:00:00.000");
 
-        TimeRange expected = new TimeRange(start, end);
+        Range<Long> expected = Range.closedOpen(Long.valueOf(start), Long.valueOf(end));
 
         assertEquals(expected, range);
     }
@@ -90,12 +92,12 @@ public class PartitionTypeTest {
 
         Calendar calendar = toCalendar(time);
 
-        TimeRange range = PartitionType.BY_MONTH.getPartitionTimeRange(calendar);
+        Range<Long> range = PartitionType.BY_MONTH.getPartitionTimeRange(calendar);
 
         long start = getTime("2013.11.01 00:00:00.000");
-        long end = getTime("2013.11.30 23:59:59.999");
+        long end = getTime("2013.12.01 00:00:00.000");
 
-        TimeRange expected = new TimeRange(start, end);
+        Range<Long> expected = Range.closedOpen(Long.valueOf(start), Long.valueOf(end));
 
         assertEquals(expected, range);
     }
@@ -107,12 +109,12 @@ public class PartitionTypeTest {
 
         Calendar calendar = toCalendar(time);
 
-        TimeRange range = PartitionType.BY_WEEK.getPartitionTimeRange(calendar);
+        Range<Long> range = PartitionType.BY_WEEK.getPartitionTimeRange(calendar);
 
         long start = getTime("2013.11.11 00:00:00.000");
-        long end = getTime("2013.11.17 23:59:59.999");
+        long end = getTime("2013.11.18 00:00:00.000");
 
-        TimeRange expected = new TimeRange(start, end);
+        Range<Long> expected = Range.closedOpen(Long.valueOf(start), Long.valueOf(end));
 
         assertEquals(expected, range);
     }
@@ -124,12 +126,12 @@ public class PartitionTypeTest {
 
         Calendar calendar = toCalendar(time);
 
-        TimeRange range = PartitionType.BY_WEEK.getPartitionTimeRange(calendar);
+        Range<Long> range = PartitionType.BY_WEEK.getPartitionTimeRange(calendar);
 
         long start = getTime("2013.11.11 00:00:00.000");
-        long end = getTime("2013.11.17 23:59:59.999");
+        long end = getTime("2013.11.18 00:00:00.000");
 
-        TimeRange expected = new TimeRange(start, end);
+        Range<Long> expected = Range.closedOpen(Long.valueOf(start), Long.valueOf(end));
 
         assertEquals(expected, range);
     }
@@ -141,12 +143,12 @@ public class PartitionTypeTest {
 
         Calendar calendar = toCalendar(time);
 
-        TimeRange range = PartitionType.BY_WEEK.getPartitionTimeRange(calendar);
+        Range<Long> range = PartitionType.BY_WEEK.getPartitionTimeRange(calendar);
 
         long start = getTime("2013.11.11 00:00:00.000");
-        long end = getTime("2013.11.17 23:59:59.999");
+        long end = getTime("2013.11.18 00:00:00.000");
 
-        TimeRange expected = new TimeRange(start, end);
+        Range<Long> expected = Range.closedOpen(Long.valueOf(start), Long.valueOf(end));
 
         assertEquals(expected, range);
     }
@@ -158,12 +160,12 @@ public class PartitionTypeTest {
 
         Calendar calendar = toCalendar(time);
 
-        TimeRange range = PartitionType.BY_WEEK.getPartitionTimeRange(calendar);
+        Range<Long> range = PartitionType.BY_WEEK.getPartitionTimeRange(calendar);
 
         long start = getTime("2013.11.11 00:00:00.000");
-        long end = getTime("2013.11.17 23:59:59.999");
+        long end = getTime("2013.11.18 00:00:00.000");
 
-        TimeRange expected = new TimeRange(start, end);
+        Range<Long> expected = Range.closedOpen(Long.valueOf(start), Long.valueOf(end));
 
         assertEquals(expected, range);
     }

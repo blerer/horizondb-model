@@ -33,6 +33,8 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.google.common.collect.Range;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -169,8 +171,8 @@ public class TimeSeriesDefinitionTest {
                                                               .addRecordType(trade)
                                                               .build();
         
-        TimeRange range = timeRange("2013.11.14 12:00:00.000", "2013.11.14 13:00:00.000");
-        List<TimeRange> ranges = definition.splitRange(range);
+        Range<Long> range = timeRange("2013.11.14 12:00:00.000", "2013.11.14 13:00:00.000");
+        List<Range<Long>> ranges = definition.splitRange(range);
         
         AssertCollections.assertListContains(ranges, range);
     }
@@ -190,11 +192,11 @@ public class TimeSeriesDefinitionTest {
                                                               .addRecordType(trade)
                                                               .build();
         
-        TimeRange range = timeRange("2013.11.14 12:00:00.000", "2013.11.15 13:00:00.000");
-        List<TimeRange> ranges = definition.splitRange(range);
+        Range<Long> range = timeRange("2013.11.14 12:00:00.000", "2013.11.15 13:00:00.000");
+        List<Range<Long>> ranges = definition.splitRange(range);
         
         AssertCollections.assertListContains(ranges, 
-                                             timeRange("2013.11.14 12:00:00.000", "2013.11.14 23:59:59.999"),
+                                             timeRange("2013.11.14 12:00:00.000", "2013.11.15 00:00:00.000"),
                                              timeRange("2013.11.15 00:00:00.000", "2013.11.15 13:00:00.000"));
     }
     
@@ -213,12 +215,12 @@ public class TimeSeriesDefinitionTest {
                                                               .addRecordType(trade)
                                                               .build();
         
-        TimeRange range = timeRange("2013.11.14 12:00:00.000", "2013.11.16 13:00:00.000");
-        List<TimeRange> ranges = definition.splitRange(range);
+        Range<Long> range = timeRange("2013.11.14 12:00:00.000", "2013.11.16 13:00:00.000");
+        List<Range<Long>> ranges = definition.splitRange(range);
         
         AssertCollections.assertListContains(ranges, 
-                                             timeRange("2013.11.14 12:00:00.000", "2013.11.14 23:59:59.999"),
-                                             timeRange("2013.11.15 00:00:00.000", "2013.11.15 23:59:59.999"),
+                                             timeRange("2013.11.14 12:00:00.000", "2013.11.15 00:00:00.000"),
+                                             timeRange("2013.11.15 00:00:00.000", "2013.11.16 00:00:00.000"),
                                              timeRange("2013.11.16 00:00:00.000", "2013.11.16 13:00:00.000"));
     }
     
@@ -286,8 +288,8 @@ public class TimeSeriesDefinitionTest {
         return format.parse(dateAsText, new ParsePosition(0)).getTime();
     }
     
-    public static TimeRange timeRange(String start, String end) {
+    public static Range<Long> timeRange(String start, String end) {
         
-        return new TimeRange(getTime(start), getTime(end));
+        return Range.closedOpen(Long.valueOf(getTime(start)), Long.valueOf(getTime(end)));
     }
 }

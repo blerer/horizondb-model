@@ -15,7 +15,6 @@
  */
 package io.horizondb.model.core;
 
-import io.horizondb.model.TimeRange;
 import io.horizondb.model.core.records.TimeSeriesRecord;
 import io.horizondb.model.schema.FieldType;
 import io.horizondb.model.schema.PartitionType;
@@ -32,6 +31,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Range;
 
 import static java.util.Arrays.asList;
 
@@ -58,7 +58,7 @@ public class RecordListBuilderTest {
                                                               .addRecordType(trade)
                                                               .build();
 
-        Multimap<TimeRange, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition).buildMultimap();
+        Multimap<Range<Long>, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition).buildMultimap();
 
         Assert.assertTrue(multimap.isEmpty());
     }
@@ -90,9 +90,10 @@ public class RecordListBuilderTest {
         expected.setDecimal(1, 125, 1);
         expected.setLong(2, 10);
 
-        Multimap<TimeRange, TimeSeriesRecord> multimap = builder.buildMultimap();
+        Multimap<Range<Long>, TimeSeriesRecord> multimap = builder.buildMultimap();
 
-        TimeRange range = new TimeRange(getTime("2013.11.14 00:00:00.000"), getTime("2013.11.14 23:59:59.999"));
+        @SuppressWarnings("boxing")
+        Range<Long> range = Range.closedOpen(getTime("2013.11.14 00:00:00.000"), getTime("2013.11.15 00:00:00.000"));
 
         AssertCollections.assertMapContains(multimap.asMap(), range, asList(expected));
     }
@@ -114,7 +115,7 @@ public class RecordListBuilderTest {
                                                               .addRecordType(trade)
                                                               .build();
 
-        Multimap<TimeRange, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition).newRecord("Trade")
+        Multimap<Range<Long>, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition).newRecord("Trade")
                                                                                           .setTimestampInMillis(0, time)
                                                                                           .setDecimal(1, 125, 1)
                                                                                           .setLong(2, 10)
@@ -136,7 +137,8 @@ public class RecordListBuilderTest {
         second.setDecimal(1, -1, 1);
         second.setLong(2, -5);
 
-        TimeRange range = new TimeRange(getTime("2013.11.14 00:00:00.000"), getTime("2013.11.14 23:59:59.999"));
+        @SuppressWarnings("boxing")
+        Range<Long> range = Range.closedOpen(getTime("2013.11.14 00:00:00.000"), getTime("2013.11.15 00:00:00.000"));
 
         AssertCollections.assertMapContains(multimap.asMap(), range, asList(first, second));
     }
@@ -159,7 +161,7 @@ public class RecordListBuilderTest {
                                                               .addRecordType(trade)
                                                               .build();
 
-        Multimap<TimeRange, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition).newRecord("Trade")
+        Multimap<Range<Long>, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition).newRecord("Trade")
                                                                                           .setTimestampInMillis(0, time)
                                                                                           .setDecimal(1, 125, 1)
                                                                                           .setLong(2, 10)
@@ -180,8 +182,11 @@ public class RecordListBuilderTest {
         second.setDecimal(1, 124, 1);
         second.setLong(2, 5);
 
-        TimeRange firstRange = new TimeRange(getTime("2013.11.14 00:00:00.000"), getTime("2013.11.14 23:59:59.999"));
-        TimeRange secondRange = new TimeRange(getTime("2013.11.15 00:00:00.000"), getTime("2013.11.15 23:59:59.999"));
+        @SuppressWarnings("boxing")
+        Range<Long> firstRange = Range.closedOpen(getTime("2013.11.14 00:00:00.000"), getTime("2013.11.15 00:00:00.000"));
+        
+        @SuppressWarnings("boxing")
+        Range<Long> secondRange = Range.closedOpen(getTime("2013.11.15 00:00:00.000"), getTime("2013.11.16 00:00:00.000"));
 
         AssertCollections.assertMapContains(multimap.asMap(), firstRange, asList(first), secondRange, asList(second));
     }
@@ -203,7 +208,7 @@ public class RecordListBuilderTest {
                                                               .addRecordType(trade)
                                                               .build();
 
-        Multimap<TimeRange, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition).newRecord("Trade")
+        Multimap<Range<Long>, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition).newRecord("Trade")
                                                                                           .setTimestampInMillis(0, time)
                                                                                           .setDecimal(1, 125, -1)
                                                                                           .setLong(2, 10)
@@ -236,7 +241,8 @@ public class RecordListBuilderTest {
         third.setDecimal(1, 6, -1);
         third.setLong(2, 1);
 
-        TimeRange range = new TimeRange(getTime("2013.11.14 00:00:00.000"), getTime("2013.11.14 23:59:59.999"));
+        @SuppressWarnings("boxing")
+        Range<Long> range = Range.closedOpen(getTime("2013.11.14 00:00:00.000"), getTime("2013.11.15 00:00:00.000"));
 
         AssertCollections.assertMapContains(multimap.asMap(), range, asList(first, second, third));
     }
@@ -259,7 +265,7 @@ public class RecordListBuilderTest {
                                                               .addRecordType(trade)
                                                               .build();
 
-        Multimap<TimeRange, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition).newRecord("Trade")
+        Multimap<Range<Long>, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition).newRecord("Trade")
                                                                                           .setTimestampInMillis(0, time)
                                                                                           .setDecimal(1, 125, 1)
                                                                                           .setLong(2, 10)
@@ -291,8 +297,10 @@ public class RecordListBuilderTest {
         third.setDecimal(1, 13, 0);
         third.setLong(2, 6);
 
-        TimeRange firstRange = new TimeRange(getTime("2013.11.14 00:00:00.000"), getTime("2013.11.14 23:59:59.999"));
-        TimeRange secondRange = new TimeRange(getTime("2013.11.15 00:00:00.000"), getTime("2013.11.15 23:59:59.999"));
+        @SuppressWarnings("boxing")
+        Range<Long> firstRange = Range.closedOpen(getTime("2013.11.14 00:00:00.000"), getTime("2013.11.15 00:00:00.000"));
+        @SuppressWarnings("boxing")
+        Range<Long> secondRange = Range.closedOpen(getTime("2013.11.15 00:00:00.000"), getTime("2013.11.16 00:00:00.000"));
 
         AssertCollections.assertMapContains(multimap.asMap(),
                                             firstRange,
@@ -318,7 +326,7 @@ public class RecordListBuilderTest {
                                                               .addRecordType(trade)
                                                               .build();
 
-        Multimap<TimeRange, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition).newRecord("Trade")
+        Multimap<Range<Long>, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition).newRecord("Trade")
                                                                                           .setTimestampInMillis(0,
                                                                                                                 time + 50)
                                                                                           .setDecimal(1, 124, -1)
@@ -351,7 +359,8 @@ public class RecordListBuilderTest {
         third.setDecimal(1, 6, -1);
         third.setLong(2, 1);
 
-        TimeRange range = new TimeRange(getTime("2013.11.14 00:00:00.000"), getTime("2013.11.14 23:59:59.999"));
+        @SuppressWarnings("boxing")
+        Range<Long> range = Range.closedOpen(getTime("2013.11.14 00:00:00.000"), getTime("2013.11.15 00:00:00.000"));
 
         AssertCollections.assertMapContains(multimap.asMap(), range, asList(first, second, third));
     }
@@ -374,7 +383,7 @@ public class RecordListBuilderTest {
                                                               .addRecordType(trade)
                                                               .build();
 
-        Multimap<TimeRange, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition).newRecord("Trade")
+        Multimap<Range<Long>, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition).newRecord("Trade")
                                                                                           .setTimestampInMillis(0,
                                                                                                                 time2 + 50)
                                                                                           .setDecimal(1, 124, -1)
@@ -406,8 +415,11 @@ public class RecordListBuilderTest {
         third.setDecimal(1, 6, -1);
         third.setLong(2, 1);
 
-        TimeRange firstRange = new TimeRange(getTime("2013.11.14 00:00:00.000"), getTime("2013.11.14 23:59:59.999"));
-        TimeRange secondRange = new TimeRange(getTime("2013.11.15 00:00:00.000"), getTime("2013.11.15 23:59:59.999"));
+        @SuppressWarnings("boxing")
+        Range<Long> firstRange = Range.closedOpen(getTime("2013.11.14 00:00:00.000"), getTime("2013.11.15 00:00:00.000"));
+        
+        @SuppressWarnings("boxing")
+        Range<Long> secondRange = Range.closedOpen(getTime("2013.11.15 00:00:00.000"), getTime("2013.11.16 00:00:00.000"));
 
         AssertCollections.assertMapContains(multimap.asMap(),
                                             firstRange,
@@ -441,7 +453,7 @@ public class RecordListBuilderTest {
                                                               .addRecordType(trade)
                                                               .build();
 
-        Multimap<TimeRange, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition).newRecord("Quote")
+        Multimap<Range<Long>, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition).newRecord("Quote")
                                                                                           .setTimestampInMillis(0, time)
                                                                                           .setDecimal(1, 123, 1)
                                                                                           .setDecimal(2, 125, 1)
@@ -474,7 +486,8 @@ public class RecordListBuilderTest {
         expectedTrade.setDecimal(1, 125, 1);
         expectedTrade.setLong(2, 10);
 
-        TimeRange range = new TimeRange(getTime("2013.11.14 00:00:00.000"), getTime("2013.11.14 23:59:59.999"));
+        @SuppressWarnings("boxing")
+        Range<Long> range = Range.closedOpen(getTime("2013.11.14 00:00:00.000"), getTime("2013.11.15 00:00:00.000"));
 
         AssertCollections.assertMapContains(multimap.asMap(), range, asList(expectedQuote, expectedTrade));
     }
@@ -509,7 +522,7 @@ public class RecordListBuilderTest {
                                                               .addRecordType(exchangeState)
                                                               .build();
 
-        Multimap<TimeRange, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition).newRecord("ExchangeState")
+        Multimap<Range<Long>, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition).newRecord("ExchangeState")
                                                                                           .setTimestampInMillis(0, time)
                                                                                           .setByte(1, 1)
                                                                                           .newRecord("Quote")
@@ -608,7 +621,8 @@ public class RecordListBuilderTest {
         thirdQuote.setLong(3, 0);
         thirdQuote.setLong(4, 0);
 
-        TimeRange range = new TimeRange(getTime("2013.11.14 00:00:00.000"), getTime("2013.11.14 23:59:59.999"));
+        @SuppressWarnings("boxing")
+        Range<Long> range = Range.closedOpen(getTime("2013.11.14 00:00:00.000"), getTime("2013.11.15 00:00:00.000"));
 
         AssertCollections.assertMapContains(multimap.asMap(),
                                             range,
@@ -652,7 +666,7 @@ public class RecordListBuilderTest {
                                                               .addRecordType(exchangeState)
                                                               .build();
 
-        Multimap<TimeRange, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition)
+        Multimap<Range<Long>, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition)
                                                                         .newRecord("ExchangeState")
                                                                         .setTimestampInMillis(0, time)
                                                                         .setByte(1, 1)
@@ -748,8 +762,11 @@ public class RecordListBuilderTest {
         thirdQuote.setLong(3, 6);
         thirdQuote.setLong(4, 4);
         
-        TimeRange firstRange = new TimeRange(getTime("2013.11.14 00:00:00.000"), getTime("2013.11.14 23:59:59.999"));
-        TimeRange secondRange = new TimeRange(getTime("2013.11.15 00:00:00.000"), getTime("2013.11.15 23:59:59.999"));
+        @SuppressWarnings("boxing")
+        Range<Long> firstRange = Range.closedOpen(getTime("2013.11.14 00:00:00.000"), getTime("2013.11.15 00:00:00.000"));
+        
+        @SuppressWarnings("boxing")
+        Range<Long> secondRange = Range.closedOpen(getTime("2013.11.15 00:00:00.000"), getTime("2013.11.16 00:00:00.000"));
 
         AssertCollections.assertMapContains(multimap.asMap(), firstRange, asList(firstES, firstQuote, firstTrade, secondQuote), secondRange, asList(secondTrade, thirdTrade, thirdQuote));
     }

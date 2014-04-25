@@ -35,7 +35,7 @@ public class MsgHeaderTest {
     @Test
     public void testComputeSize() throws IOException {
 
-        MsgHeader header = MsgHeader.newRequestHeader(OpCode.CREATE_TIMESERIES, 124);
+        MsgHeader header = MsgHeader.newRequestHeader(OpCode.HQL_QUERY, 124);
 
         Buffer buffer = Buffers.allocate(100);
 
@@ -47,7 +47,7 @@ public class MsgHeaderTest {
     @Test
     public void testGetParser() throws IOException {
 
-        MsgHeader header = MsgHeader.newRequestHeader(OpCode.CREATE_TIMESERIES, 124);
+        MsgHeader header = MsgHeader.newRequestHeader(OpCode.HQL_QUERY, 124);
 
         Buffer buffer = Buffers.allocate(100);
 

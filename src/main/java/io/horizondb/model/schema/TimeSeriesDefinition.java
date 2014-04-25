@@ -21,7 +21,6 @@ import io.horizondb.io.encoding.VarInts;
 import io.horizondb.io.serialization.Parser;
 import io.horizondb.io.serialization.Serializable;
 import io.horizondb.io.serialization.Serializables;
-import io.horizondb.model.TimeRange;
 import io.horizondb.model.core.records.BinaryTimeSeriesRecord;
 import io.horizondb.model.core.records.TimeSeriesRecord;
 
@@ -42,6 +41,7 @@ import org.apache.commons.lang.builder.ToStringStyle;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
+import com.google.common.collect.Range;
 
 import static org.apache.commons.lang.SystemUtils.LINE_SEPARATOR;
 import static org.apache.commons.lang.Validate.notNull;
@@ -175,7 +175,7 @@ public final class TimeSeriesDefinition implements Serializable {
      * @param timestampInMillis the timestamp in millisecond
      * @return the time range of the partition to which belongs the specified time.
      */
-    public TimeRange getPartitionTimeRange(long timestampInMillis) {
+    public Range<Long> getPartitionTimeRange(long timestampInMillis) {
 
         Calendar calendar = Calendar.getInstance(this.timeZone);
         calendar.setTimeInMillis(timestampInMillis);
@@ -553,19 +553,18 @@ public final class TimeSeriesDefinition implements Serializable {
      * @param range the range to split
      * @return the ranges resulting from the split
      */
-    public List<TimeRange> splitRange(TimeRange range) {
+    public List<Range<Long>> splitRange(Range<Long> range) {
         
-        TimeRange remaining = range;
-        List<TimeRange> ranges = new ArrayList<>();
+        Range<Long> remaining = range;
+        List<Range<Long>> ranges = new ArrayList<>();
         
-        TimeRange partition = getPartitionTimeRange(remaining.getStart());
+        Range<Long> partition = getPartitionTimeRange(remaining.lowerEndpoint().longValue());
         
-        while (!partition.includes(remaining)) {
+        while (!partition.encloses(remaining)) {
             
-            TimeRange[] splittedRange = remaining.split(partition.getEnd() + 1);
-            ranges.add(splittedRange[0]);
-            remaining = splittedRange[1];
-            partition = getPartitionTimeRange(remaining.getStart());
+            ranges.add(Range.closedOpen(remaining.lowerEndpoint(), partition.upperEndpoint()));
+            remaining = Range.closedOpen(partition.upperEndpoint(), remaining.upperEndpoint());
+            partition = getPartitionTimeRange(remaining.lowerEndpoint().longValue());
         }
         
         ranges.add(remaining);
@@ -597,7 +596,13 @@ public final class TimeSeriesDefinition implements Serializable {
             builder.append(definition.toHql());
         }
         
-        builder.append(')').append(';');
+        builder.append(')');
+        
+        builder.append("TIME_UNIT = ")
+               .append(this.timeUnit)
+               .append(" TIMEZONE = '")
+               .append(this.timeZone.getID())
+               .append("';");
         
         return builder.toString(); 
     }

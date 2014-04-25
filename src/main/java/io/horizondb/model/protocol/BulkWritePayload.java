@@ -16,7 +16,6 @@
 package io.horizondb.model.protocol;
 
 import io.horizondb.io.ByteWriter;
-import io.horizondb.model.TimeRange;
 import io.horizondb.model.core.Record;
 import io.horizondb.model.core.RecordUtils;
 
@@ -25,6 +24,8 @@ import java.util.List;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
+
+import com.google.common.collect.Range;
 
 /**
  * <code>Payload</code> used to request the write of a bulk of records.
@@ -49,7 +50,7 @@ public final class BulkWritePayload extends AbstractBulkWritePayload {
      */
     public BulkWritePayload(String databaseName, 
                             String seriesName, 
-                            TimeRange partitionTimeRange, 
+                            Range<Long> partitionTimeRange, 
                             List<? extends Record> records) {
 
         super(databaseName, seriesName, partitionTimeRange);

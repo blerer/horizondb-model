@@ -19,11 +19,12 @@ import io.horizondb.io.ByteReader;
 import io.horizondb.io.ByteWriter;
 import io.horizondb.io.encoding.VarInts;
 import io.horizondb.io.serialization.Parser;
-import io.horizondb.model.TimeRange;
 
 import java.io.IOException;
 
 import javax.annotation.concurrent.Immutable;
+
+import com.google.common.collect.Range;
 
 /**
  * A query used to request data from the server.
@@ -47,7 +48,11 @@ public final class QueryPayload implements Payload {
 
             String databaseName = VarInts.readString(reader);
             String seriesName = VarInts.readString(reader);
-            TimeRange range = TimeRange.parseFrom(reader);
+            
+            long lowerEndPoint = VarInts.readUnsignedLong(reader);
+            long upperEndPoint = VarInts.readUnsignedLong(reader);
+            
+            Range<Long> range = Range.closedOpen(Long.valueOf(lowerEndPoint), Long.valueOf(upperEndPoint));
 
             return new QueryPayload(databaseName, seriesName, range);
         }
@@ -66,12 +71,12 @@ public final class QueryPayload implements Payload {
     /**
      * The time range for which data must be returned from the partition.
      */
-    private final TimeRange timeRange;
+    private final Range<Long> timeRange;
 
     /**
      * @param timeRange
      */
-    public QueryPayload(String databaseName, String seriesName, TimeRange timeRange) {
+    public QueryPayload(String databaseName, String seriesName, Range<Long> timeRange) {
 
         this.databaseName = databaseName;
         this.seriesName = seriesName;
@@ -101,7 +106,7 @@ public final class QueryPayload implements Payload {
      * 
      * @return the time range for which data must be returned.
      */
-    public TimeRange getTimeRange() {
+    public Range<Long> getTimeRange() {
         return this.timeRange;
     }
 
@@ -133,7 +138,8 @@ public final class QueryPayload implements Payload {
     public int computeSerializedSize() {
         return VarInts.computeStringSize(this.databaseName) 
                 + VarInts.computeStringSize(this.seriesName) 
-                + this.timeRange.computeSerializedSize();
+                + VarInts.computeUnsignedLongSize(this.timeRange.lowerEndpoint().longValue())
+                + VarInts.computeUnsignedLongSize(this.timeRange.upperEndpoint().longValue());
     }
 
     /**
@@ -144,6 +150,7 @@ public final class QueryPayload implements Payload {
         
         VarInts.writeString(writer, this.databaseName);
         VarInts.writeString(writer, this.seriesName);
-        this.timeRange.writeTo(writer);
+        VarInts.writeUnsignedLong(writer, this.timeRange.lowerEndpoint().longValue());
+        VarInts.writeUnsignedLong(writer, this.timeRange.upperEndpoint().longValue());
     }
 }

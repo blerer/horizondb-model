@@ -17,15 +17,8 @@ package io.horizondb.model.protocol;
 
 import io.horizondb.io.Buffer;
 import io.horizondb.io.buffers.Buffers;
-import io.horizondb.model.protocol.Msg;
-import io.horizondb.model.protocol.OpCode;
-import io.horizondb.model.schema.DatabaseDefinition;
-import io.horizondb.model.schema.FieldType;
-import io.horizondb.model.schema.RecordTypeDefinition;
-import io.horizondb.model.schema.TimeSeriesDefinition;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
 
@@ -40,28 +33,9 @@ public class MsgTest {
     @Test
     public void testComputeSize() throws IOException {
 
-        RecordTypeDefinition quote = RecordTypeDefinition.newBuilder("Quote")
-                                                         .addField("bestBid", FieldType.DECIMAL)
-                                                         .addField("bestAsk", FieldType.DECIMAL)
-                                                         .addField("bidVolume", FieldType.INTEGER)
-                                                         .addField("askVolume", FieldType.INTEGER)
-                                                         .build();
+        HqlQueryPayload payload = new HqlQueryPayload("", "USE TEST;");
 
-        RecordTypeDefinition trade = RecordTypeDefinition.newBuilder("Trade")
-                                                         .addField("price", FieldType.DECIMAL)
-                                                         .addField("volume", FieldType.DECIMAL)
-                                                         .addField("aggressorSide", FieldType.BYTE)
-                                                         .build();
-
-        DatabaseDefinition databaseDefinition = new DatabaseDefinition("test");
-
-        TimeSeriesDefinition definition = databaseDefinition.newTimeSeriesDefinitionBuilder("DAX")
-                                                            .timeUnit(TimeUnit.NANOSECONDS)
-                                                            .addRecordType(quote)
-                                                            .addRecordType(trade)
-                                                            .build();
-
-        Msg<TimeSeriesDefinition> msg = Msg.newRequestMsg(OpCode.CREATE_TIMESERIES, definition);
+        Msg<HqlQueryPayload> msg = Msg.newRequestMsg(OpCode.HQL_QUERY, payload);
 
         Buffer buffer = Buffers.allocate(200);
 
