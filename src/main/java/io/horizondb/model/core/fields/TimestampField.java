@@ -41,12 +41,12 @@ public final class TimestampField extends AbstractField {
     /**
      * The time unit.
      */
-    private final TimeUnit unit;
+    private final TimeUnit sourceUnit;
 
     /**
      * The timestamp.
      */
-    private long timestamp;
+    private long sourceTimestamp;
 
     /**
      * {@inheritDoc}
@@ -54,17 +54,17 @@ public final class TimestampField extends AbstractField {
     @Override
     public FieldType getType() {
 
-        if (this.unit.equals(TimeUnit.NANOSECONDS)) {
+        if (this.sourceUnit.equals(TimeUnit.NANOSECONDS)) {
 
             return FieldType.NANOSECONDS_TIMESTAMP;
         }
 
-        if (this.unit.equals(TimeUnit.MICROSECONDS)) {
+        if (this.sourceUnit.equals(TimeUnit.MICROSECONDS)) {
 
             return FieldType.MICROSECONDS_TIMESTAMP;
         }
 
-        if (this.unit.equals(TimeUnit.MILLISECONDS)) {
+        if (this.sourceUnit.equals(TimeUnit.MILLISECONDS)) {
 
             return FieldType.MILLISECONDS_TIMESTAMP;
         }
@@ -78,8 +78,8 @@ public final class TimestampField extends AbstractField {
     @Override
     public Field newInstance() {
 
-        TimestampField copy = new TimestampField(this.unit);
-        copy.timestamp = this.timestamp;
+        TimestampField copy = new TimestampField(this.sourceUnit);
+        copy.sourceTimestamp = this.sourceTimestamp;
 
         return copy;
     }
@@ -90,7 +90,7 @@ public final class TimestampField extends AbstractField {
     public TimestampField(TimeUnit unit) {
 
         notNull(unit, "the unit parameter must not be null.");
-        this.unit = unit;
+        this.sourceUnit = unit;
     }
 
     /**
@@ -98,7 +98,7 @@ public final class TimestampField extends AbstractField {
      */
     @Override
     public boolean isZero() {
-        return this.timestamp == 0;
+        return this.sourceTimestamp == 0;
     }
 
     /**
@@ -106,7 +106,7 @@ public final class TimestampField extends AbstractField {
      */
     @Override
     public void setValueToZero() {
-        this.timestamp = 0;
+        this.sourceTimestamp = 0;
     }
 
     /**
@@ -115,7 +115,7 @@ public final class TimestampField extends AbstractField {
     @Override
     public void add(Field field) {
 
-        this.timestamp += ((TimestampField) field).timestamp;
+        this.sourceTimestamp += ((TimestampField) field).sourceTimestamp;
     }
 
     /**
@@ -124,7 +124,7 @@ public final class TimestampField extends AbstractField {
     @Override
     public void subtract(Field field) {
 
-        this.timestamp -= ((TimestampField) field).timestamp;
+        this.sourceTimestamp -= ((TimestampField) field).sourceTimestamp;
     }
 
     /**
@@ -133,7 +133,27 @@ public final class TimestampField extends AbstractField {
     @Override
     public void copyTo(Field field) {
 
-        ((TimestampField) field).timestamp = this.timestamp;
+        ((TimestampField) field).sourceTimestamp = this.sourceTimestamp;
+    }
+
+    /**    
+     * {@inheritDoc}
+     */
+    @Override
+    public void setValueFromString(String s) {
+        
+        int length = s.length();
+        int index = length - 1;   
+
+        while (Character.isLetter(s.charAt(index))) {
+            
+            index--;
+        }
+        
+        String symbol = s.substring(index + 1);
+        String t = s.substring(0, index + 1);
+        
+        setTimestamp(Long.parseLong(t), getTimeUnit(symbol));
     }
 
     /**
@@ -141,7 +161,7 @@ public final class TimestampField extends AbstractField {
      */
     @Override
     public void writeTo(ByteWriter writer) throws IOException {
-        VarInts.writeLong(writer, this.timestamp);
+        VarInts.writeLong(writer, this.sourceTimestamp);
     }
 
     /**
@@ -149,7 +169,7 @@ public final class TimestampField extends AbstractField {
      */
     @Override
     public void readFrom(ByteReader reader) throws IOException {
-        this.timestamp = VarInts.readLong(reader);
+        this.sourceTimestamp = VarInts.readLong(reader);
     }
 
     /**
@@ -157,79 +177,15 @@ public final class TimestampField extends AbstractField {
      */
     @Override
     public int computeSize() {
-        return VarInts.computeLongSize(this.timestamp);
+        return VarInts.computeLongSize(this.sourceTimestamp);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public long getTimestampInNanos() {
-
-        return this.unit.toNanos(this.timestamp);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public long getTimestampInMicros() {
-
-        return this.unit.toMicros(this.timestamp);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public long getTimestampInMillis() {
-
-        return this.unit.toMillis(this.timestamp);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public long getTimestampInSeconds() {
-
-        return this.unit.toSeconds(this.timestamp);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setTimestampInNanos(long timestamp) {
-
-        setTimestamp(timestamp, TimeUnit.NANOSECONDS);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setTimestampInMicros(long timestamp) {
-
-        setTimestamp(timestamp, TimeUnit.MICROSECONDS);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setTimestampInMillis(long timestamp) {
-
-        setTimestamp(timestamp, TimeUnit.MILLISECONDS);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setTimestampInSeconds(long timestamp) {
-
-        setTimestamp(timestamp, TimeUnit.SECONDS);
+    public long getTimestampIn(TimeUnit unit) {
+        return unit.convert(this.sourceTimestamp, this.sourceUnit);
     }
 
     /**    
@@ -238,9 +194,9 @@ public final class TimestampField extends AbstractField {
     @Override
     public void writePrettyPrint(PrintStream stream) {
                
-        stream.print(this.timestamp);
+        stream.print(this.sourceTimestamp);
         stream.print(' ');
-        stream.print(getTimeUnitSymbol(this.unit));
+        stream.print(getTimeUnitSymbol(this.sourceUnit));
     }
 
     /**
@@ -262,28 +218,55 @@ public final class TimestampField extends AbstractField {
     }
 
     /**
-     * @param timestamp
-     * @param sourceUnit
+     * Returns the unit of time for the specified symbol.
+     * 
+     * @param timeUnit the time unit
+     * @return the unit of time for the specified symbol
      */
-    private void setTimestamp(long sourceTimestamp, TimeUnit sourceUnit) {
+    private TimeUnit getTimeUnit(String symbol) {
+        
+        switch (symbol) {
+            
+            case "": return this.sourceUnit;
+            case "ns": return TimeUnit.NANOSECONDS;
+            case "µs": return TimeUnit.MICROSECONDS;
+            case "ms": return TimeUnit.MILLISECONDS;
+            case "s": return TimeUnit.SECONDS;
+            default: throw new IllegalStateException("Unknown time unit: " + symbol);
+        }
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setTimestamp(long sourceTimestamp, TimeUnit unit) {
 
-        if (sourceUnit.compareTo(this.unit) < 0) {
+        if (unit.compareTo(this.sourceUnit) < 0) {
 
-            throw new TypeConversionException("A timestamp in " + sourceUnit.toString().toLowerCase()
+            throw new TypeConversionException("A timestamp in " + unit.toString().toLowerCase()
                     + " cannot be stored in a field of type: " + getType() + ".");
         }
 
-        this.timestamp = this.unit.convert(sourceTimestamp, sourceUnit);
+        this.sourceTimestamp = this.sourceUnit.convert(sourceTimestamp, unit);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
+    public int compareTo(Field other) {
+            return Long.compare(this.sourceTimestamp, other.getTimestampIn(this.sourceUnit));
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public String toString() {
 
-        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).append("timestamp", this.timestamp)
-                                                                          .append("unit", this.unit)
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).append("timestamp", this.sourceTimestamp)
+                                                                          .append("unit", this.sourceUnit)
                                                                           .toString();
     }
 
@@ -300,7 +283,9 @@ public final class TimestampField extends AbstractField {
             return false;
         }
         TimestampField rhs = (TimestampField) object;
-        return new EqualsBuilder().append(this.timestamp, rhs.timestamp).append(this.unit, rhs.unit).isEquals();
+        return new EqualsBuilder().append(this.sourceTimestamp, rhs.sourceTimestamp)
+                                  .append(this.sourceUnit, rhs.sourceUnit)
+                                  .isEquals();
     }
 
     /**
@@ -309,6 +294,8 @@ public final class TimestampField extends AbstractField {
      */
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(773109111, 83366071).append(this.timestamp).append(this.unit).toHashCode();
+        return new HashCodeBuilder(773109111, 83366071).append(this.sourceTimestamp)
+                                                       .append(this.sourceUnit)
+                                                       .toHashCode();
     }
 }

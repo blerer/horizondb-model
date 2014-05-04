@@ -15,6 +15,8 @@
  */
 package io.horizondb.model.core.fields;
 
+import java.util.concurrent.TimeUnit;
+
 import io.horizondb.model.core.Field;
 
 /**
@@ -104,12 +106,12 @@ public abstract class AbstractField implements Field {
     public byte getDecimalExponent() {
         throw new TypeConversionException("A value of type " + getType() + " cannot be converted into a decimal.");
     }
-
+    
     /**
      * {@inheritDoc}
      */
     @Override
-    public long getTimestampInNanos() {
+    public long getTimestampIn(TimeUnit unit) {
         throw new TypeConversionException("A value of type " + getType() + " cannot be converted into a timestamp.");
     }
 
@@ -117,24 +119,32 @@ public abstract class AbstractField implements Field {
      * {@inheritDoc}
      */
     @Override
-    public long getTimestampInMicros() {
-        throw new TypeConversionException("A value of type " + getType() + " cannot be converted into a timestamp.");
+    public final long getTimestampInNanos() {
+        return getTimestampIn(TimeUnit.NANOSECONDS);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public long getTimestampInMillis() {
-        throw new TypeConversionException("A value of type " + getType() + " cannot be converted into a timestamp.");
+    public final long getTimestampInMicros() {
+        return getTimestampIn(TimeUnit.MICROSECONDS);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public long getTimestampInSeconds() {
-        throw new TypeConversionException("A value of type " + getType() + " cannot be converted into a timestamp.");
+    public final long getTimestampInMillis() {
+        return getTimestampIn(TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final long getTimestampInSeconds() {
+        return getTimestampIn(TimeUnit.SECONDS);
     }
 
     /**
@@ -149,31 +159,40 @@ public abstract class AbstractField implements Field {
      * {@inheritDoc}
      */
     @Override
-    public void setTimestampInNanos(long timestamp) {
-        throw new TypeConversionException("A timestamp cannot be stored in a field of type " + getType() + ".");
+    public final void setTimestampInNanos(long timestamp) {
+        setTimestamp(timestamp, TimeUnit.NANOSECONDS);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void setTimestampInMicros(long timestamp) {
-        throw new TypeConversionException("A timestamp cannot be stored in a field of type " + getType() + ".");
+    public final void setTimestampInMicros(long timestamp) {
+        setTimestamp(timestamp, TimeUnit.MICROSECONDS);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void setTimestampInMillis(long timestamp) {
-        throw new TypeConversionException("A timestamp cannot be stored in a field of type " + getType() + ".");
+    public final void setTimestampInMillis(long timestamp) {
+        setTimestamp(timestamp, TimeUnit.MILLISECONDS);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void setTimestampInSeconds(long timestamp) {
+    public final void setTimestampInSeconds(long timestamp) {
+        setTimestamp(timestamp, TimeUnit.SECONDS);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setTimestamp(long timestamp, TimeUnit unit) {
+
         throw new TypeConversionException("A timestamp cannot be stored in a field of type " + getType() + ".");
     }
 }

@@ -120,6 +120,14 @@ public final class LongField extends AbstractField {
     public int computeSize() {
         return VarInts.computeLongSize(this.value);
     }
+    
+    /**    
+     * {@inheritDoc}
+     */
+    @Override
+    public int compareTo(Field other) {
+        return Long.compare(this.value, other.getLong());
+    }
 
     /**
      * {@inheritDoc}
@@ -194,6 +202,14 @@ public final class LongField extends AbstractField {
         return 0;
     }
 
+    /**    
+     * {@inheritDoc}
+     */
+    @Override
+    public void setValueFromString(String s) {
+        setLong(Long.parseLong(s));
+    }
+    
     /**
      * {@inheritDoc}
      */

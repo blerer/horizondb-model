@@ -185,6 +185,22 @@ public class IntegerField extends AbstractField {
         return 0;
     }
 
+    /**    
+     * {@inheritDoc}
+     */
+    @Override
+    public void setValueFromString(String s) {
+        setInt(Integer.parseInt(s));
+    }
+
+    /**    
+     * {@inheritDoc}
+     */
+    @Override
+    public int compareTo(Field other) {
+        return Integer.compare(this.value, other.getInt());
+    }
+
     /**
      * {@inheritDoc}
      */

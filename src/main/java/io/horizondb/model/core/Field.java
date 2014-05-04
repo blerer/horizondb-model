@@ -22,6 +22,7 @@ import io.horizondb.model.schema.FieldType;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Represents a field from a <code>Record</code> of a time series.
@@ -29,7 +30,7 @@ import java.io.PrintStream;
  * @author Benjamin
  * 
  */
-public interface Field {
+public interface Field extends Comparable<Field> {
 
     /**
      * Returns the field type.
@@ -85,6 +86,15 @@ public interface Field {
      * @throws TypeConversionException if this field does not accept decimal values.
      */
     void setDecimal(long mantissa, int exponent);
+    
+    /**
+     * Sets the value of this field to the specified timestamp in the specified unit.
+     * 
+     * @param timestamp the timestamp value.
+     * @param unit the timestamp unit.
+     * @throws TypeConversionException if this field does not accept nanoseconds timestamp values.
+     */
+    void setTimestamp(long timestamp, TimeUnit unit);
 
     /**
      * Sets the value of this field to the specified nanoseconds timestamp.
@@ -159,6 +169,13 @@ public interface Field {
      * @return the exponent of the value of the field.
      */
     byte getDecimalExponent();
+
+    /**
+     * Returns the value of this field as a timestamp with the specified unit.
+     * 
+     * @return the value of this field as a timestamp with the specified unit.
+     */
+    long getTimestampIn(TimeUnit unit);
 
     /**
      * Returns the value of this field as a nanoseconds timestamp.
@@ -243,6 +260,12 @@ public interface Field {
      * Sets the value of the field to zero.
      */
     void setValueToZero();
+    
+    /**
+     * Sets the value from the specified <code>String</code>.
+     * @param s the new value as <code>String</code>
+     */
+    void setValueFromString(String s);
 
     /**
      * Writes the content of this <code>Field</code> in a readable format into the specified stream.

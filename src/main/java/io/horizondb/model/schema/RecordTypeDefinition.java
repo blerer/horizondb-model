@@ -21,6 +21,7 @@ import io.horizondb.io.encoding.VarInts;
 import io.horizondb.io.serialization.Parser;
 import io.horizondb.io.serialization.Serializable;
 import io.horizondb.io.serialization.Serializables;
+import io.horizondb.model.core.Field;
 import io.horizondb.model.core.records.BinaryTimeSeriesRecord;
 import io.horizondb.model.core.records.TimeSeriesRecord;
 
@@ -31,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.concurrent.Immutable;
 
+import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
@@ -217,7 +219,22 @@ public class RecordTypeDefinition implements Serializable {
 
         return PARSER;
     }
-
+    
+    /**
+     * Creates a new instance of the specified <code>Field</code>. 
+     * 
+     * @param fieldIndex the field index
+     * @return a new instance of the specified <code>Field</code>
+     */
+    Field newField(int fieldIndex) {
+        
+        Validate.isTrue(fieldIndex >= 0 && fieldIndex <= this.fields.size(), 
+                "No field has been defined with the index: " + fieldIndex 
+                + " fot the record type: " + this.name);
+        
+        return this.fields.get(fieldIndex - 1).getType().newField();
+    } 
+    
     /**
      * Creates a new <code>RecordTypeDefinition</code> instance using the specified <code>Builder</code>.
      * 
@@ -440,5 +457,5 @@ public class RecordTypeDefinition implements Serializable {
 
         builder.append(')');
         return builder.toString();
-    }  
+    }
 }

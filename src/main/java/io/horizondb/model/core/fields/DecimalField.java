@@ -305,6 +305,16 @@ public class DecimalField extends AbstractField {
      * {@inheritDoc}
      */
     @Override
+    public int compareTo(Field other) {
+        return Double.compare(getDouble(), other.getDouble());
+    }
+
+    
+    
+    /**    
+     * {@inheritDoc}
+     */
+    @Override
     public void writePrettyPrint(PrintStream stream) {
         
         stream.print(this.mantissa);
@@ -471,5 +481,13 @@ public class DecimalField extends AbstractField {
         }
 
         return Math.pow(10, exponent);
+    }
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setValueFromString(String s) {
+        // TODO Auto-generated method stub
+        
     }
 }

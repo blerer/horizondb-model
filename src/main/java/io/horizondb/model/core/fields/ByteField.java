@@ -117,6 +117,14 @@ public class ByteField extends AbstractField {
 
         return 1;
     }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int compareTo(Field other) {
+        return Integer.compare(this.value, other.getByte());
+    }
 
     /**
      * {@inheritDoc}
@@ -172,6 +180,14 @@ public class ByteField extends AbstractField {
     @Override
     public byte getDecimalExponent() {
         return 0;
+    }
+
+    /**    
+     * {@inheritDoc}
+     */
+    @Override
+    public void setValueFromString(String s) {
+        setByte(Byte.parseByte(s));
     }
 
     /**

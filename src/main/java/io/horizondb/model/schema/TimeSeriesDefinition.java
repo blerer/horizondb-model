@@ -21,6 +21,7 @@ import io.horizondb.io.encoding.VarInts;
 import io.horizondb.io.serialization.Parser;
 import io.horizondb.io.serialization.Serializable;
 import io.horizondb.io.serialization.Serializables;
+import io.horizondb.model.core.Field;
 import io.horizondb.model.core.records.BinaryTimeSeriesRecord;
 import io.horizondb.model.core.records.TimeSeriesRecord;
 
@@ -197,6 +198,21 @@ public final class TimeSeriesDefinition implements Serializable {
         return this.recordTypes.get(index).newRecord(index, this.timeUnit);
     }
 
+    /**
+     * Returns a new field instance of the specified record type. 
+     * 
+     * @param recordTypeIndex the index of the record type
+     * @param fieldIndex the field index
+     * @return a new field instance of the specified record type
+     */
+    public Field newField(int recordTypeIndex, int fieldIndex) {
+        
+        Validate.isTrue(recordTypeIndex >= 0 && recordTypeIndex <= this.recordTypes.size(), 
+                "No record has been defined for the index: " + recordTypeIndex);
+        
+        return this.recordTypes.get(recordTypeIndex).newField(fieldIndex);
+    }
+    
     /**
      * Returns the index of the specified record type.
      * 
