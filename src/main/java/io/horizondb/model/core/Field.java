@@ -24,6 +24,8 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.concurrent.TimeUnit;
 
+import com.google.common.collect.RangeSet;
+
 /**
  * Represents a field from a <code>Record</code> of a time series.
  * 
@@ -73,10 +75,10 @@ public interface Field extends Comparable<Field> {
     /**
      * Sets the value of this field to the specified double.
      * 
-     * @param double the double value.
+     * @param d the double value.
      * @throws TypeConversionException if this field does not accept double values.
      */
-    void setDouble(double b);
+    void setDouble(double d);
 
     /**
      * Sets the value of this field to the specified decimal.
@@ -274,4 +276,25 @@ public interface Field extends Comparable<Field> {
      * @throws IOException if an I/O problem occurs
      */
     void writePrettyPrint(PrintStream stream);
+    
+    /**
+     * Returns the maximum value that this field can have.
+     * 
+     * @return the maximum value that this field can have.
+     */
+    Field maxValue();
+    
+    /**
+     * Returns the minimum value that this field can have.
+     * 
+     * @return the minimum value that this field can have.
+     */
+    Field minValue();
+    
+    /**
+     * Returns a <code>RangeSet</code> that contains all the values that this field can have.
+     * 
+     * @return a <code>RangeSet</code> that contains all the values that this field can have.
+     */
+    RangeSet<Field> allValues();
 }

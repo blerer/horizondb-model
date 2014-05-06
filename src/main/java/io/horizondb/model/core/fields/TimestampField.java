@@ -19,10 +19,12 @@ import io.horizondb.io.ByteReader;
 import io.horizondb.io.ByteWriter;
 import io.horizondb.io.encoding.VarInts;
 import io.horizondb.model.core.Field;
+import io.horizondb.model.core.util.TimeUtils;
 import io.horizondb.model.schema.FieldType;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
@@ -37,7 +39,17 @@ import static org.apache.commons.lang.Validate.notNull;
  * 
  */
 public final class TimestampField extends AbstractField {
-
+    
+    /**
+     * The field maximum value.
+     */
+    private static final Field MAX_VALUE = ImmutableField.of(new TimestampField(Long.MAX_VALUE, TimeUnit.MILLISECONDS));
+    
+    /**
+     * The field minimum value.
+     */
+    private static final Field MIN_VALUE = ImmutableField.of(new TimestampField(Long.MIN_VALUE, TimeUnit.MILLISECONDS));
+        
     /**
      * The time unit.
      */
@@ -47,7 +59,7 @@ public final class TimestampField extends AbstractField {
      * The timestamp.
      */
     private long sourceTimestamp;
-
+    
     /**
      * {@inheritDoc}
      */
@@ -78,10 +90,7 @@ public final class TimestampField extends AbstractField {
     @Override
     public Field newInstance() {
 
-        TimestampField copy = new TimestampField(this.sourceUnit);
-        copy.sourceTimestamp = this.sourceTimestamp;
-
-        return copy;
+        return new TimestampField(this.sourceTimestamp, this.sourceUnit);
     }
 
     /**
@@ -156,6 +165,26 @@ public final class TimestampField extends AbstractField {
         setTimestamp(Long.parseLong(t), getTimeUnit(symbol));
     }
 
+    /**
+     * Sets the value from the specified <code>String</code> using the specified 
+     * time zone.
+     * @param timeZone the time zone used
+     * @param s the <code>String</code>
+     */
+    public void setValueFromString(TimeZone timeZone, String s) {
+        
+        if (s.startsWith("'") && s.endsWith("'")) {
+            
+            String dateTime = s.substring(1, s.length() - 1);
+            long timeInMillis = TimeUtils.parseDateTime(timeZone, dateTime);
+            setTimestampInMillis(timeInMillis);
+        
+        } else {
+            
+            setValueFromString(s);
+        }
+    }
+    
     /**
      * {@inheritDoc}
      */
@@ -297,5 +326,34 @@ public final class TimestampField extends AbstractField {
         return new HashCodeBuilder(773109111, 83366071).append(this.sourceTimestamp)
                                                        .append(this.sourceUnit)
                                                        .toHashCode();
+    }
+        
+    /**    
+     * {@inheritDoc}
+     */
+    @Override
+    public Field maxValue() {
+        return MAX_VALUE;
+    }
+
+    /**    
+     * {@inheritDoc}
+     */
+    @Override
+    public Field minValue() {
+        return MIN_VALUE;
+    }
+    
+    /**
+     * Creates a <code>TimestampField</code> with the specified value.
+     * 
+     * @param timestamp the timestamp
+     * @param unit the timestamp unit
+     */
+    private TimestampField(long timestamp, TimeUnit unit) {
+
+        notNull(unit, "the unit parameter must not be null.");
+        this.sourceTimestamp = timestamp;
+        this.sourceUnit = unit;
     }
 }

@@ -24,10 +24,10 @@ import io.horizondb.model.schema.FieldType;
 import java.io.IOException;
 import java.io.PrintStream;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.apache.commons.lang.builder.ToStringStyle;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
 
 /**
  * <code>Field</code> containing an integer value.
@@ -38,20 +38,34 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 public class IntegerField extends AbstractField {
 
     /**
+     * The field maximum value.
+     */
+    private static final Field MAX_VALUE = ImmutableField.of(new IntegerField(Integer.MAX_VALUE));
+    
+    /**
+     * The field minimum value.
+     */
+    private static final Field MIN_VALUE = ImmutableField.of(new IntegerField(Integer.MIN_VALUE));
+    
+    /**
      * The field value.
      */
     private int value;
 
+    /**
+     * Creates a new <code>IntegerField</code> instance.
+     */
+    public IntegerField() {
+        
+    }
+    
     /**
      * {@inheritDoc}
      */
     @Override
     public Field newInstance() {
 
-        IntegerField copy = new IntegerField();
-        copy.setInt(this.value);
-
-        return copy;
+        return new IntegerField(this.value);
     }
 
     /**
@@ -240,5 +254,30 @@ public class IntegerField extends AbstractField {
     public int hashCode() {
 
         return new HashCodeBuilder(657043163, 1790494667).append(this.value).toHashCode();
+    }
+    
+    /**    
+     * {@inheritDoc}
+     */
+    @Override
+    public Field maxValue() {
+        return MAX_VALUE;
+    }
+
+    /**    
+     * {@inheritDoc}
+     */
+    @Override
+    public Field minValue() {
+        return MIN_VALUE;
+    }
+
+    /**
+     * Creates a new <code>IntegerField</code> instance with the specified value.
+     * 
+     * @param i the field value
+     */
+    private IntegerField(int i) {
+        this.value = i;
     }
 }

@@ -28,6 +28,11 @@ import java.util.TimeZone;
 public final class TimeUtils {
 
     /**
+     * Europe/Berlin time zone.
+     */
+    public static final TimeZone EUROPE_BERLIN_TIMEZONE = TimeZone.getTimeZone("Europe/Berlin");
+    
+    /**
      * Parses the specified <code>String</code> representing a date/time.
      * <p>The supported patterns are: 'yyyy-MM-dd', 'yyyy-MM-dd HH:mm:ss' and 
      * 'yyyy-MM-dd HH:mm:ss.SSS'.</p>

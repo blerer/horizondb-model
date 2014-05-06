@@ -17,6 +17,10 @@ package io.horizondb.model.core.fields;
 
 import java.util.concurrent.TimeUnit;
 
+import com.google.common.collect.ImmutableRangeSet;
+import com.google.common.collect.Range;
+import com.google.common.collect.RangeSet;
+
 import io.horizondb.model.core.Field;
 
 /**
@@ -151,7 +155,7 @@ public abstract class AbstractField implements Field {
      * {@inheritDoc}
      */
     @Override
-    public void setDouble(double b) {
+    public void setDouble(double d) {
         throw new TypeConversionException("A double cannot be stored in a field of type " + getType() + ".");
     }
 
@@ -194,5 +198,13 @@ public abstract class AbstractField implements Field {
     public void setTimestamp(long timestamp, TimeUnit unit) {
 
         throw new TypeConversionException("A timestamp cannot be stored in a field of type " + getType() + ".");
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public RangeSet<Field> allValues() {
+        return ImmutableRangeSet.of(Range.closed(minValue(), maxValue()));
     }
 }

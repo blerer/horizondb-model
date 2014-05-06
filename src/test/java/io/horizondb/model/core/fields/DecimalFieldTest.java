@@ -17,7 +17,7 @@ package io.horizondb.model.core.fields;
 
 import io.horizondb.io.Buffer;
 import io.horizondb.io.buffers.Buffers;
-import io.horizondb.model.core.fields.DecimalField;
+import io.horizondb.model.core.Field;
 
 import java.io.IOException;
 
@@ -464,5 +464,41 @@ public class DecimalFieldTest {
         assertEquals(14323, DecimalField.mantissa(1.4323, -4));
         assertEquals(75, DecimalField.mantissa(7.5E-4, -5));
         assertEquals(1234, DecimalField.mantissa(1.234E3, 0));
+    }
+    
+    @Test
+    public void testSetValueFromString() {
+
+        DecimalField field = new DecimalField();
+        
+        field.setValueFromString("2E-3");
+        assertEquals(2, field.getDecimalMantissa());
+        assertEquals(-3, field.getDecimalExponent());
+        
+        field.setValueFromString("1.234E3");
+        assertEquals(1234, field.getDecimalMantissa());
+        assertEquals(0, field.getDecimalExponent());
+        
+        field.setValueFromString("NaN");
+        assertEquals(DecimalField.NaN_MANTISSA, field.getDecimalMantissa());
+        assertEquals(DecimalField.NaN_EXPONENT, field.getDecimalExponent());
+    }
+    
+    @Test
+    public void testMaxValue() {
+        
+        Field field = new DecimalField();
+        field.setDecimal(Long.MAX_VALUE, Byte.MAX_VALUE);
+        
+        assertEquals(-1, field.compareTo(field.maxValue()));
+    }
+    
+    @Test
+    public void testMinValue() {
+        
+        Field field = new DecimalField();
+        field.setDecimal(Long.MIN_VALUE, Byte.MAX_VALUE);
+        
+        assertEquals(1, field.compareTo(field.minValue()));
     }
 }

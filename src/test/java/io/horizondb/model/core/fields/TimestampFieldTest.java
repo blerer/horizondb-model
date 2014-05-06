@@ -20,7 +20,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static io.horizondb.model.core.util.TimeUtils.EUROPE_BERLIN_TIMEZONE;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Benjamin
@@ -81,5 +82,31 @@ public class TimestampFieldTest {
         
         field.setValueFromString("6000000000");
         assertEquals(6000000000L, field.getTimestampInNanos());
+    }
+    
+    @Test
+    public void testSetValueFromStringWithDateTime() {
+
+        TimestampField field = new TimestampField(TimeUnit.NANOSECONDS);
+        
+        field.setValueFromString(EUROPE_BERLIN_TIMEZONE, "'2014-05-03'");
+        assertEquals(1399068000000L, field.getTimestampInMillis());
+        
+        field.setValueFromString(EUROPE_BERLIN_TIMEZONE, "'2014-05-03 22:11:34'");
+        assertEquals(1399147894000L, field.getTimestampInMillis());
+        
+        field.setValueFromString(EUROPE_BERLIN_TIMEZONE, "'2014-05-03 22:11:34.150'");
+        assertEquals(1399147894150L, field.getTimestampInMillis());
+    }
+    
+    @Test
+    public void testSetValueFromStringWithTime() {
+
+        long timeInMillis = 1399147894150L;
+
+        TimestampField field = new TimestampField(TimeUnit.MILLISECONDS);
+        
+        field.setValueFromString(EUROPE_BERLIN_TIMEZONE, timeInMillis + "ms");
+        assertEquals(timeInMillis, field.getTimestampInMillis());
     }
 }

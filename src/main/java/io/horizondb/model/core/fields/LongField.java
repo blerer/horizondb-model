@@ -38,10 +38,28 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 public final class LongField extends AbstractField {
 
     /**
+     * The field maximum value.
+     */
+    private static final Field MAX_VALUE = ImmutableField.of(new LongField(Long.MAX_VALUE));
+    
+    /**
+     * The field minimum value.
+     */
+    private static final Field MIN_VALUE = ImmutableField.of(new LongField(Long.MIN_VALUE));
+    
+    
+    /**
      * The field value.
      */
     private long value;
 
+    /**
+     * Creates a new <code>LongField</code> instance.
+     */
+    public LongField() {
+        
+    }
+    
     /**
      * {@inheritDoc}
      */
@@ -247,5 +265,30 @@ public final class LongField extends AbstractField {
     @Override
     public int hashCode() {
         return new HashCodeBuilder(248797033, 1948140529).append(this.value).toHashCode();
+    }
+    
+    /**    
+     * {@inheritDoc}
+     */
+    @Override
+    public Field maxValue() {
+        return MAX_VALUE;
+    }
+
+    /**    
+     * {@inheritDoc}
+     */
+    @Override
+    public Field minValue() {
+        return MIN_VALUE;
+    }
+
+    /**
+     * Creates a new <code>LongField</code> instance with the specified value.
+     * 
+     * @param l the field value
+     */
+    private LongField(long l) {
+        this.value = l;
     }
 }

@@ -47,6 +47,21 @@ public class DecimalField extends AbstractField {
      * The mantissa for a NaN double.
      */
     public static final long NaN_MANTISSA = 0;
+    
+    /**
+     * The exponent for a positive or negative infinite double.
+     */
+    public static final byte INFINITY_EXPONENT = Byte.MIN_VALUE;
+
+    /**
+     * The mantissa for the positive infinity.
+     */
+    public static final long POSITIVE_INFINITY_MANTISSA = 1;
+    
+    /**
+     * The mantissa for the negative infinity.
+     */
+    public static final long NEGATIVE_INFINITY_MANTISSA = -1;
 
     /**
      * Constant used to speed up computation.
@@ -55,6 +70,19 @@ public class DecimalField extends AbstractField {
             100000000d, 1000000000d, 10000000000d, 100000000000d, 1000000000000d, 10000000000000d, 100000000000000d,
             1000000000000000d };
 
+    /**
+     * The field maximum value.
+     */
+    private static final Field MAX_VALUE = ImmutableField.of(new DecimalField(POSITIVE_INFINITY_MANTISSA, 
+                                                                              INFINITY_EXPONENT));
+    
+    /**
+     * The field minimum value.
+     */
+    private static final Field MIN_VALUE = ImmutableField.of(new DecimalField(NEGATIVE_INFINITY_MANTISSA, 
+                                                                              INFINITY_EXPONENT));
+    
+    
     /**
      * The mantissa.
      */
@@ -66,15 +94,19 @@ public class DecimalField extends AbstractField {
     private byte exponent;
 
     /**
+     * Creates a new <code>DecimalField</code> instance.
+     */
+    public DecimalField() {
+        
+    }
+    
+    /**
      * {@inheritDoc}
      */
     @Override
     public Field newInstance() {
 
-        DecimalField copy = new DecimalField();
-        copy.setDecimal(this.mantissa, this.exponent);
-
-        return copy;
+        return new DecimalField(this.mantissa, this.exponent);
     }
 
     /**
@@ -102,6 +134,23 @@ public class DecimalField extends AbstractField {
 
         DecimalField other = (DecimalField) field;
         add(other.mantissa, other.exponent);
+    }
+
+    /**    
+     * {@inheritDoc}
+     */
+    @Override
+    public void setDouble(double d) {
+        
+        int doubleExponent = exponent(d);
+        long doubleMantissa = mantissa(d, doubleExponent);
+        
+        if (toDouble(doubleMantissa, doubleExponent) != d && !Double.isNaN(d)) {
+            throw new TypeConversionException("the double: " + d + " cannot be stored in a field of type decimal.");
+        }  
+        
+        this.exponent = (byte) doubleExponent;
+        this.mantissa = doubleMantissa;
     }
 
     /**
@@ -237,18 +286,9 @@ public class DecimalField extends AbstractField {
      */
     @Override
     public double getDouble() {
-
-        if (isNaN(this.mantissa, this.exponent)) {
-            return Double.NaN;
-        }
-
-        if (this.exponent > 0) {
-
-            return this.mantissa * pow10(this.exponent);
-        }
-
-        return this.mantissa / pow10(-this.exponent);
+        return toDouble(this.mantissa, this.exponent);
     }
+
 
     /**
      * {@inheritDoc}
@@ -309,7 +349,22 @@ public class DecimalField extends AbstractField {
         return Double.compare(getDouble(), other.getDouble());
     }
 
-    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setValueFromString(String s) {
+        
+        int exponentIndex = s.indexOf('E');
+        
+        if (!s.contains(".") && exponentIndex >= 0) {
+            
+            this.mantissa = Long.parseLong(s.substring(0, exponentIndex));
+            this.exponent = Byte.parseByte(s.substring(exponentIndex + 1));            
+        }
+        
+        setDouble(Double.parseDouble(s));
+    }
     
     /**    
      * {@inheritDoc}
@@ -317,9 +372,41 @@ public class DecimalField extends AbstractField {
     @Override
     public void writePrettyPrint(PrintStream stream) {
         
+        if (isNaN(this.mantissa, this.exponent)) {
+            
+            stream.print("NaN");
+            return;
+        }
+
+        if (isPositiveInfinity(this.mantissa, this.exponent)) {
+            stream.print("Infinity");
+            return;
+        }
+        
+        if (isNegativeInfinity(this.mantissa, this.exponent)) {
+            stream.print("-Infinity");
+            return;
+        }
+        
         stream.print(this.mantissa);
         stream.print(" * 10E");
         stream.print(this.exponent);
+    }
+
+    /**    
+     * {@inheritDoc}
+     */
+    @Override
+    public Field maxValue() {
+        return MAX_VALUE;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Field minValue() {
+        return MIN_VALUE;
     }
 
     /**
@@ -375,7 +462,7 @@ public class DecimalField extends AbstractField {
     static int exponent(double d) {
 
         if (Double.isNaN(d)) {
-            return Byte.MIN_VALUE;
+            return NaN_EXPONENT;
         }
 
         if (d == ((long) d)) {
@@ -399,13 +486,24 @@ public class DecimalField extends AbstractField {
 
         String value = Double.toString(d);
 
+        return exponent(value);
+    }
+
+    /**
+     * Extracts the exponent value from the specified double.
+     * 
+     * @param s the double as <code>String</code>
+     * @return the exponent value from the specified double
+     */
+    private static int exponent(String s) {
+        
         int numberOfFractionDigits = 0;
 
         boolean startCounting = false;
 
-        for (int i = value.length() - 1; i >= 0; i--) {
+        for (int i = s.length() - 1; i >= 0; i--) {
 
-            char c = value.charAt(i);
+            char c = s.charAt(i);
 
             if (c == '.') {
 
@@ -418,7 +516,7 @@ public class DecimalField extends AbstractField {
 
                 if (c == 'E') {
 
-                    numberOfFractionDigits = -Integer.parseInt(value.substring(i + 1));
+                    numberOfFractionDigits = -Integer.parseInt(s.substring(i + 1));
                     startCounting = false;
 
                 } else {
@@ -454,6 +552,18 @@ public class DecimalField extends AbstractField {
     }
 
     /**
+     * Creates a new <code>DecimalField</code> instance with the specified value.
+     * 
+     * @param mantissa the mantissa
+     * @param exponent the exponent
+     */
+    private DecimalField(long mantissa, byte exponent) {
+        
+        this.mantissa = mantissa;
+        this.exponent = exponent;
+    }
+    
+    /**
      * Returns <code>true</code> if the double corresponding to specified mantissa and exponent is
      * <code>Double.NaN</code>, <code>false</code> otherwise.
      * 
@@ -466,7 +576,35 @@ public class DecimalField extends AbstractField {
 
         return exponent == NaN_EXPONENT && mantissa == NaN_MANTISSA;
     }
+    
+    /**
+     * Returns <code>true</code> if the double corresponding to specified mantissa and exponent is
+     * <code>Double.POSITIVE_INFINITY</code>, <code>false</code> otherwise.
+     * 
+     * @param mantissa the mantissa
+     * @param exponent the exponent
+     * @return <code>true</code> if the double corresponding to specified mantissa and exponent is
+     * <code>Double.POSITIVE_INFINITY</code>, <code>false</code> otherwise.
+     */
+    private static boolean isPositiveInfinity(long mantissa, int exponent) {
 
+        return exponent == INFINITY_EXPONENT && mantissa == POSITIVE_INFINITY_MANTISSA;
+    }
+
+    /**
+     * Returns <code>true</code> if the double corresponding to specified mantissa and exponent is
+     * <code>Double.POSITIVE_INFINITY</code>, <code>false</code> otherwise.
+     * 
+     * @param mantissa the mantissa
+     * @param exponent the exponent
+     * @return <code>true</code> if the double corresponding to specified mantissa and exponent is
+     * <code>Double.POSITIVE_INFINITY</code>, <code>false</code> otherwise.
+     */
+    private static boolean isNegativeInfinity(long mantissa, int exponent) {
+
+        return exponent == INFINITY_EXPONENT && mantissa == NEGATIVE_INFINITY_MANTISSA;
+    }
+    
     /**
      * Returns 10 raised to the power of the specified exponent.
      * 
@@ -482,12 +620,33 @@ public class DecimalField extends AbstractField {
 
         return Math.pow(10, exponent);
     }
+    
     /**
-     * {@inheritDoc}
+     * Converts the specified decimal into a double.
+     * 
+     * @param mantissa the decimal mantissa
+     * @param exponent the decimal exponent
+     * @return the double corresponding to the specified decimal
      */
-    @Override
-    public void setValueFromString(String s) {
-        // TODO Auto-generated method stub
+    private static double toDouble(long mantissa, int exponent) {
         
+        if (isNaN(mantissa, exponent)) {
+            return Double.NaN;
+        }
+
+        if (isPositiveInfinity(mantissa, exponent)) {
+            return Double.POSITIVE_INFINITY;
+        }
+        
+        if (isNegativeInfinity(mantissa, exponent)) {
+            return Double.NEGATIVE_INFINITY;
+        }
+        
+        if (exponent > 0) {
+
+            return mantissa * pow10(exponent);
+        }
+
+        return mantissa / pow10(-exponent);
     }
 }

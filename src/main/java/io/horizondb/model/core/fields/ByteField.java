@@ -37,17 +37,34 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 public class ByteField extends AbstractField {
 
     /**
+     * The field maximum value.
+     */
+    private static final Field MAX_VALUE = ImmutableField.of(new ByteField(Byte.MAX_VALUE));
+    
+    /**
+     * The field minimum value.
+     */
+    private static final Field MIN_VALUE = ImmutableField.of(new ByteField(Byte.MIN_VALUE));
+    
+    /**
      * The field value.
      */
     private int value;
 
+    /**
+     * Creates a new <code>ByteField</code> instance.
+     */
+    public ByteField() {
+        
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Field newInstance() {
 
-        ByteField copy = new ByteField();
-        copy.setByte(this.value);
-
-        return copy;
+        return new ByteField(this.value);
     }
 
     /**
@@ -227,5 +244,30 @@ public class ByteField extends AbstractField {
     @Override
     public void writePrettyPrint(PrintStream stream) {
         stream.print(this.value);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */    
+    @Override
+    public Field maxValue() {
+        return MAX_VALUE;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Field minValue() {
+        return MIN_VALUE;
+    }
+
+    /**
+     * Creates a new <code>ByteField</code> instance with the specified value.
+     * 
+     * @param the field value.
+     */
+    private ByteField(int b) {
+        this.value = b;
     }
 }
