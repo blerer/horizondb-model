@@ -23,6 +23,7 @@ import io.horizondb.model.schema.FieldType;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.TimeZone;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
@@ -135,7 +136,7 @@ public final class LongField extends AbstractField {
      * {@inheritDoc}
      */
     @Override
-    public int computeSize() {
+    public int computeSerializedSize() {
         return VarInts.computeLongSize(this.value);
     }
     
@@ -224,7 +225,7 @@ public final class LongField extends AbstractField {
      * {@inheritDoc}
      */
     @Override
-    public void setValueFromString(String s) {
+    public void setValueFromString(TimeZone timeZone, String s) {
         setLong(Long.parseLong(s));
     }
     
@@ -247,8 +248,8 @@ public final class LongField extends AbstractField {
         if (!(object instanceof LongField)) {
             return false;
         }
-        LongField rhs = (LongField) object;
-        return new EqualsBuilder().append(this.value, rhs.value).isEquals();
+        Field rhs = (Field) object;
+        return new EqualsBuilder().append(this.getLong(), rhs.getLong()).isEquals();
     }
 
     /**

@@ -22,6 +22,7 @@ import io.horizondb.model.schema.FieldType;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.TimeZone;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
@@ -130,7 +131,7 @@ public class ByteField extends AbstractField {
      * {@inheritDoc}
      */
     @Override
-    public int computeSize() {
+    public int computeSerializedSize() {
 
         return 1;
     }
@@ -203,7 +204,7 @@ public class ByteField extends AbstractField {
      * {@inheritDoc}
      */
     @Override
-    public void setValueFromString(String s) {
+    public void setValueFromString(TimeZone timeZone, String s) {
         setByte(Byte.parseByte(s));
     }
 
@@ -226,8 +227,8 @@ public class ByteField extends AbstractField {
         if (!(object instanceof ByteField)) {
             return false;
         }
-        ByteField rhs = (ByteField) object;
-        return new EqualsBuilder().append(this.value, rhs.value).isEquals();
+        Field rhs = (Field) object;
+        return new EqualsBuilder().append(this.getLong(), rhs.getLong()).isEquals();
     }
 
     /**

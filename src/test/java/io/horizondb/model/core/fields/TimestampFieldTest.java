@@ -68,19 +68,19 @@ public class TimestampFieldTest {
         
         TimestampField field = new TimestampField(TimeUnit.NANOSECONDS);
         
-        field.setValueFromString("2000000000ns");
+        field.setValueFromString(EUROPE_BERLIN_TIMEZONE, "2000000000ns");
         assertEquals(2000000000L, field.getTimestampInNanos());
         
-        field.setValueFromString("3000000µs");
+        field.setValueFromString(EUROPE_BERLIN_TIMEZONE, "3000000µs");
         assertEquals(3000000000L, field.getTimestampInNanos());
         
-        field.setValueFromString("4000ms");
+        field.setValueFromString(EUROPE_BERLIN_TIMEZONE, "4000ms");
         assertEquals(4000000000L, field.getTimestampInNanos());
         
-        field.setValueFromString("5s");
+        field.setValueFromString(EUROPE_BERLIN_TIMEZONE, "5s");
         assertEquals(5000000000L, field.getTimestampInNanos());
         
-        field.setValueFromString("6000000000");
+        field.setValueFromString(EUROPE_BERLIN_TIMEZONE, "6000000000");
         assertEquals(6000000000L, field.getTimestampInNanos());
     }
     

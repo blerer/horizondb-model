@@ -24,6 +24,6 @@ public final class Globals {
     /**
      * The name of the column used to store the time series timestamp.
      */
-    public static final String TIMESTAMP_COLUMN = "timestamp";
+    public static final String TIMESTAMP_FIELD = "timestamp";
     
 }

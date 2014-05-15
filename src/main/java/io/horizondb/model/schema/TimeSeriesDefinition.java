@@ -21,7 +21,9 @@ import io.horizondb.io.encoding.VarInts;
 import io.horizondb.io.serialization.Parser;
 import io.horizondb.io.serialization.Serializable;
 import io.horizondb.io.serialization.Serializables;
+import io.horizondb.model.Globals;
 import io.horizondb.model.core.Field;
+import io.horizondb.model.core.fields.TimestampField;
 import io.horizondb.model.core.records.BinaryTimeSeriesRecord;
 import io.horizondb.model.core.records.TimeSeriesRecord;
 
@@ -190,6 +192,23 @@ public final class TimeSeriesDefinition implements Serializable {
      * @param type the name of the record type.
      * @return a new record instances of the specified type.
      */
+    public TimeSeriesRecord newRecord(String name) {
+
+        int index = getRecordTypeIndex(name);
+
+        if (index < 0) {
+            return null;
+        }
+        
+        return newRecord(index);
+    }
+    
+    /**
+     * Returns a new record instances of the specified type.
+     * 
+     * @param type the name of the record type.
+     * @return a new record instances of the specified type.
+     */
     public TimeSeriesRecord newRecord(int index) {
 
         Validate.isTrue(index >= 0 && index <= this.recordTypes.size(), "No record has been defined for the index: "
@@ -198,6 +217,33 @@ public final class TimeSeriesDefinition implements Serializable {
         return this.recordTypes.get(index).newRecord(index, this.timeUnit);
     }
 
+    /**
+     * Returns new field instance for the specified fieldName. 
+     * 
+     * @param fieldName the field name
+     * @return a new field instance for the specified fieldName. 
+     */
+    public Field newField(String fieldName) {
+        
+        if (Globals.TIMESTAMP_FIELD.equals(fieldName)) {
+            return new TimestampField(getTimeUnit());
+        }
+        
+        for (int i = 0, m = this.recordTypes.size(); i < m; i++) {
+            
+            RecordTypeDefinition def = this.recordTypes.get(i);
+            
+            int index = def.getFieldIndex(fieldName);
+            
+            if (index >= 0) {
+                
+                return def.newField(index);
+            }
+        }
+        
+        return null;
+    }
+    
     /**
      * Returns a new field instance of the specified record type. 
      * 
@@ -209,6 +255,10 @@ public final class TimeSeriesDefinition implements Serializable {
         
         Validate.isTrue(recordTypeIndex >= 0 && recordTypeIndex <= this.recordTypes.size(), 
                 "No record has been defined for the index: " + recordTypeIndex);
+        
+        if (0 == fieldIndex) {
+            return new TimestampField(getTimeUnit());
+        }
         
         return this.recordTypes.get(recordTypeIndex).newField(fieldIndex);
     }
@@ -417,12 +467,94 @@ public final class TimeSeriesDefinition implements Serializable {
         for (int i = 0, m = recordTypes.size(); i < m; i++) {
 
             RecordTypeDefinition recordType = recordTypes.get(i);
-            
+
             builder.put(recordType.getName(), Integer.valueOf(i));
         }
         
         return builder.build();
     }
+
+    /**
+     * Returns the name of the record type with the specified index.
+     * 
+     * @param index the record type index
+     * @return the name of the record type with the specified index
+     */
+    public String getRecordName(int index) {
+        return this.recordTypeIndices.inverse().get(Integer.valueOf(index));
+    }
+
+    /**
+     * Returns the name of the specified field of the specified record type.
+     * 
+     * @param recordTypeIndex the index of the record type
+     * @param fieldIndex the index of the field
+     * @return the name of the specified field of the specified record type
+     */
+    public String getFieldName(int recordTypeIndex, int fieldIndex) {
+        return this.recordTypes.get(recordTypeIndex).fieldName(fieldIndex);
+    }
+
+    /**
+     * Splits the specified time range per partitions.
+     * 
+     * @param range the range to split
+     * @return the ranges resulting from the split
+     */
+    public List<Range<Long>> splitRange(Range<Long> range) {
+        
+        Range<Long> remaining = range;
+        List<Range<Long>> ranges = new ArrayList<>();
+        
+        Range<Long> partition = getPartitionTimeRange(remaining.lowerEndpoint().longValue());
+        
+        while (!partition.encloses(remaining)) {
+            
+            ranges.add(Range.closedOpen(remaining.lowerEndpoint(), partition.upperEndpoint()));
+            remaining = Range.closedOpen(partition.upperEndpoint(), remaining.upperEndpoint());
+            partition = getPartitionTimeRange(remaining.lowerEndpoint().longValue());
+        }
+        
+        ranges.add(remaining);
+        
+        return ranges;
+    }
+    
+    /**
+     * Returns the HQL query that can be used to create this <code>TimeSeriesDefinition</code>.
+     * 
+     * @return  the HQL query that can be used to create this <code>TimeSeriesDefinition</code>.
+     */
+    public String toHql() {
+        
+        StringBuilder builder = new StringBuilder().append("CREATE TIMESERIES ")
+                                                   .append(this.name)
+                                                   .append(" (")
+                                                   .append(LINE_SEPARATOR);
+        
+        for (int i = 0, m = this.recordTypes.size(); i < m; i++) {
+            
+            RecordTypeDefinition definition = this.recordTypes.get(i);
+            
+            if (i != 0) {
+                builder.append(",")
+                       .append(LINE_SEPARATOR);
+            }
+            
+            builder.append(definition.toHql());
+        }
+        
+        builder.append(')');
+        
+        builder.append("TIME_UNIT = ")
+               .append(this.timeUnit)
+               .append(" TIMEZONE = '")
+               .append(this.timeZone.getID())
+               .append("';");
+        
+        return builder.toString(); 
+    }
+    
 
     /**
      * Builds instance of <code>TimeSerieDefinition</code>.
@@ -540,86 +672,5 @@ public final class TimeSeriesDefinition implements Serializable {
 
             return new TimeSeriesDefinition(this);
         }
-    }
-
-    /**
-     * Returns the name of the record type with the specified index.
-     * 
-     * @param index the record type index
-     * @return the name of the record type with the specified index
-     */
-    public String getRecordName(int index) {
-        return this.recordTypeIndices.inverse().get(Integer.valueOf(index));
-    }
-
-    /**
-     * Returns the name of the specified field of the specified record type.
-     * 
-     * @param recordTypeIndex the index of the record type
-     * @param fieldIndex the index of the field
-     * @return the name of the specified field of the specified record type
-     */
-    public String getFieldName(int recordTypeIndex, int fieldIndex) {
-        return this.recordTypes.get(recordTypeIndex).fieldName(fieldIndex);
-    }
-
-    /**
-     * Splits the specified time range per partitions.
-     * 
-     * @param range the range to split
-     * @return the ranges resulting from the split
-     */
-    public List<Range<Long>> splitRange(Range<Long> range) {
-        
-        Range<Long> remaining = range;
-        List<Range<Long>> ranges = new ArrayList<>();
-        
-        Range<Long> partition = getPartitionTimeRange(remaining.lowerEndpoint().longValue());
-        
-        while (!partition.encloses(remaining)) {
-            
-            ranges.add(Range.closedOpen(remaining.lowerEndpoint(), partition.upperEndpoint()));
-            remaining = Range.closedOpen(partition.upperEndpoint(), remaining.upperEndpoint());
-            partition = getPartitionTimeRange(remaining.lowerEndpoint().longValue());
-        }
-        
-        ranges.add(remaining);
-        
-        return ranges;
-    }
-    
-    /**
-     * Returns the HQL query that can be used to create this <code>TimeSeriesDefinition</code>.
-     * 
-     * @return  the HQL query that can be used to create this <code>TimeSeriesDefinition</code>.
-     */
-    public String toHql() {
-        
-        StringBuilder builder = new StringBuilder().append("CREATE TIMESERIES ")
-                                                   .append(this.name)
-                                                   .append(" (")
-                                                   .append(LINE_SEPARATOR);
-        
-        for (int i = 0, m = this.recordTypes.size(); i < m; i++) {
-            
-            RecordTypeDefinition definition = this.recordTypes.get(i);
-            
-            if (i != 0) {
-                builder.append(",")
-                       .append(LINE_SEPARATOR);
-            }
-            
-            builder.append(definition.toHql());
-        }
-        
-        builder.append(')');
-        
-        builder.append("TIME_UNIT = ")
-               .append(this.timeUnit)
-               .append(" TIMEZONE = '")
-               .append(this.timeZone.getID())
-               .append("';");
-        
-        return builder.toString(); 
     }
 }

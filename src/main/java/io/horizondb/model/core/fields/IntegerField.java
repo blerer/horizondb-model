@@ -23,6 +23,7 @@ import io.horizondb.model.schema.FieldType;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.TimeZone;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -131,7 +132,7 @@ public class IntegerField extends AbstractField {
      * {@inheritDoc}
      */
     @Override
-    public int computeSize() {
+    public int computeSerializedSize() {
         return VarInts.computeIntSize(this.value);
     }
 
@@ -203,7 +204,7 @@ public class IntegerField extends AbstractField {
      * {@inheritDoc}
      */
     @Override
-    public void setValueFromString(String s) {
+    public void setValueFromString(TimeZone timeZone, String s) {
         setInt(Integer.parseInt(s));
     }
 
@@ -243,8 +244,8 @@ public class IntegerField extends AbstractField {
         if (!(object instanceof IntegerField)) {
             return false;
         }
-        IntegerField rhs = (IntegerField) object;
-        return new EqualsBuilder().append(this.value, rhs.value).isEquals();
+        Field rhs = (Field) object;
+        return new EqualsBuilder().append(this.getLong(), rhs.getLong()).isEquals();
     }
 
     /**

@@ -22,12 +22,16 @@ import io.horizondb.io.serialization.Serializable;
 import io.horizondb.model.core.Field;
 import io.horizondb.model.core.fields.ByteField;
 import io.horizondb.model.core.fields.DecimalField;
+import io.horizondb.model.core.fields.ImmutableField;
 import io.horizondb.model.core.fields.IntegerField;
 import io.horizondb.model.core.fields.LongField;
 import io.horizondb.model.core.fields.TimestampField;
 
 import java.io.IOException;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
+
+import com.google.common.collect.Range;
 
 /**
  * The possible types for a field.
@@ -170,7 +174,51 @@ public enum FieldType implements Serializable {
     }
 
     public abstract Field newField();
+    
+    /**
+     * Creates a new field instance with the specified value.
+     * 
+     * @param timezone the time series time zone
+     * @param value the value as a <code>String</code>
+     * @return a new instance of this field with the specified value.
+     */
+    public Field newField(TimeZone timezone, String value) {
+        
+        Field field = newField();
+        field.setValueFromString(timezone, value);
+        
+        return field;
+    }
 
+    /**
+     * Creates a range of fields from the field with the <code>from</code> value, inclusive, to the 
+     * field with the <code>to</code> value, exclusive.
+     * 
+     * @param timezone the time series time zone
+     * @param from the lower end point of the range (inclusive)
+     * @param to the upper end point of the range (exclusive)
+     * @return a range of fields
+     */
+    public Range<Field> range(TimeZone timezone, String from, String to) {
+        
+        return Range.<Field>closedOpen(ImmutableField.of(newField(timezone, from)), 
+                                       ImmutableField.of(newField(timezone, to)));
+    }
+
+    /**
+     * Creates a range of fields from the field with the <code>from</code> value, inclusive, to the 
+     * field with the <code>to</code> value, exclusive. The time zone used to parse the <code>String</code> will
+     * be the default timezone.
+     * 
+     * @param from the lower end point of the range (inclusive)
+     * @param to the upper end point of the range (exclusive)
+     * @return a range of fields
+     */
+    public Range<Field> range(String from, String to) {
+        
+        return range(TimeZone.getDefault(), from, to);
+    }
+    
     /**
      * {@inheritDoc}
      */

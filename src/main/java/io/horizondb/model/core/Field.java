@@ -16,14 +16,16 @@
 package io.horizondb.model.core;
 
 import io.horizondb.io.ByteReader;
-import io.horizondb.io.ByteWriter;
+import io.horizondb.io.serialization.Serializable;
 import io.horizondb.model.core.fields.TypeConversionException;
 import io.horizondb.model.schema.FieldType;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
+import com.google.common.collect.Range;
 import com.google.common.collect.RangeSet;
 
 /**
@@ -32,7 +34,7 @@ import com.google.common.collect.RangeSet;
  * @author Benjamin
  * 
  */
-public interface Field extends Comparable<Field> {
+public interface Field extends Comparable<Field>, Serializable {
 
     /**
      * Returns the field type.
@@ -230,27 +232,32 @@ public interface Field extends Comparable<Field> {
     void readFrom(ByteReader reader) throws IOException;
 
     /**
-     * Writes the field value to the specified <code>ByteWriter</code>.
-     * 
-     * @param writer the writer to write to.
-     * @throws IOException if an I/O problem occurs.
-     */
-    void writeTo(ByteWriter writer) throws IOException;
-
-    /**
-     * Computes the size in bytes of this field.
-     * 
-     * @return the size in bytes of this field.
-     */
-    int computeSize();
-
-    /**
      * Creates a clone of this field.
      * 
      * @return a clone of this field.
      */
     Field newInstance();
+    
+    /**
+     * Creates a new instance of this field with the specified value.
+     * 
+     * @param timezone the time series time zone
+     * @param value the value as a <code>String</code>
+     * @return a new instance of this field with the specified value.
+     */
+    Field newInstance(TimeZone timezone, String value);
 
+    /**
+     * Creates a range of fields from the field with the <code>from</code> value, inclusive, to the 
+     * field with the <code>to</code> value, exclusive.
+     * 
+     * @param timezone the time series time zone
+     * @param from the lower end point of the range (inclusive)
+     * @param to the upper end point of the range (exclusive)
+     * @return a range of fields
+     */
+    Range<Field> range(TimeZone timezone, String from, String to);
+    
     /**
      * Subtract the value of the specified field from this one.
      * 
@@ -262,13 +269,15 @@ public interface Field extends Comparable<Field> {
      * Sets the value of the field to zero.
      */
     void setValueToZero();
-    
+
     /**
      * Sets the value from the specified <code>String</code>.
-     * @param s the new value as <code>String</code>
+     * 
+     * @param timeZone the time zone used
+     * @param s the <code>String</code>
      */
-    void setValueFromString(String s);
-
+    void setValueFromString(TimeZone timeZone, String s);
+    
     /**
      * Writes the content of this <code>Field</code> in a readable format into the specified stream.
      * 

@@ -21,6 +21,7 @@ import io.horizondb.io.encoding.VarInts;
 import io.horizondb.io.serialization.Parser;
 import io.horizondb.io.serialization.Serializable;
 import io.horizondb.io.serialization.Serializables;
+import io.horizondb.model.Globals;
 import io.horizondb.model.core.Field;
 import io.horizondb.model.core.records.BinaryTimeSeriesRecord;
 import io.horizondb.model.core.records.TimeSeriesRecord;
@@ -151,16 +152,19 @@ public class RecordTypeDefinition implements Serializable {
      * Return the index of the field with the specified name.
      *  
      * @param fieldName the field name
-     * @return the index of the field with the specified name
+     * @return the index of the field with the specified name or -1 if no field has the specified name.
      */
     public int getFieldIndex(String fieldName) {
+        
+        if (Globals.TIMESTAMP_FIELD.equals(fieldName)) {
+            return 0;
+        }
         
         Integer index = this.fieldIndices.get(fieldName);
         
         if (index == null) {
             
-            throw new IllegalArgumentException("No field have not been defined with the name " + fieldName 
-                                               + " within the record type " + this.name + ".");
+            return -1;
         }
         
         return index.intValue();

@@ -23,6 +23,7 @@ import io.horizondb.model.schema.FieldType;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.TimeZone;
 
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.builder.EqualsBuilder;
@@ -207,7 +208,7 @@ public class DecimalField extends AbstractField {
      * {@inheritDoc}
      */
     @Override
-    public int computeSize() {
+    public int computeSerializedSize() {
         return VarInts.computeLongSize(this.mantissa) + 1;
     }
 
@@ -328,7 +329,7 @@ public class DecimalField extends AbstractField {
         if (!(object instanceof DecimalField)) {
             return false;
         }
-        DecimalField rhs = (DecimalField) object;
+        Field rhs = (Field) object;
 
         return new EqualsBuilder().append(this.getDouble(), rhs.getDouble()).isEquals();
     }
@@ -353,7 +354,7 @@ public class DecimalField extends AbstractField {
      * {@inheritDoc}
      */
     @Override
-    public void setValueFromString(String s) {
+    public void setValueFromString(TimeZone timeZone, String s) {
         
         int exponentIndex = s.indexOf('E');
         

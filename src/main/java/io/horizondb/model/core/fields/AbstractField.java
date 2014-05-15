@@ -15,13 +15,14 @@
  */
 package io.horizondb.model.core.fields;
 
+import io.horizondb.model.core.Field;
+
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 import com.google.common.collect.ImmutableRangeSet;
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeSet;
-
-import io.horizondb.model.core.Field;
 
 /**
  * This abstract class provides default implementations for the set and get methods in the Field interface.
@@ -206,5 +207,25 @@ public abstract class AbstractField implements Field {
     @Override
     public RangeSet<Field> allValues() {
         return ImmutableRangeSet.of(Range.closed(minValue(), maxValue()));
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Field newInstance(TimeZone timezone, String value) {
+        
+        Field field = newInstance();
+        field.setValueFromString(timezone, value);
+        return field;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Range<Field> range(TimeZone timezone, String from, String to) {
+        return Range.closedOpen(newInstance(timezone, from), 
+                                newInstance(timezone, to));
     }
 }

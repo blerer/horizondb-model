@@ -346,7 +346,7 @@ public class TimeSeriesRecord extends AbstractTimeSeriesRecord implements Compar
 
         for (int i = 0; i < this.fields.length; i++) {
             if (bitSet.readBit()) {
-                size += getField(i).computeSize();
+                size += getField(i).computeSerializedSize();
             }
         }
 

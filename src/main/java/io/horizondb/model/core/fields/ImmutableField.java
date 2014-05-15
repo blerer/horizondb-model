@@ -15,8 +15,10 @@ package io.horizondb.model.core.fields;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
+import com.google.common.collect.Range;
 import com.google.common.collect.RangeSet;
 
 import static org.apache.commons.lang.Validate.notNull;
@@ -278,8 +280,8 @@ public final class ImmutableField implements Field {
      * {@inheritDoc}
      */
     @Override
-    public int computeSize() {
-        return this.field.computeSize();
+    public int computeSerializedSize() {
+        return this.field.computeSerializedSize();
     }
 
     /**
@@ -287,7 +289,24 @@ public final class ImmutableField implements Field {
      */
     @Override
     public Field newInstance() {
-        return null;
+        return this;
+    }
+
+    /**    
+     * {@inheritDoc}
+     */
+    @Override
+    public Field newInstance(TimeZone timezone, String value) {
+        return ImmutableField.of(this.field.newInstance(timezone, value));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Range<Field> range(TimeZone timezone, String from, String to) {
+        return Range.closedOpen(newInstance(timezone, from), 
+                                newInstance(timezone, to));
     }
 
     /**
@@ -310,7 +329,7 @@ public final class ImmutableField implements Field {
      * {@inheritDoc}
      */
     @Override
-    public void setValueFromString(String s) {
+    public void setValueFromString(TimeZone timeZone, String s) {
         throw new UnsupportedOperationException();
     }
 
@@ -339,20 +358,27 @@ public final class ImmutableField implements Field {
     }
 
     /**
-     * Creates a new <code>ImmutableField</code> which is a copy of the specified field.
-     * @param field the field to copy.
-     */
-    private ImmutableField(Field field) {
-        notNull(field, "the field parameter must not be null.");  
-        this.field = field.newInstance();
-    }
-
-    /**
      * {@inheritDoc}
      */
     @Override
     public RangeSet<Field> allValues() {
         return this.field.allValues();
+    }
+
+    /**    
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object obj) {
+        return this.field.equals(obj);
+    }
+
+    /**    
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        return this.field.hashCode();
     }
 
     /**
@@ -364,5 +390,14 @@ public final class ImmutableField implements Field {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
             .append("field", this.field)
             .toString();
+    }
+    
+    /**
+     * Creates a new <code>ImmutableField</code> which is a copy of the specified field.
+     * @param field the field to copy.
+     */
+    private ImmutableField(Field field) {
+        notNull(field, "the field parameter must not be null.");  
+        this.field = field.newInstance();
     }
 }

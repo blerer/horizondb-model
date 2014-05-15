@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.horizondb.model;
+package io.horizondb.model.schema;
 
 import io.horizondb.io.Buffer;
 import io.horizondb.io.buffers.Buffers;
@@ -34,6 +34,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.google.common.collect.Range;
+
+import static org.junit.Assert.assertNull;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -147,35 +149,39 @@ public class TimeSeriesDefinitionTest {
             assertTrue(true);
         }
         
-        try {
-            
-            definition.getFieldIndex(0, "unknown");
-            fail();
-        } catch (IllegalArgumentException e) {
-            assertTrue(true);
-        }
+        assertEquals(-1 , definition.getFieldIndex(0, "unknown"));
     }
     
     @Test
-    public void testSplitRangeWithRangeIncludedWithinDailyPartition() {
-        
-        RecordTypeDefinition trade = RecordTypeDefinition.newBuilder("Trade")
-                                                         .addField("price", FieldType.DECIMAL)
-                                                         .addField("volume", FieldType.DECIMAL)
-                                                         .addField("aggressorSide", FieldType.BYTE)
+    public void testNewFieldWithFieldName() {
+
+        RecordTypeDefinition quote = RecordTypeDefinition.newBuilder("Quote")
+                                                         .addDecimalField("bestBid")
+                                                         .addDecimalField("bestAsk")
+                                                         .addIntegerField("bidVolume")
+                                                         .addIntegerField("askVolume")
+                                                         .addByteField("exchangeState")
                                                          .build();
-        
+
+        RecordTypeDefinition trade = RecordTypeDefinition.newBuilder("Trade")
+                                                         .addDecimalField("price")
+                                                         .addIntegerField("volume")
+                                                         .addByteField("aggressorSide")
+                                                         .addByteField("exchangeState")
+                                                         .build();
+
         TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("DAX")
-                                                              .timeZone(TimeZone.getTimeZone("CET"))
-                                                              .partitionType(PartitionType.BY_DAY)
+                                                              .timeUnit(TimeUnit.NANOSECONDS)
+                                                              .addRecordType(quote)
                                                               .addRecordType(trade)
                                                               .build();
         
-        Range<Long> range = timeRange("2013.11.14 12:00:00.000", "2013.11.14 13:00:00.000");
-        List<Range<Long>> ranges = definition.splitRange(range);
-        
-        AssertCollections.assertListContains(ranges, range);
+        assertNull(definition.newField("test"));
+        assertEquals(FieldType.INTEGER.newField(), definition.newField("volume"));
+        assertEquals(FieldType.DECIMAL.newField(), definition.newField("bestBid"));
+        assertEquals(FieldType.BYTE.newField(), definition.newField("exchangeState"));
     }
+
     
     @Test
     public void testSplitRangeWithRangeIncludedWithin2DailyPartition() {

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.horizondb.model;
+package io.horizondb.model.schema;
 
 import io.horizondb.model.schema.PartitionType;
 

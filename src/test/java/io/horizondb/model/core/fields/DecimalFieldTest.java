@@ -23,6 +23,7 @@ import java.io.IOException;
 
 import org.junit.Test;
 
+import static io.horizondb.model.core.util.TimeUtils.EUROPE_BERLIN_TIMEZONE;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -471,15 +472,15 @@ public class DecimalFieldTest {
 
         DecimalField field = new DecimalField();
         
-        field.setValueFromString("2E-3");
+        field.setValueFromString(EUROPE_BERLIN_TIMEZONE, "2E-3");
         assertEquals(2, field.getDecimalMantissa());
         assertEquals(-3, field.getDecimalExponent());
         
-        field.setValueFromString("1.234E3");
+        field.setValueFromString(EUROPE_BERLIN_TIMEZONE, "1.234E3");
         assertEquals(1234, field.getDecimalMantissa());
         assertEquals(0, field.getDecimalExponent());
         
-        field.setValueFromString("NaN");
+        field.setValueFromString(EUROPE_BERLIN_TIMEZONE, "NaN");
         assertEquals(DecimalField.NaN_MANTISSA, field.getDecimalMantissa());
         assertEquals(DecimalField.NaN_EXPONENT, field.getDecimalExponent());
     }

@@ -149,28 +149,6 @@ public final class TimestampField extends AbstractField {
      * {@inheritDoc}
      */
     @Override
-    public void setValueFromString(String s) {
-        
-        int length = s.length();
-        int index = length - 1;   
-
-        while (Character.isLetter(s.charAt(index))) {
-            
-            index--;
-        }
-        
-        String symbol = s.substring(index + 1);
-        String t = s.substring(0, index + 1);
-        
-        setTimestamp(Long.parseLong(t), getTimeUnit(symbol));
-    }
-
-    /**
-     * Sets the value from the specified <code>String</code> using the specified 
-     * time zone.
-     * @param timeZone the time zone used
-     * @param s the <code>String</code>
-     */
     public void setValueFromString(TimeZone timeZone, String s) {
         
         if (s.startsWith("'") && s.endsWith("'")) {
@@ -181,7 +159,18 @@ public final class TimestampField extends AbstractField {
         
         } else {
             
-            setValueFromString(s);
+            int length = s.length();
+            int index = length - 1;   
+
+            while (Character.isLetter(s.charAt(index))) {
+                
+                index--;
+            }
+            
+            String symbol = s.substring(index + 1);
+            String t = s.substring(0, index + 1);
+            
+            setTimestamp(Long.parseLong(t), getTimeUnit(symbol));
         }
     }
     
@@ -205,7 +194,7 @@ public final class TimestampField extends AbstractField {
      * {@inheritDoc}
      */
     @Override
-    public int computeSize() {
+    public int computeSerializedSize() {
         return VarInts.computeLongSize(this.sourceTimestamp);
     }
 
@@ -311,9 +300,8 @@ public final class TimestampField extends AbstractField {
         if (!(object instanceof TimestampField)) {
             return false;
         }
-        TimestampField rhs = (TimestampField) object;
-        return new EqualsBuilder().append(this.sourceTimestamp, rhs.sourceTimestamp)
-                                  .append(this.sourceUnit, rhs.sourceUnit)
+        Field rhs = (Field) object;
+        return new EqualsBuilder().append(getTimestampInNanos(), rhs.getTimestampInNanos())
                                   .isEquals();
     }
 
