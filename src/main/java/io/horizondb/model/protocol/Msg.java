@@ -87,6 +87,11 @@ public final class Msg<T extends Serializable> implements Serializable {
         return new Msg<S>(MsgHeader.newResponseHeader(header, 0, payload.computeSerializedSize()), payload);
     }
 
+    public static <S extends Serializable> Msg<S> newResponseMsg(MsgHeader header, OpCode opCode, S payload) {
+
+        return new Msg<S>(MsgHeader.newResponseHeader(header, opCode, 0, payload.computeSerializedSize()), payload);
+    }
+    
     public static Msg<ErrorPayload> newErrorMsg(MsgHeader header, ErrorPayload errorPayload) {
 
         return new Msg<ErrorPayload>(MsgHeader.newResponseHeader(header, errorPayload.getCode(), errorPayload.computeSerializedSize()),

@@ -16,6 +16,7 @@
 package io.horizondb.model.protocol;
 
 import io.horizondb.io.ByteWriter;
+import io.horizondb.model.core.Field;
 import io.horizondb.model.core.Record;
 import io.horizondb.model.core.RecordUtils;
 
@@ -50,7 +51,7 @@ public final class BulkWritePayload extends AbstractBulkWritePayload {
      */
     public BulkWritePayload(String databaseName, 
                             String seriesName, 
-                            Range<Long> partitionTimeRange, 
+                            Range<Field> partitionTimeRange, 
                             List<? extends Record> records) {
 
         super(databaseName, seriesName, partitionTimeRange);

@@ -19,6 +19,7 @@ import io.horizondb.io.ByteReader;
 import io.horizondb.io.ByteWriter;
 import io.horizondb.io.serialization.Parser;
 import io.horizondb.io.serialization.Serializable;
+import io.horizondb.model.core.Field;
 
 import java.io.IOException;
 import java.util.Calendar;
@@ -44,7 +45,7 @@ public enum PartitionType implements Serializable {
          * {@inheritDoc}
          */
         @Override
-        public Range<Long> getPartitionTimeRange(Calendar calendar) {
+        public Range<Field> getPartitionTimeRange(Calendar calendar) {
             return getPartitionTimeRange(calendar, Calendar.DAY_OF_MONTH);
         }
     },
@@ -55,7 +56,7 @@ public enum PartitionType implements Serializable {
          * {@inheritDoc}
          */
         @Override
-        public Range<Long> getPartitionTimeRange(Calendar calendar) {
+        public Range<Field> getPartitionTimeRange(Calendar calendar) {
 
             int firstDayOfWeek = calendar.getFirstDayOfWeek();
             int currentDayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
@@ -70,12 +71,14 @@ public enum PartitionType implements Serializable {
             calendar.add(Calendar.DAY_OF_MONTH, numberOfDay);
 
             Calendar cal = DateUtils.truncate(calendar, Calendar.DAY_OF_MONTH);
-            long start = cal.getTimeInMillis();
+            Field from = FieldType.MILLISECONDS_TIMESTAMP.newField();
+            from.setTimestampInMillis(cal.getTimeInMillis());
 
             cal.add(Calendar.DAY_OF_MONTH, 7);
-            long end = cal.getTimeInMillis();
+            Field to = FieldType.MILLISECONDS_TIMESTAMP.newField();
+            to.setTimestampInMillis(cal.getTimeInMillis());
 
-            return Range.closedOpen(Long.valueOf(start), Long.valueOf(end));
+            return Range.closedOpen(from, to);
         }
     },
 
@@ -85,7 +88,7 @@ public enum PartitionType implements Serializable {
          * {@inheritDoc}
          */
         @Override
-        public Range<Long> getPartitionTimeRange(Calendar calendar) {
+        public Range<Field> getPartitionTimeRange(Calendar calendar) {
             return getPartitionTimeRange(calendar, Calendar.MONTH);
         }
     };
@@ -162,7 +165,7 @@ public enum PartitionType implements Serializable {
      * 
      * @param calendar the date.
      */
-    public abstract Range<Long> getPartitionTimeRange(Calendar calendar);
+    public abstract Range<Field> getPartitionTimeRange(Calendar calendar);
 
     /**
      * Returns the type of field represented by the next readable byte in the specified reader.
@@ -183,14 +186,16 @@ public enum PartitionType implements Serializable {
      * @param field the field corresponding to the partition type
      * @return the partition corresponding to the specified field which contains the specified date.
      */
-    private static Range<Long> getPartitionTimeRange(Calendar calendar, int field) {
+    private static Range<Field> getPartitionTimeRange(Calendar calendar, int field) {
 
         Calendar cal = DateUtils.truncate(calendar, field);
-        long start = cal.getTimeInMillis();
+        Field from = FieldType.MILLISECONDS_TIMESTAMP.newField();
+        from.setTimestampInMillis(cal.getTimeInMillis());
 
         cal.add(field, 1);
-        long end = cal.getTimeInMillis();
+        Field to = FieldType.MILLISECONDS_TIMESTAMP.newField();
+        to.setTimestampInMillis(cal.getTimeInMillis());
 
-        return Range.closedOpen(Long.valueOf(start), Long.valueOf(end));
+        return Range.closedOpen(from, to);
     }
 }

@@ -1,6 +1,4 @@
 /**
- * Copyright 2013 Benjamin Lerer
- * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +15,7 @@ package io.horizondb.model.schema;
 
 import io.horizondb.io.Buffer;
 import io.horizondb.io.buffers.Buffers;
+import io.horizondb.model.core.Field;
 import io.horizondb.model.schema.FieldType;
 import io.horizondb.model.schema.PartitionType;
 import io.horizondb.model.schema.RecordTypeDefinition;
@@ -34,6 +33,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.google.common.collect.Range;
+
+import static io.horizondb.model.schema.FieldType.MILLISECONDS_TIMESTAMP;
 
 import static org.junit.Assert.assertNull;
 
@@ -198,12 +199,12 @@ public class TimeSeriesDefinitionTest {
                                                               .addRecordType(trade)
                                                               .build();
         
-        Range<Long> range = timeRange("2013.11.14 12:00:00.000", "2013.11.15 13:00:00.000");
-        List<Range<Long>> ranges = definition.splitRange(range);
+        Range<Field> range = MILLISECONDS_TIMESTAMP.range("'2013-11-14 12:00:00'", "'2013-11-15 13:00:00'");
+        List<Range<Field>> ranges = definition.splitRange(range);
         
         AssertCollections.assertListContains(ranges, 
-                                             timeRange("2013.11.14 12:00:00.000", "2013.11.15 00:00:00.000"),
-                                             timeRange("2013.11.15 00:00:00.000", "2013.11.15 13:00:00.000"));
+                                             MILLISECONDS_TIMESTAMP.range("'2013-11-14 12:00:00'", "'2013-11-15'"),
+                                             MILLISECONDS_TIMESTAMP.range("'2013-11-15'", "'2013-11-15 13:00:00.000'"));
     }
     
     @Test
@@ -221,13 +222,13 @@ public class TimeSeriesDefinitionTest {
                                                               .addRecordType(trade)
                                                               .build();
         
-        Range<Long> range = timeRange("2013.11.14 12:00:00.000", "2013.11.16 13:00:00.000");
-        List<Range<Long>> ranges = definition.splitRange(range);
+        Range<Field> range = MILLISECONDS_TIMESTAMP.range("'2013-11-14 12:00:00'", "'2013-11-16 13:00:00'");
+        List<Range<Field>> ranges = definition.splitRange(range);
         
         AssertCollections.assertListContains(ranges, 
-                                             timeRange("2013.11.14 12:00:00.000", "2013.11.15 00:00:00.000"),
-                                             timeRange("2013.11.15 00:00:00.000", "2013.11.16 00:00:00.000"),
-                                             timeRange("2013.11.16 00:00:00.000", "2013.11.16 13:00:00.000"));
+                                             MILLISECONDS_TIMESTAMP.range("'2013-11-14 12:00:00.000'", "'2013-11-15'"),
+                                             MILLISECONDS_TIMESTAMP.range("'2013-11-15'", "'2013-11-16'"),
+                                             MILLISECONDS_TIMESTAMP.range("'2013-11-16'", "'2013-11-16 13:00:00.000'"));
     }
     
     @Test

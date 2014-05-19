@@ -319,23 +319,23 @@ public class RecordListMultimapBuilder {
         return this;
     }
     
-    public final LinkedListMultimap<Range<Long>, TimeSeriesRecord> buildMultimap() {
+    public final LinkedListMultimap<Range<Field>, TimeSeriesRecord> buildMultimap() {
 
         addCurrentToRecords();
         
         Collections.sort(this.records);
 
-        LinkedListMultimap<Range<Long>, TimeSeriesRecord> map = LinkedListMultimap.create();
+        LinkedListMultimap<Range<Field>, TimeSeriesRecord> map = LinkedListMultimap.create();
         
-        Range<Long> range = null;
+        Range<Field> range = null;
         
         for (int i = 0, m = this.records.size(); i < m; i++) {
             
             TimeSeriesRecord record = this.records.get(i);
             
-            long timestamp = record.getTimestampInMillis(0);
+            Field timestamp = record.getField(0);
             
-            if (range == null || !range.contains(Long.valueOf(timestamp))) {
+            if (range == null || !range.contains(timestamp)) {
 
                 range = this.definition.getPartitionTimeRange(timestamp);
             }
@@ -346,7 +346,7 @@ public class RecordListMultimapBuilder {
         int numberOfRecordTypes = this.definition.getNumberOfRecordTypes();
         
 
-        for (Range<Long> timeRange : map.keySet()) {
+        for (Range<Field> timeRange : map.keySet()) {
 
             TimeSeriesRecord[] nextRecords = new TimeSeriesRecord[numberOfRecordTypes];
             

@@ -22,8 +22,6 @@ import io.horizondb.model.schema.RecordTypeDefinition;
 import io.horizondb.model.schema.TimeSeriesDefinition;
 import io.horizondb.test.AssertCollections;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
@@ -32,6 +30,10 @@ import org.junit.Test;
 
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Range;
+
+import static io.horizondb.model.core.util.TimeUtils.parseDateTime;
+
+import static io.horizondb.model.schema.FieldType.MILLISECONDS_TIMESTAMP;
 
 import static java.util.Arrays.asList;
 
@@ -58,13 +60,13 @@ public class RecordListBuilderTest {
                                                               .addRecordType(trade)
                                                               .build();
 
-        Multimap<Range<Long>, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition).buildMultimap();
+        Multimap<Range<Field>, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition).buildMultimap();
 
         Assert.assertTrue(multimap.isEmpty());
     }
 
     @Test
-    public void testWithOnlyOneRecord() throws ParseException {
+    public void testWithOnlyOneRecord() {
 
         RecordTypeDefinition trade = RecordTypeDefinition.newBuilder("Trade")
                                                          .addDecimalField("price")
@@ -78,7 +80,7 @@ public class RecordListBuilderTest {
                                                               .addRecordType(trade)
                                                               .build();
 
-        long timestamp = getTime("2013.11.14 11:46:00.000");
+        long timestamp = parseDateTime("2013-11-14 11:46:00.000");
 
         RecordListMultimapBuilder builder = new RecordListMultimapBuilder(definition).newRecord("Trade")
                                                                      .setTimestampInMillis(0, timestamp)
@@ -90,18 +92,17 @@ public class RecordListBuilderTest {
         expected.setDecimal(1, 125, 1);
         expected.setLong(2, 10);
 
-        Multimap<Range<Long>, TimeSeriesRecord> multimap = builder.buildMultimap();
+        Multimap<Range<Field>, TimeSeriesRecord> multimap = builder.buildMultimap();
 
-        @SuppressWarnings("boxing")
-        Range<Long> range = Range.closedOpen(getTime("2013.11.14 00:00:00.000"), getTime("2013.11.15 00:00:00.000"));
+        Range<Field> range = MILLISECONDS_TIMESTAMP.range("'2013-11-14'", "'2013-11-15'");
 
         AssertCollections.assertMapContains(multimap.asMap(), range, asList(expected));
     }
 
     @Test
-    public void testWithTwoRecordsOfTheSameType() throws ParseException {
+    public void testWithTwoRecordsOfTheSameType() {
 
-        long time = getTime("2013.11.14 11:46:00.000");
+        long time = parseDateTime("2013-11-14 11:46:00.000");
 
         RecordTypeDefinition trade = RecordTypeDefinition.newBuilder("Trade")
                                                          .addDecimalField("price")
@@ -115,7 +116,7 @@ public class RecordListBuilderTest {
                                                               .addRecordType(trade)
                                                               .build();
 
-        Multimap<Range<Long>, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition).newRecord("Trade")
+        Multimap<Range<Field>, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition).newRecord("Trade")
                                                                                           .setTimestampInMillis(0, time)
                                                                                           .setDecimal(1, 125, 1)
                                                                                           .setLong(2, 10)
@@ -137,17 +138,16 @@ public class RecordListBuilderTest {
         second.setDecimal(1, -1, 1);
         second.setLong(2, -5);
 
-        @SuppressWarnings("boxing")
-        Range<Long> range = Range.closedOpen(getTime("2013.11.14 00:00:00.000"), getTime("2013.11.15 00:00:00.000"));
+        Range<Field> range = MILLISECONDS_TIMESTAMP.range("'2013-11-14'", "'2013-11-15'");
 
         AssertCollections.assertMapContains(multimap.asMap(), range, asList(first, second));
     }
 
     @Test
-    public void testWithTwoRecordsOfTheSameTypeInDifferentPartitions() throws ParseException {
+    public void testWithTwoRecordsOfTheSameTypeInDifferentPartitions() {
 
-        long time = getTime("2013.11.14 11:46:00.000");
-        long time2 = getTime("2013.11.15 17:35:00.000");
+        long time = parseDateTime("2013-11-14 11:46:00.000");
+        long time2 = parseDateTime("2013-11-15 17:35:00.000");
 
         RecordTypeDefinition trade = RecordTypeDefinition.newBuilder("Trade")
                                                          .addDecimalField("price")
@@ -161,7 +161,7 @@ public class RecordListBuilderTest {
                                                               .addRecordType(trade)
                                                               .build();
 
-        Multimap<Range<Long>, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition).newRecord("Trade")
+        Multimap<Range<Field>, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition).newRecord("Trade")
                                                                                           .setTimestampInMillis(0, time)
                                                                                           .setDecimal(1, 125, 1)
                                                                                           .setLong(2, 10)
@@ -182,19 +182,16 @@ public class RecordListBuilderTest {
         second.setDecimal(1, 124, 1);
         second.setLong(2, 5);
 
-        @SuppressWarnings("boxing")
-        Range<Long> firstRange = Range.closedOpen(getTime("2013.11.14 00:00:00.000"), getTime("2013.11.15 00:00:00.000"));
-        
-        @SuppressWarnings("boxing")
-        Range<Long> secondRange = Range.closedOpen(getTime("2013.11.15 00:00:00.000"), getTime("2013.11.16 00:00:00.000"));
+        Range<Field> firstRange = MILLISECONDS_TIMESTAMP.range("'2013-11-14'", "'2013-11-15'");
+        Range<Field> secondRange = MILLISECONDS_TIMESTAMP.range("'2013-11-15'", "'2013-11-16'");
 
         AssertCollections.assertMapContains(multimap.asMap(), firstRange, asList(first), secondRange, asList(second));
     }
 
     @Test
-    public void testWithThreeRecordsOfSameType() throws ParseException {
+    public void testWithThreeRecordsOfSameType() {
 
-        long time = getTime("2013.11.14 11:46:00.000");
+        long time = parseDateTime("2013-11-14 11:46:00.000");
 
         RecordTypeDefinition trade = RecordTypeDefinition.newBuilder("Trade")
                                                          .addDecimalField("price")
@@ -208,7 +205,7 @@ public class RecordListBuilderTest {
                                                               .addRecordType(trade)
                                                               .build();
 
-        Multimap<Range<Long>, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition).newRecord("Trade")
+        Multimap<Range<Field>, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition).newRecord("Trade")
                                                                                           .setTimestampInMillis(0, time)
                                                                                           .setDecimal(1, 125, -1)
                                                                                           .setLong(2, 10)
@@ -241,17 +238,16 @@ public class RecordListBuilderTest {
         third.setDecimal(1, 6, -1);
         third.setLong(2, 1);
 
-        @SuppressWarnings("boxing")
-        Range<Long> range = Range.closedOpen(getTime("2013.11.14 00:00:00.000"), getTime("2013.11.15 00:00:00.000"));
+        Range<Field> range = MILLISECONDS_TIMESTAMP.range("'2013-11-14'", "'2013-11-15'");
 
         AssertCollections.assertMapContains(multimap.asMap(), range, asList(first, second, third));
     }
 
     @Test
-    public void testWithThreeRecordsOfSameTypeWithinTwoDifferentPartitions() throws ParseException {
+    public void testWithThreeRecordsOfSameTypeWithinTwoDifferentPartitions() {
 
-        long time = getTime("2013.11.14 11:46:00.000");
-        long time2 = getTime("2013.11.15 17:35:00.000");
+        long time = parseDateTime("2013-11-14 11:46:00.000");
+        long time2 = parseDateTime("2013-11-15 17:35:00.000");
 
         RecordTypeDefinition trade = RecordTypeDefinition.newBuilder("Trade")
                                                          .addDecimalField("price")
@@ -265,7 +261,7 @@ public class RecordListBuilderTest {
                                                               .addRecordType(trade)
                                                               .build();
 
-        Multimap<Range<Long>, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition).newRecord("Trade")
+        Multimap<Range<Field>, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition).newRecord("Trade")
                                                                                           .setTimestampInMillis(0, time)
                                                                                           .setDecimal(1, 125, 1)
                                                                                           .setLong(2, 10)
@@ -297,10 +293,8 @@ public class RecordListBuilderTest {
         third.setDecimal(1, 13, 0);
         third.setLong(2, 6);
 
-        @SuppressWarnings("boxing")
-        Range<Long> firstRange = Range.closedOpen(getTime("2013.11.14 00:00:00.000"), getTime("2013.11.15 00:00:00.000"));
-        @SuppressWarnings("boxing")
-        Range<Long> secondRange = Range.closedOpen(getTime("2013.11.15 00:00:00.000"), getTime("2013.11.16 00:00:00.000"));
+        Range<Field> firstRange = MILLISECONDS_TIMESTAMP.range("'2013-11-14'", "'2013-11-15'");
+        Range<Field> secondRange = MILLISECONDS_TIMESTAMP.range("'2013-11-15'", "'2013-11-16'");
 
         AssertCollections.assertMapContains(multimap.asMap(),
                                             firstRange,
@@ -310,9 +304,9 @@ public class RecordListBuilderTest {
     }
 
     @Test
-    public void testWithThreeRecordsOfSameTypeInDisorder() throws ParseException {
+    public void testWithThreeRecordsOfSameTypeInDisorder() {
 
-        long time = getTime("2013.11.14 11:46:00.000");
+        long time = parseDateTime("2013-11-14 11:46:00.000");
 
         RecordTypeDefinition trade = RecordTypeDefinition.newBuilder("Trade")
                                                          .addDecimalField("price")
@@ -326,7 +320,7 @@ public class RecordListBuilderTest {
                                                               .addRecordType(trade)
                                                               .build();
 
-        Multimap<Range<Long>, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition).newRecord("Trade")
+        Multimap<Range<Field>, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition).newRecord("Trade")
                                                                                           .setTimestampInMillis(0,
                                                                                                                 time + 50)
                                                                                           .setDecimal(1, 124, -1)
@@ -359,17 +353,16 @@ public class RecordListBuilderTest {
         third.setDecimal(1, 6, -1);
         third.setLong(2, 1);
 
-        @SuppressWarnings("boxing")
-        Range<Long> range = Range.closedOpen(getTime("2013.11.14 00:00:00.000"), getTime("2013.11.15 00:00:00.000"));
+        Range<Field> range = MILLISECONDS_TIMESTAMP.range("'2013-11-14'", "'2013-11-15'");
 
         AssertCollections.assertMapContains(multimap.asMap(), range, asList(first, second, third));
     }
 
     @Test
-    public void testWithThreeRecordsOfSameTypeInDisorderWithTwoPartition() throws ParseException {
+    public void testWithThreeRecordsOfSameTypeInDisorderWithTwoPartition() {
 
-        long time = getTime("2013.11.14 11:46:00.000");
-        long time2 = getTime("2013.11.15 17:35:00.000");
+        long time = parseDateTime("2013-11-14 11:46:00.000");
+        long time2 = parseDateTime("2013-11-15 17:35:00.000");
 
         RecordTypeDefinition trade = RecordTypeDefinition.newBuilder("Trade")
                                                          .addDecimalField("price")
@@ -383,7 +376,7 @@ public class RecordListBuilderTest {
                                                               .addRecordType(trade)
                                                               .build();
 
-        Multimap<Range<Long>, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition).newRecord("Trade")
+        Multimap<Range<Field>, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition).newRecord("Trade")
                                                                                           .setTimestampInMillis(0,
                                                                                                                 time2 + 50)
                                                                                           .setDecimal(1, 124, -1)
@@ -415,11 +408,8 @@ public class RecordListBuilderTest {
         third.setDecimal(1, 6, -1);
         third.setLong(2, 1);
 
-        @SuppressWarnings("boxing")
-        Range<Long> firstRange = Range.closedOpen(getTime("2013.11.14 00:00:00.000"), getTime("2013.11.15 00:00:00.000"));
-        
-        @SuppressWarnings("boxing")
-        Range<Long> secondRange = Range.closedOpen(getTime("2013.11.15 00:00:00.000"), getTime("2013.11.16 00:00:00.000"));
+        Range<Field> firstRange = MILLISECONDS_TIMESTAMP.range("'2013-11-14'", "'2013-11-15'");
+        Range<Field> secondRange = MILLISECONDS_TIMESTAMP.range("'2013-11-15'", "'2013-11-16'");
 
         AssertCollections.assertMapContains(multimap.asMap(),
                                             firstRange,
@@ -429,9 +419,9 @@ public class RecordListBuilderTest {
     }
 
     @Test
-    public void testWithOnlyTwoRecordOfDifferentType() throws ParseException {
+    public void testWithOnlyTwoRecordOfDifferentType() {
 
-        long time = getTime("2013.11.14 11:46:00.000");
+        long time = parseDateTime("2013-11-14 11:46:00.000");
 
         RecordTypeDefinition trade = RecordTypeDefinition.newBuilder("Trade")
                                                          .addDecimalField("price")
@@ -453,7 +443,7 @@ public class RecordListBuilderTest {
                                                               .addRecordType(trade)
                                                               .build();
 
-        Multimap<Range<Long>, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition).newRecord("Quote")
+        Multimap<Range<Field>, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition).newRecord("Quote")
                                                                                           .setTimestampInMillis(0, time)
                                                                                           .setDecimal(1, 123, 1)
                                                                                           .setDecimal(2, 125, 1)
@@ -486,16 +476,15 @@ public class RecordListBuilderTest {
         expectedTrade.setDecimal(1, 125, 1);
         expectedTrade.setLong(2, 10);
 
-        @SuppressWarnings("boxing")
-        Range<Long> range = Range.closedOpen(getTime("2013.11.14 00:00:00.000"), getTime("2013.11.15 00:00:00.000"));
+        Range<Field> range = MILLISECONDS_TIMESTAMP.range("'2013-11-14'", "'2013-11-15'");
 
         AssertCollections.assertMapContains(multimap.asMap(), range, asList(expectedQuote, expectedTrade));
     }
 
     @Test
-    public void testWithMultipleRecordsOfDifferentType() throws ParseException {
+    public void testWithMultipleRecordsOfDifferentType() {
 
-        long time = getTime("2013.11.14 11:46:00.000");
+        long time = parseDateTime("2013-11-14 11:46:00.000");
 
         RecordTypeDefinition trade = RecordTypeDefinition.newBuilder("Trade")
                                                          .addDecimalField("price")
@@ -522,7 +511,7 @@ public class RecordListBuilderTest {
                                                               .addRecordType(exchangeState)
                                                               .build();
 
-        Multimap<Range<Long>, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition).newRecord("ExchangeState")
+        Multimap<Range<Field>, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition).newRecord("ExchangeState")
                                                                                           .setTimestampInMillis(0, time)
                                                                                           .setByte(1, 1)
                                                                                           .newRecord("Quote")
@@ -621,8 +610,7 @@ public class RecordListBuilderTest {
         thirdQuote.setLong(3, 0);
         thirdQuote.setLong(4, 0);
 
-        @SuppressWarnings("boxing")
-        Range<Long> range = Range.closedOpen(getTime("2013.11.14 00:00:00.000"), getTime("2013.11.15 00:00:00.000"));
+        Range<Field> range = MILLISECONDS_TIMESTAMP.range("'2013-11-14'", "'2013-11-15'");
 
         AssertCollections.assertMapContains(multimap.asMap(),
                                             range,
@@ -636,10 +624,10 @@ public class RecordListBuilderTest {
     }
 
     @Test
-    public void testWithMultipleRecordsOfDifferentTypeAndTwoPartition() throws ParseException {
+    public void testWithMultipleRecordsOfDifferentTypeAndTwoPartition() {
 
-        long time = getTime("2013.11.14 11:46:00.000");
-        long time2 = getTime("2013.11.15 17:35:00.000");
+        long time = parseDateTime("2013-11-14 11:46:00.000");
+        long time2 = parseDateTime("2013-11-15 17:35:00.000");
 
         RecordTypeDefinition trade = RecordTypeDefinition.newBuilder("Trade")
                                                          .addDecimalField("price")
@@ -666,7 +654,7 @@ public class RecordListBuilderTest {
                                                               .addRecordType(exchangeState)
                                                               .build();
 
-        Multimap<Range<Long>, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition)
+        Multimap<Range<Field>, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition)
                                                                         .newRecord("ExchangeState")
                                                                         .setTimestampInMillis(0, time)
                                                                         .setByte(1, 1)
@@ -762,26 +750,9 @@ public class RecordListBuilderTest {
         thirdQuote.setLong(3, 6);
         thirdQuote.setLong(4, 4);
         
-        @SuppressWarnings("boxing")
-        Range<Long> firstRange = Range.closedOpen(getTime("2013.11.14 00:00:00.000"), getTime("2013.11.15 00:00:00.000"));
-        
-        @SuppressWarnings("boxing")
-        Range<Long> secondRange = Range.closedOpen(getTime("2013.11.15 00:00:00.000"), getTime("2013.11.16 00:00:00.000"));
+        Range<Field> firstRange = MILLISECONDS_TIMESTAMP.range("'2013-11-14'", "'2013-11-15'");
+        Range<Field> secondRange = MILLISECONDS_TIMESTAMP.range("'2013-11-15'", "'2013-11-16'");
 
         AssertCollections.assertMapContains(multimap.asMap(), firstRange, asList(firstES, firstQuote, firstTrade, secondQuote), secondRange, asList(secondTrade, thirdTrade, thirdQuote));
     }
-
-    /**
-     * Returns the time in milliseconds corresponding to the specified {@link String}.
-     * 
-     * @param dateAsText the date/time to convert in milliseconds
-     * @return the time in milliseconds corresponding to the specified {@link String}.
-     * @throws ParseException if a problem occurs while generating the time.
-     */
-    private static long getTime(String dateAsText) throws ParseException {
-
-        SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss.SSS");
-        return format.parse(dateAsText).getTime();
-    }
-
 }

@@ -175,13 +175,13 @@ public final class TimeSeriesDefinition implements Serializable {
     /**
      * Returns the time range of the partition to which belongs the specified time.
      * 
-     * @param timestampInMillis the timestamp in millisecond
+     * @param timestamp the timestamp field
      * @return the time range of the partition to which belongs the specified time.
      */
-    public Range<Long> getPartitionTimeRange(long timestampInMillis) {
+    public Range<Field> getPartitionTimeRange(Field timestamp) {
 
         Calendar calendar = Calendar.getInstance(this.timeZone);
-        calendar.setTimeInMillis(timestampInMillis);
+        calendar.setTimeInMillis(timestamp.getTimestampInMillis());
 
         return this.partitionType.getPartitionTimeRange(calendar);
     }
@@ -501,18 +501,18 @@ public final class TimeSeriesDefinition implements Serializable {
      * @param range the range to split
      * @return the ranges resulting from the split
      */
-    public List<Range<Long>> splitRange(Range<Long> range) {
+    public List<Range<Field>> splitRange(Range<Field> range) {
         
-        Range<Long> remaining = range;
-        List<Range<Long>> ranges = new ArrayList<>();
+        Range<Field> remaining = range;
+        List<Range<Field>> ranges = new ArrayList<>();
         
-        Range<Long> partition = getPartitionTimeRange(remaining.lowerEndpoint().longValue());
+        Range<Field> partition = getPartitionTimeRange(remaining.lowerEndpoint());
         
         while (!partition.encloses(remaining)) {
             
             ranges.add(Range.closedOpen(remaining.lowerEndpoint(), partition.upperEndpoint()));
             remaining = Range.closedOpen(partition.upperEndpoint(), remaining.upperEndpoint());
-            partition = getPartitionTimeRange(remaining.lowerEndpoint().longValue());
+            partition = getPartitionTimeRange(remaining.lowerEndpoint());
         }
         
         ranges.add(remaining);

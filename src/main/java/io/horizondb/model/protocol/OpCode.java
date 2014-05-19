@@ -105,31 +105,6 @@ public enum OpCode implements Serializable {
     },
 
     /**
-     * The operation code to request data from a time series.
-     */
-    QUERY(6) {
-
-        @Override
-        public Parser<?> getPayloadParser(boolean request) {
-
-            if (request) {
-
-                return QueryPayload.getParser();
-            }
-
-            return DataChunkPayload.getParser();
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public boolean isMutation() {
-            return false;
-        }
-    }, 
-    
-    /**
      * The operation code to execute an HQL query on the server.
      */
     HQL_QUERY(7) {
@@ -150,7 +125,7 @@ public enum OpCode implements Serializable {
     },
     
     /**
-     * The operation code used when nno operation need to be performed.
+     * The operation code used when no operation need to be performed.
      */
     NOOP(8) {
 
@@ -178,6 +153,26 @@ public enum OpCode implements Serializable {
         public Parser<?> getPayloadParser(boolean request) {
 
             return SetDatabasePayload.getParser();
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public boolean isMutation() {
+            return false;
+        }
+    },
+    
+    /**
+     * The operation code use to transfert data.
+     */
+    DATA_CHUNK(10) {
+
+        @Override
+        public Parser<?> getPayloadParser(boolean request) {
+
+            return DataChunkPayload.getParser();
         }
 
         /**

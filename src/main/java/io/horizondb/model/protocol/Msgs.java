@@ -16,6 +16,7 @@
 package io.horizondb.model.protocol;
 
 import io.horizondb.io.serialization.Serializable;
+import io.horizondb.model.core.Field;
 import io.horizondb.model.core.Record;
 import io.horizondb.model.schema.TimeSeriesDefinition;
 
@@ -101,7 +102,7 @@ public final class Msgs {
      */
     public static Msg<BulkWritePayload> newBulkWriteRequest(String databaseName, 
                                                             String seriesName,
-                                                            Range<Long> partitionTimeRange,
+                                                            Range<Field> partitionTimeRange,
                                                             List<? extends Record> records) {
         
         return Msg.newRequestMsg(OpCode.BULK_WRITE, 
@@ -117,22 +118,6 @@ public final class Msgs {
     public static Msg<?> newBulkWriteResponse(Msg<?> request) {
         
         return Msg.emptyMsg(MsgHeader.newResponseHeader(request.getHeader(), 0, 0));
-    }
-    
-    /**
-     * Creates a new message to request a set of records.
-     * 
-     * @param databaseName the name of the database 
-     * @param seriesName the name of the time series 
-     * @param timeRange the time range for which the records must be returned
-     * @return a new message to request a set of records.
-     */
-    public static Msg<QueryPayload> newQueryRequest(String databaseName, 
-                                                            String seriesName,
-                                                            Range<Long> timeRange) {
-        
-        return Msg.newRequestMsg(OpCode.QUERY, 
-                                 new QueryPayload(databaseName, seriesName, timeRange));
     }
     
     /**

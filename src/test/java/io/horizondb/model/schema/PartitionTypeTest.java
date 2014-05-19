@@ -15,18 +15,18 @@
  */
 package io.horizondb.model.schema;
 
-import io.horizondb.model.schema.PartitionType;
+import io.horizondb.model.core.Field;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.TimeZone;
 
 import org.junit.Test;
 
 import com.google.common.collect.Range;
 
-import static org.junit.Assert.*;
+import static io.horizondb.model.core.util.TimeUtils.EUROPE_BERLIN_TIMEZONE;
+import static io.horizondb.model.core.util.TimeUtils.parseDateTime;
+import static io.horizondb.model.schema.FieldType.MILLISECONDS_TIMESTAMP;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Benjamin
@@ -35,158 +35,120 @@ import static org.junit.Assert.*;
 public class PartitionTypeTest {
 
     @Test
-    public void testGetPartitionTimeRangeByDay() throws ParseException {
+    public void testGetPartitionTimeRangeByDay() {
 
-        long time = getTime("2013.11.16 09:12:35.670");
+        long time = parseDateTime(EUROPE_BERLIN_TIMEZONE, "2013-11-16 09:12:35.670");
 
         Calendar calendar = toCalendar(time);
 
-        Range<Long> range = PartitionType.BY_DAY.getPartitionTimeRange(calendar);
+        Range<Field> range = PartitionType.BY_DAY.getPartitionTimeRange(calendar);
 
-        long start = getTime("2013.11.16 00:00:00.000");
-        long end = getTime("2013.11.17 00:00:00.000");
-
-        Range<Long> expected = Range.closedOpen(Long.valueOf(start), Long.valueOf(end));
+        Range<Field> expected = MILLISECONDS_TIMESTAMP.range(EUROPE_BERLIN_TIMEZONE, "'2013-11-16'", "'2013-11-17'");
 
         assertEquals(expected, range);
     }
 
     @Test
-    public void testGetPartitionTimeRangeByDayWithStartTime() throws ParseException {
+    public void testGetPartitionTimeRangeByDayWithStartTime() {
 
-        long time = getTime("2013.11.16 00:00:00.000");
+        long time = parseDateTime(EUROPE_BERLIN_TIMEZONE, "2013-11-16");
 
         Calendar calendar = toCalendar(time);
 
-        Range<Long> range = PartitionType.BY_DAY.getPartitionTimeRange(calendar);
+        Range<Field> range = PartitionType.BY_DAY.getPartitionTimeRange(calendar);
 
-        long start = getTime("2013.11.16 00:00:00.000");
-        long end = getTime("2013.11.17 00:00:00.000");
-
-        Range<Long> expected = Range.closedOpen(Long.valueOf(start), Long.valueOf(end));
+        Range<Field> expected = MILLISECONDS_TIMESTAMP.range(EUROPE_BERLIN_TIMEZONE, "'2013-11-16'", "'2013-11-17'");
 
         assertEquals(expected, range);
     }
 
     @Test
-    public void testGetPartitionTimeRangeByMonthWithStartTime() throws ParseException {
+    public void testGetPartitionTimeRangeByMonthWithStartTime() {
 
-        long time = getTime("2013.11.01 00:00:00.000");
+        long time = parseDateTime(EUROPE_BERLIN_TIMEZONE, "2013-11-01");
 
         Calendar calendar = toCalendar(time);
 
-        Range<Long> range = PartitionType.BY_MONTH.getPartitionTimeRange(calendar);
+        Range<Field> range = PartitionType.BY_MONTH.getPartitionTimeRange(calendar);
 
-        long start = getTime("2013.11.01 00:00:00.000");
-        long end = getTime("2013.12.01 00:00:00.000");
-
-        Range<Long> expected = Range.closedOpen(Long.valueOf(start), Long.valueOf(end));
+        Range<Field> expected = MILLISECONDS_TIMESTAMP.range(EUROPE_BERLIN_TIMEZONE, "'2013-11-01'", "'2013-12-01'");
 
         assertEquals(expected, range);
     }
 
     @Test
-    public void testGetPartitionTimeRangeByMonth() throws ParseException {
+    public void testGetPartitionTimeRangeByMonth() {
 
-        long time = getTime("2013.11.16 09:12:35.670");
+        long time = parseDateTime(EUROPE_BERLIN_TIMEZONE, "2013-11-16 09:12:35.670");
 
         Calendar calendar = toCalendar(time);
 
-        Range<Long> range = PartitionType.BY_MONTH.getPartitionTimeRange(calendar);
+        Range<Field> range = PartitionType.BY_MONTH.getPartitionTimeRange(calendar);
 
-        long start = getTime("2013.11.01 00:00:00.000");
-        long end = getTime("2013.12.01 00:00:00.000");
-
-        Range<Long> expected = Range.closedOpen(Long.valueOf(start), Long.valueOf(end));
+        Range<Field> expected = MILLISECONDS_TIMESTAMP.range(EUROPE_BERLIN_TIMEZONE, "'2013-11-01'", "'2013-12-01'");
 
         assertEquals(expected, range);
     }
 
     @Test
-    public void testGetPartitionTimeRangeByWeekWithStartTime() throws ParseException {
+    public void testGetPartitionTimeRangeByWeekWithStartTime() {
 
-        long time = getTime("2013.11.11 00:00:00.000");
+        long time = parseDateTime(EUROPE_BERLIN_TIMEZONE, "2013-11-11");
 
         Calendar calendar = toCalendar(time);
 
-        Range<Long> range = PartitionType.BY_WEEK.getPartitionTimeRange(calendar);
+        Range<Field> range = PartitionType.BY_WEEK.getPartitionTimeRange(calendar);
 
-        long start = getTime("2013.11.11 00:00:00.000");
-        long end = getTime("2013.11.18 00:00:00.000");
-
-        Range<Long> expected = Range.closedOpen(Long.valueOf(start), Long.valueOf(end));
+        Range<Field> expected = MILLISECONDS_TIMESTAMP.range(EUROPE_BERLIN_TIMEZONE, "'2013-11-11'", "'2013-11-18'");
 
         assertEquals(expected, range);
     }
 
     @Test
-    public void testGetPartitionTimeRangeByWeek() throws ParseException {
+    public void testGetPartitionTimeRangeByWeek() {
 
-        long time = getTime("2013.11.16 09:12:35.670");
+        long time = parseDateTime(EUROPE_BERLIN_TIMEZONE, "2013-11-16 09:12:35.670");
 
         Calendar calendar = toCalendar(time);
 
-        Range<Long> range = PartitionType.BY_WEEK.getPartitionTimeRange(calendar);
+        Range<Field> range = PartitionType.BY_WEEK.getPartitionTimeRange(calendar);
 
-        long start = getTime("2013.11.11 00:00:00.000");
-        long end = getTime("2013.11.18 00:00:00.000");
-
-        Range<Long> expected = Range.closedOpen(Long.valueOf(start), Long.valueOf(end));
+        Range<Field> expected = MILLISECONDS_TIMESTAMP.range(EUROPE_BERLIN_TIMEZONE, "'2013-11-11'", "'2013-11-18'");
 
         assertEquals(expected, range);
     }
 
     @Test
-    public void testGetPartitionTimeRangeWithSunday() throws ParseException {
+    public void testGetPartitionTimeRangeWithSunday() {
 
-        long time = getTime("2013.11.17 09:12:35.670");
+        long time = parseDateTime(EUROPE_BERLIN_TIMEZONE, "2013-11-17 09:12:35.670");
 
         Calendar calendar = toCalendar(time);
 
-        Range<Long> range = PartitionType.BY_WEEK.getPartitionTimeRange(calendar);
+        Range<Field> range = PartitionType.BY_WEEK.getPartitionTimeRange(calendar);
 
-        long start = getTime("2013.11.11 00:00:00.000");
-        long end = getTime("2013.11.18 00:00:00.000");
-
-        Range<Long> expected = Range.closedOpen(Long.valueOf(start), Long.valueOf(end));
+        Range<Field> expected = MILLISECONDS_TIMESTAMP.range(EUROPE_BERLIN_TIMEZONE, "'2013-11-11'", "'2013-11-18'");
 
         assertEquals(expected, range);
     }
 
     @Test
-    public void testGetPartitionTimeRangeWithMonday() throws ParseException {
+    public void testGetPartitionTimeRangeWithMonday() {
 
-        long time = getTime("2013.11.11 00:00:00.000");
+        long time = parseDateTime(EUROPE_BERLIN_TIMEZONE, "2013-11-11");
 
         Calendar calendar = toCalendar(time);
 
-        Range<Long> range = PartitionType.BY_WEEK.getPartitionTimeRange(calendar);
+        Range<Field> range = PartitionType.BY_WEEK.getPartitionTimeRange(calendar);
 
-        long start = getTime("2013.11.11 00:00:00.000");
-        long end = getTime("2013.11.18 00:00:00.000");
-
-        Range<Long> expected = Range.closedOpen(Long.valueOf(start), Long.valueOf(end));
+        Range<Field> expected = MILLISECONDS_TIMESTAMP.range(EUROPE_BERLIN_TIMEZONE, "'2013-11-11'", "'2013-11-18'");
 
         assertEquals(expected, range);
-    }
-
-    /**
-     * Returns the time in milliseconds corresponding to the specified {@link String}.
-     * 
-     * @param dateAsText the date/time to convert in milliseconds
-     * @return the time in milliseconds corresponding to the specified {@link String}.
-     * @throws ParseException if a problem occurs while generating the time.
-     */
-    private static long getTime(String dateAsText) throws ParseException {
-
-        SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss.SSS");
-        return format.parse(dateAsText).getTime();
     }
 
     private static Calendar toCalendar(long timeInMilliseconds) {
 
-        TimeZone timeZone = TimeZone.getTimeZone("Europe/Berlin");
-        Calendar calendar = Calendar.getInstance(timeZone);
+        Calendar calendar = Calendar.getInstance(EUROPE_BERLIN_TIMEZONE);
         calendar.setTimeInMillis(timeInMilliseconds);
         return calendar;
     }

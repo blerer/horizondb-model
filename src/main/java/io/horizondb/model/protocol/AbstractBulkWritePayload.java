@@ -19,6 +19,8 @@ import io.horizondb.io.ByteReader;
 import io.horizondb.io.ByteWriter;
 import io.horizondb.io.encoding.VarInts;
 import io.horizondb.io.serialization.Parser;
+import io.horizondb.model.core.Field;
+import io.horizondb.model.core.util.SerializationUtils;
 
 import java.io.IOException;
 
@@ -47,7 +49,7 @@ abstract class AbstractBulkWritePayload implements Payload {
     /**
      * The partition time range.
      */
-    private final Range<Long> partitionTimeRange;
+    private final Range<Field> partitionTimeRange;
 
     /**
      * Creates a new <code>AbstractBulkWritePayload</code> for the specified database and the specified series.
@@ -56,7 +58,7 @@ abstract class AbstractBulkWritePayload implements Payload {
      * @param seriesName the time series name
      * @param partitionTimeRange the partition time range
      */
-    public AbstractBulkWritePayload(String databaseName, String seriesName, Range<Long> partitionTimeRange) {
+    public AbstractBulkWritePayload(String databaseName, String seriesName, Range<Field> partitionTimeRange) {
 
         this.databaseName = databaseName;
         this.seriesName = seriesName;
@@ -86,7 +88,7 @@ abstract class AbstractBulkWritePayload implements Payload {
      * 
      * @return the partition time range.
      */
-    public Range<Long> getPartitionTimeRange() {
+    public Range<Field> getPartitionTimeRange() {
         return this.partitionTimeRange;
     }
 
@@ -96,8 +98,7 @@ abstract class AbstractBulkWritePayload implements Payload {
     @Override
     public final int computeSerializedSize() {
         return VarInts.computeStringSize(this.databaseName) + VarInts.computeStringSize(this.seriesName)
-                + VarInts.computeUnsignedLongSize(this.partitionTimeRange.lowerEndpoint().longValue())
-                + VarInts.computeUnsignedLongSize(this.partitionTimeRange.upperEndpoint().longValue())
+                + SerializationUtils.computeRangeSerializedSize(this.partitionTimeRange)
                 + computeRecordSetSerializedSize();
     }
 
@@ -109,8 +110,7 @@ abstract class AbstractBulkWritePayload implements Payload {
 
         VarInts.writeString(writer, this.databaseName);
         VarInts.writeString(writer, this.seriesName);
-        VarInts.writeUnsignedLong(writer, this.partitionTimeRange.lowerEndpoint().longValue());
-        VarInts.writeUnsignedLong(writer, this.partitionTimeRange.upperEndpoint().longValue());
+        SerializationUtils.writeRange(writer, this.partitionTimeRange);
         writeRecordSetTo(writer);
     }
 
@@ -152,11 +152,7 @@ abstract class AbstractBulkWritePayload implements Payload {
             String databaseName = VarInts.readString(reader);
             String seriesName = VarInts.readString(reader);
             
-            long lowerEndPoint = VarInts.readUnsignedLong(reader);
-            long upperEndPoint = VarInts.readUnsignedLong(reader);
-            
-            Range<Long> partitionTimeRange = Range.closedOpen(Long.valueOf(lowerEndPoint),
-                                                              Long.valueOf(upperEndPoint));
+            Range<Field> partitionTimeRange = SerializationUtils.parseRangeFrom(reader);
 
             S recordSet = parseRecordSetFrom(reader);
 
@@ -182,7 +178,7 @@ abstract class AbstractBulkWritePayload implements Payload {
          */
         protected abstract T newBulkWritePayload(String databaseName, 
                                                  String seriesName, 
-                                                 Range<Long> partitionTimeRange, 
+                                                 Range<Field> partitionTimeRange, 
                                                  S recordSet);
 
     }
