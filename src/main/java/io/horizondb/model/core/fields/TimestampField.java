@@ -124,7 +124,9 @@ public final class TimestampField extends AbstractField {
     @Override
     public void add(Field field) {
 
-        this.sourceTimestamp += ((TimestampField) field).sourceTimestamp;
+        TimestampField timestampField = (TimestampField) field;
+        
+        this.sourceTimestamp += this.sourceUnit.convert(timestampField.sourceTimestamp, timestampField.sourceUnit);
     }
 
     /**
@@ -133,7 +135,9 @@ public final class TimestampField extends AbstractField {
     @Override
     public void subtract(Field field) {
 
-        this.sourceTimestamp -= ((TimestampField) field).sourceTimestamp;
+        TimestampField timestampField = (TimestampField) field;
+        
+        this.sourceTimestamp -= this.sourceUnit.convert(timestampField.sourceTimestamp, timestampField.sourceUnit);
     }
 
     /**
@@ -141,8 +145,7 @@ public final class TimestampField extends AbstractField {
      */
     @Override
     public void copyTo(Field field) {
-
-        ((TimestampField) field).sourceTimestamp = this.sourceTimestamp;
+        field.setTimestamp(this.sourceTimestamp, this.sourceUnit);
     }
 
     /**    

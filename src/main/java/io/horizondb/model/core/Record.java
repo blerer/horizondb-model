@@ -16,6 +16,7 @@
 package io.horizondb.model.core;
 
 import io.horizondb.io.serialization.Serializable;
+import io.horizondb.model.core.records.BinaryTimeSeriesRecord;
 import io.horizondb.model.core.records.TimeSeriesRecord;
 import io.horizondb.model.schema.TimeSeriesDefinition;
 
@@ -174,6 +175,14 @@ public interface Record extends Serializable {
      * @throws IOException if an I/O problem occurs.
      */
     TimeSeriesRecord toTimeSeriesRecord() throws IOException;
+    
+    /**
+     * Return a <code>BinaryTimeSeriesRecord</code> containing the same data as this record.
+     * 
+     * @return a <code>BinaryTimeSeriesRecord</code> containing the same data as this record.
+     * @throws IOException if an I/O problem occurs.
+     */
+    BinaryTimeSeriesRecord toBinaryTimeSeriesRecord() throws IOException;
     
     /**
      * Writes the content of this <code>Record</code> in a readable format into the specified stream.

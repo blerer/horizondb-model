@@ -19,11 +19,8 @@ import io.horizondb.io.ByteReader;
 import io.horizondb.io.ByteWriter;
 import io.horizondb.io.ReadableBuffer;
 import io.horizondb.io.serialization.Parser;
-import io.horizondb.model.core.Field;
 
 import java.io.IOException;
-
-import com.google.common.collect.Range;
 
 /**
  * @author Benjamin
@@ -53,10 +50,9 @@ public class BinaryBulkWritePayload extends AbstractBulkWritePayload {
         @Override
         protected BinaryBulkWritePayload newBulkWritePayload(String databaseName,
                                                    String seriesName,
-                                                   Range<Field> partitionTimeRange,
                                                    ReadableBuffer buffer) {
 
-            return new BinaryBulkWritePayload(databaseName, seriesName, partitionTimeRange, buffer);
+            return new BinaryBulkWritePayload(databaseName, seriesName, buffer);
         }
     };
 
@@ -70,11 +66,10 @@ public class BinaryBulkWritePayload extends AbstractBulkWritePayload {
      * 
      * @param databaseName the database name
      * @param seriesName the time series name
-     * @param partitionTimeRange the partition time range
      * @param buffer the readable buffer
      */
-    private BinaryBulkWritePayload(String databaseName, String seriesName, Range<Field> partitionTimeRange, ReadableBuffer buffer) {
-        super(databaseName, seriesName, partitionTimeRange);
+    private BinaryBulkWritePayload(String databaseName, String seriesName, ReadableBuffer buffer) {
+        super(databaseName, seriesName);
         this.buffer = buffer;
     }
 

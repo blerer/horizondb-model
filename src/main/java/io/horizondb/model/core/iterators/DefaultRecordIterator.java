@@ -17,7 +17,7 @@ package io.horizondb.model.core.iterators;
 
 import io.horizondb.model.core.Record;
 import io.horizondb.model.core.RecordIterator;
-import io.horizondb.model.core.RecordListMultimapBuilder;
+import io.horizondb.model.core.RecordListBuilder;
 import io.horizondb.model.schema.TimeSeriesDefinition;
 
 import java.util.Iterator;
@@ -93,7 +93,7 @@ public class DefaultRecordIterator implements RecordIterator {
         /**
          * The builder used to build the record list.
          */
-        private final RecordListMultimapBuilder builder;
+        private final RecordListBuilder builder;
         
         /**
          * Adds a new record of the specified type.
@@ -240,7 +240,7 @@ public class DefaultRecordIterator implements RecordIterator {
          */
         private Builder(TimeSeriesDefinition definition) {
             notNull(definition, "the definition parameter must not be null.");            
-            this.builder = new RecordListMultimapBuilder(definition);
+            this.builder = new RecordListBuilder(definition);
         }
     }
 }

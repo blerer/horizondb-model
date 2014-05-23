@@ -19,15 +19,11 @@ import io.horizondb.io.ByteReader;
 import io.horizondb.io.ByteWriter;
 import io.horizondb.io.encoding.VarInts;
 import io.horizondb.io.serialization.Parser;
-import io.horizondb.model.core.Field;
-import io.horizondb.model.core.util.SerializationUtils;
 
 import java.io.IOException;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
-
-import com.google.common.collect.Range;
 
 /**
  * Base class for the record batch classes.
@@ -47,22 +43,15 @@ abstract class AbstractBulkWritePayload implements Payload {
     private final String seriesName;
 
     /**
-     * The partition time range.
-     */
-    private final Range<Field> partitionTimeRange;
-
-    /**
      * Creates a new <code>AbstractBulkWritePayload</code> for the specified database and the specified series.
      * 
      * @param databaseName the database name
      * @param seriesName the time series name
-     * @param partitionTimeRange the partition time range
      */
-    public AbstractBulkWritePayload(String databaseName, String seriesName, Range<Field> partitionTimeRange) {
+    public AbstractBulkWritePayload(String databaseName, String seriesName) {
 
         this.databaseName = databaseName;
         this.seriesName = seriesName;
-        this.partitionTimeRange = partitionTimeRange;
     }
 
     /**
@@ -84,21 +73,11 @@ abstract class AbstractBulkWritePayload implements Payload {
     }
 
     /**
-     * Returns the partition time range.
-     * 
-     * @return the partition time range.
-     */
-    public Range<Field> getPartitionTimeRange() {
-        return this.partitionTimeRange;
-    }
-
-    /**
      * {@inheritDoc}
      */
     @Override
     public final int computeSerializedSize() {
         return VarInts.computeStringSize(this.databaseName) + VarInts.computeStringSize(this.seriesName)
-                + SerializationUtils.computeRangeSerializedSize(this.partitionTimeRange)
                 + computeRecordSetSerializedSize();
     }
 
@@ -110,7 +89,6 @@ abstract class AbstractBulkWritePayload implements Payload {
 
         VarInts.writeString(writer, this.databaseName);
         VarInts.writeString(writer, this.seriesName);
-        SerializationUtils.writeRange(writer, this.partitionTimeRange);
         writeRecordSetTo(writer);
     }
 
@@ -136,8 +114,6 @@ abstract class AbstractBulkWritePayload implements Payload {
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).append("databaseName", this.databaseName)
                                                                           .append("seriesName", this.seriesName)
-                                                                          .append("partitionTimeRange", 
-                                                                                  this.partitionTimeRange)
                                                                           .toString();
     }
 
@@ -151,12 +127,10 @@ abstract class AbstractBulkWritePayload implements Payload {
 
             String databaseName = VarInts.readString(reader);
             String seriesName = VarInts.readString(reader);
-            
-            Range<Field> partitionTimeRange = SerializationUtils.parseRangeFrom(reader);
 
             S recordSet = parseRecordSetFrom(reader);
 
-            return newBulkWritePayload(databaseName, seriesName, partitionTimeRange, recordSet);
+            return newBulkWritePayload(databaseName, seriesName, recordSet);
         }
 
         /**
@@ -173,12 +147,10 @@ abstract class AbstractBulkWritePayload implements Payload {
          * @param databaseName the database name
          * @param seriesName the series name
          * @param recordSet the record set.
-         * @param partitionTimeRange the partition time range
          * @return a new record batch instance.
          */
         protected abstract T newBulkWritePayload(String databaseName, 
                                                  String seriesName, 
-                                                 Range<Field> partitionTimeRange, 
                                                  S recordSet);
 
     }

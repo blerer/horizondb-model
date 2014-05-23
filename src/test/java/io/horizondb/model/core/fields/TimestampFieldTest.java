@@ -109,4 +109,124 @@ public class TimestampFieldTest {
         field.setValueFromString(EUROPE_BERLIN_TIMEZONE, timeInMillis + "ms");
         assertEquals(timeInMillis, field.getTimestampInMillis());
     }
+        
+    @Test
+    public void testCopyTo() {
+        
+        long timeInMillis = 1399147894150L;
+
+        TimestampField field = new TimestampField(TimeUnit.MILLISECONDS);
+        field.setTimestampInMillis(timeInMillis);
+        
+        assertEquals(1399147894150L, field.getTimestampInMillis());
+        
+        long timeInMillis2 = 1399147894180L;
+        
+        TimestampField other = new TimestampField(TimeUnit.MILLISECONDS);
+        other.setTimestampInMillis(timeInMillis2);
+        
+        field.copyTo(other);
+        
+        assertEquals(1399147894150L, other.getTimestampInMillis());
+    }
+    
+    @Test
+    public void testCopyToWithDifferentUnits() {
+        
+        long timeInMillis = 1399147894150L;
+
+        TimestampField field = new TimestampField(TimeUnit.MILLISECONDS);
+        field.setTimestampInMillis(timeInMillis);
+        
+        assertEquals(1399147894150L, field.getTimestampInMillis());
+        
+        long timeInNanos = 1399147894180000000L;
+        
+        TimestampField other = new TimestampField(TimeUnit.NANOSECONDS);
+        other.setTimestampInNanos(timeInNanos);
+        
+        field.copyTo(other);
+        
+        assertEquals(1399147894150000000L, other.getTimestampInNanos());
+    }
+    
+    @Test
+    public void testAdd() {
+        
+        long timeInMillis = 1399147894150L;
+
+        TimestampField field = new TimestampField(TimeUnit.MILLISECONDS);
+        field.setTimestampInMillis(timeInMillis);
+        
+        assertEquals(1399147894150L, field.getTimestampInMillis());
+        
+        long timeInMillis2 = 15;
+        
+        TimestampField other = new TimestampField(TimeUnit.MILLISECONDS);
+        other.setTimestampInMillis(timeInMillis2);
+        
+        field.add(other);
+        
+        assertEquals(1399147894165L, field.getTimestampInMillis());
+    }
+    
+    @Test
+    public void testAddWithDifferentUnits() {
+
+        long timeInNanos = 1399147894150000000L;
+
+        TimestampField field = new TimestampField(TimeUnit.NANOSECONDS);
+        field.setTimestampInNanos(timeInNanos);
+
+        assertEquals(1399147894150L, field.getTimestampInMillis());
+
+        long timeInMillis = 15;
+
+        TimestampField other = new TimestampField(TimeUnit.MILLISECONDS);
+        other.setTimestampInMillis(timeInMillis);
+
+        field.add(other);
+
+        assertEquals(1399147894165000000L, field.getTimestampInNanos());
+    }
+    
+    @Test
+    public void testSubstract() {
+        
+        long timeInMillis = 1399147894150L;
+
+        TimestampField field = new TimestampField(TimeUnit.MILLISECONDS);
+        field.setTimestampInMillis(timeInMillis);
+        
+        assertEquals(1399147894150L, field.getTimestampInMillis());
+        
+        long timeInMillis2 = 50;
+        
+        TimestampField other = new TimestampField(TimeUnit.MILLISECONDS);
+        other.setTimestampInMillis(timeInMillis2);
+        
+        field.subtract(other);
+        
+        assertEquals(1399147894100L, field.getTimestampInMillis());
+    }
+    
+    @Test
+    public void testSubstractWithDifferentUnits() {
+
+        long timeInNanos = 1399147894150000000L;
+
+        TimestampField field = new TimestampField(TimeUnit.NANOSECONDS);
+        field.setTimestampInNanos(timeInNanos);
+
+        assertEquals(1399147894150L, field.getTimestampInMillis());
+
+        long timeInMillis = 50;
+
+        TimestampField other = new TimestampField(TimeUnit.MILLISECONDS);
+        other.setTimestampInMillis(timeInMillis);
+
+        field.subtract(other);
+
+        assertEquals(1399147894100000000L, field.getTimestampInNanos());
+    }
 }

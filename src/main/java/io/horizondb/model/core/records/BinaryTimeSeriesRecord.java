@@ -66,6 +66,14 @@ public class BinaryTimeSeriesRecord extends AbstractTimeSeriesRecord {
     }
 
     /**
+     * 
+     */
+    BinaryTimeSeriesRecord(int recordType, Field... fields) {
+
+        super(recordType, fields);
+    }
+    
+    /**
      * Copy constructor.
      * 
      * @param record the record to copy.
@@ -159,8 +167,21 @@ public class BinaryTimeSeriesRecord extends AbstractTimeSeriesRecord {
      */
     @Override
     public TimeSeriesRecord toTimeSeriesRecord() throws IOException {
+    
+        TimeSeriesRecord timeSeriesRecord = new TimeSeriesRecord(getType(), deepCopy(getFields()));
+        timeSeriesRecord.setDelta(isDelta());        
+        
+        System.out.println(timeSeriesRecord.isDelta());
+        
+        return timeSeriesRecord;
+    }
 
-        return new TimeSeriesRecord(getType(), deepCopy(getFields()));
+    /**    
+     * {@inheritDoc}
+     */
+    @Override
+    public BinaryTimeSeriesRecord toBinaryTimeSeriesRecord() throws IOException {
+        return this;
     }
 
     /**

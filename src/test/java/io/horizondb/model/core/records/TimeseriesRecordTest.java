@@ -513,6 +513,22 @@ public class TimeseriesRecordTest {
 
         assertArrayEquals(new byte[] { 6, -48, -23, -60, 9, 2 }, buffer.array());
     }
+    
+    @Test
+    public void testWriteToWithDelta() throws IOException {
+
+        TimeSeriesRecord record = new TimeSeriesRecord(TYPE, TimeUnit.NANOSECONDS, FieldType.INTEGER);
+
+        record.setDelta(true);
+        record.setTimestampInNanos(0, 10001000);
+        record.setInt(1, 1);
+
+        Buffer buffer = Buffers.allocate(6);
+
+        record.writeTo(buffer);
+
+        assertArrayEquals(new byte[] { 7, -48, -23, -60, 9, 2 }, buffer.array());
+    }
 
     @Test
     public void testWriteToWithDecimalField() throws IOException {

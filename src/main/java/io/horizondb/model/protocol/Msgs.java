@@ -16,13 +16,10 @@
 package io.horizondb.model.protocol;
 
 import io.horizondb.io.serialization.Serializable;
-import io.horizondb.model.core.Field;
 import io.horizondb.model.core.Record;
 import io.horizondb.model.schema.TimeSeriesDefinition;
 
 import java.util.List;
-
-import com.google.common.collect.Range;
 
 /**
  * Messages factory methods.
@@ -96,17 +93,15 @@ public final class Msgs {
      * 
      * @param databaseName the name of the database 
      * @param seriesName the name of the time series 
-     * @param partitionTimeRange the time range identifying the partition
      * @param records the records to write
      * @return a new message to request the creation of the specified time series in the specified database.
      */
     public static Msg<BulkWritePayload> newBulkWriteRequest(String databaseName, 
                                                             String seriesName,
-                                                            Range<Field> partitionTimeRange,
                                                             List<? extends Record> records) {
         
         return Msg.newRequestMsg(OpCode.BULK_WRITE, 
-                                 new BulkWritePayload(databaseName, seriesName, partitionTimeRange, records));
+                                 new BulkWritePayload(databaseName, seriesName, records));
     }
     
     /**

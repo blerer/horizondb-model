@@ -16,7 +16,9 @@
 package io.horizondb.model.core.records;
 
 import io.horizondb.io.BitSet;
+import io.horizondb.io.Buffer;
 import io.horizondb.io.ByteWriter;
+import io.horizondb.io.buffers.Buffers;
 import io.horizondb.io.encoding.VarInts;
 import io.horizondb.model.core.Field;
 import io.horizondb.model.core.Record;
@@ -77,6 +79,7 @@ public class TimeSeriesRecord extends AbstractTimeSeriesRecord implements Compar
      */
     private TimeSeriesRecord(TimeSeriesRecord record) {
         this(record.getType(), deepCopy(record.fields));
+        setDelta(record.isDelta());
     }
 
     /**
@@ -386,6 +389,22 @@ public class TimeSeriesRecord extends AbstractTimeSeriesRecord implements Compar
     @Override
     public TimeSeriesRecord toTimeSeriesRecord() {
         return this;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public BinaryTimeSeriesRecord toBinaryTimeSeriesRecord() throws IOException {
+        
+        BinaryTimeSeriesRecord binaryRecord = new BinaryTimeSeriesRecord(getType(), deepCopy(getFields()));
+        
+        Buffer buffer = Buffers.allocate(computeSerializedSize());
+        writeTo(buffer);
+        
+        binaryRecord.fill(buffer);
+        
+        return binaryRecord;
     }
 
     /**

@@ -22,20 +22,14 @@ import io.horizondb.model.schema.RecordTypeDefinition;
 import io.horizondb.model.schema.TimeSeriesDefinition;
 import io.horizondb.test.AssertCollections;
 
+import java.util.List;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Range;
-
 import static io.horizondb.model.core.util.TimeUtils.parseDateTime;
-
-import static io.horizondb.model.schema.FieldType.MILLISECONDS_TIMESTAMP;
-
-import static java.util.Arrays.asList;
 
 /**
  * @author Benjamin
@@ -60,9 +54,9 @@ public class RecordListBuilderTest {
                                                               .addRecordType(trade)
                                                               .build();
 
-        Multimap<Range<Field>, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition).buildMultimap();
+        List<TimeSeriesRecord> list = new RecordListBuilder(definition).build();
 
-        Assert.assertTrue(multimap.isEmpty());
+        Assert.assertTrue(list.isEmpty());
     }
 
     @Test
@@ -82,7 +76,7 @@ public class RecordListBuilderTest {
 
         long timestamp = parseDateTime("2013-11-14 11:46:00.000");
 
-        RecordListMultimapBuilder builder = new RecordListMultimapBuilder(definition).newRecord("Trade")
+        RecordListBuilder builder = new RecordListBuilder(definition).newRecord("Trade")
                                                                      .setTimestampInMillis(0, timestamp)
                                                                      .setDecimal(1, 125, 1)
                                                                      .setLong(2, 10);
@@ -92,11 +86,7 @@ public class RecordListBuilderTest {
         expected.setDecimal(1, 125, 1);
         expected.setLong(2, 10);
 
-        Multimap<Range<Field>, TimeSeriesRecord> multimap = builder.buildMultimap();
-
-        Range<Field> range = MILLISECONDS_TIMESTAMP.range("'2013-11-14'", "'2013-11-15'");
-
-        AssertCollections.assertMapContains(multimap.asMap(), range, asList(expected));
+        AssertCollections.assertListContains(builder.build(), expected);
     }
 
     @Test
@@ -116,16 +106,15 @@ public class RecordListBuilderTest {
                                                               .addRecordType(trade)
                                                               .build();
 
-        Multimap<Range<Field>, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition).newRecord("Trade")
-                                                                                          .setTimestampInMillis(0, time)
-                                                                                          .setDecimal(1, 125, 1)
-                                                                                          .setLong(2, 10)
-                                                                                          .newRecord("Trade")
-                                                                                          .setTimestampInMillis(0,
-                                                                                                                time + 50)
-                                                                                          .setDecimal(1, 124, 1)
-                                                                                          .setLong(2, 5)
-                                                                                          .buildMultimap();
+        List<TimeSeriesRecord> list = new RecordListBuilder(definition).newRecord("Trade")
+                                                                       .setTimestampInMillis(0, time)
+                                                                       .setDecimal(1, 125, 1)
+                                                                       .setLong(2, 10)
+                                                                       .newRecord("Trade")
+                                                                       .setTimestampInMillis(0, time + 50)
+                                                                       .setDecimal(1, 124, 1)
+                                                                       .setLong(2, 5)
+                                                                       .build();
 
         TimeSeriesRecord first = new TimeSeriesRecord(0, TimeUnit.MILLISECONDS, FieldType.DECIMAL, FieldType.LONG);
         first.setTimestampInMillis(0, time);
@@ -138,54 +127,7 @@ public class RecordListBuilderTest {
         second.setDecimal(1, -1, 1);
         second.setLong(2, -5);
 
-        Range<Field> range = MILLISECONDS_TIMESTAMP.range("'2013-11-14'", "'2013-11-15'");
-
-        AssertCollections.assertMapContains(multimap.asMap(), range, asList(first, second));
-    }
-
-    @Test
-    public void testWithTwoRecordsOfTheSameTypeInDifferentPartitions() {
-
-        long time = parseDateTime("2013-11-14 11:46:00.000");
-        long time2 = parseDateTime("2013-11-15 17:35:00.000");
-
-        RecordTypeDefinition trade = RecordTypeDefinition.newBuilder("Trade")
-                                                         .addDecimalField("price")
-                                                         .addLongField("volume")
-                                                         .build();
-
-        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("DAX")
-                                                              .timeUnit(TimeUnit.MILLISECONDS)
-                                                              .timeZone(TIMEZONE)
-                                                              .partitionType(PartitionType.BY_DAY)
-                                                              .addRecordType(trade)
-                                                              .build();
-
-        Multimap<Range<Field>, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition).newRecord("Trade")
-                                                                                          .setTimestampInMillis(0, time)
-                                                                                          .setDecimal(1, 125, 1)
-                                                                                          .setLong(2, 10)
-                                                                                          .newRecord("Trade")
-                                                                                          .setTimestampInMillis(0,
-                                                                                                                time2)
-                                                                                          .setDecimal(1, 124, 1)
-                                                                                          .setLong(2, 5)
-                                                                                          .buildMultimap();
-
-        TimeSeriesRecord first = new TimeSeriesRecord(0, TimeUnit.MILLISECONDS, FieldType.DECIMAL, FieldType.LONG);
-        first.setTimestampInMillis(0, time);
-        first.setDecimal(1, 125, 1);
-        first.setLong(2, 10);
-
-        TimeSeriesRecord second = new TimeSeriesRecord(0, TimeUnit.MILLISECONDS, FieldType.DECIMAL, FieldType.LONG);
-        second.setTimestampInMillis(0, time2);
-        second.setDecimal(1, 124, 1);
-        second.setLong(2, 5);
-
-        Range<Field> firstRange = MILLISECONDS_TIMESTAMP.range("'2013-11-14'", "'2013-11-15'");
-        Range<Field> secondRange = MILLISECONDS_TIMESTAMP.range("'2013-11-15'", "'2013-11-16'");
-
-        AssertCollections.assertMapContains(multimap.asMap(), firstRange, asList(first), secondRange, asList(second));
+        AssertCollections.assertListContains(list, first, second);
     }
 
     @Test
@@ -205,21 +147,19 @@ public class RecordListBuilderTest {
                                                               .addRecordType(trade)
                                                               .build();
 
-        Multimap<Range<Field>, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition).newRecord("Trade")
-                                                                                          .setTimestampInMillis(0, time)
-                                                                                          .setDecimal(1, 125, -1)
-                                                                                          .setLong(2, 10)
-                                                                                          .newRecord("Trade")
-                                                                                          .setTimestampInMillis(0,
-                                                                                                                time + 50)
-                                                                                          .setDecimal(1, 124, -1)
-                                                                                          .setLong(2, 5)
-                                                                                          .newRecord("Trade")
-                                                                                          .setTimestampInMillis(0,
-                                                                                                                time + 120)
-                                                                                          .setDecimal(1, 13, 0)
-                                                                                          .setLong(2, 6)
-                                                                                          .buildMultimap();
+        List<TimeSeriesRecord> list = new RecordListBuilder(definition).newRecord("Trade")
+                                                                       .setTimestampInMillis(0, time)
+                                                                       .setDecimal(1, 125, -1)
+                                                                       .setLong(2, 10)
+                                                                       .newRecord("Trade")
+                                                                       .setTimestampInMillis(0, time + 50)
+                                                                       .setDecimal(1, 124, -1)
+                                                                       .setLong(2, 5)
+                                                                       .newRecord("Trade")
+                                                                       .setTimestampInMillis(0, time + 120)
+                                                                       .setDecimal(1, 13, 0)
+                                                                       .setLong(2, 6)
+                                                                       .build();
 
         TimeSeriesRecord first = new TimeSeriesRecord(0, TimeUnit.MILLISECONDS, FieldType.DECIMAL, FieldType.LONG);
         first.setTimestampInMillis(0, time);
@@ -238,69 +178,7 @@ public class RecordListBuilderTest {
         third.setDecimal(1, 6, -1);
         third.setLong(2, 1);
 
-        Range<Field> range = MILLISECONDS_TIMESTAMP.range("'2013-11-14'", "'2013-11-15'");
-
-        AssertCollections.assertMapContains(multimap.asMap(), range, asList(first, second, third));
-    }
-
-    @Test
-    public void testWithThreeRecordsOfSameTypeWithinTwoDifferentPartitions() {
-
-        long time = parseDateTime("2013-11-14 11:46:00.000");
-        long time2 = parseDateTime("2013-11-15 17:35:00.000");
-
-        RecordTypeDefinition trade = RecordTypeDefinition.newBuilder("Trade")
-                                                         .addDecimalField("price")
-                                                         .addLongField("volume")
-                                                         .build();
-
-        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("DAX")
-                                                              .timeUnit(TimeUnit.MILLISECONDS)
-                                                              .timeZone(TIMEZONE)
-                                                              .partitionType(PartitionType.BY_DAY)
-                                                              .addRecordType(trade)
-                                                              .build();
-
-        Multimap<Range<Field>, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition).newRecord("Trade")
-                                                                                          .setTimestampInMillis(0, time)
-                                                                                          .setDecimal(1, 125, 1)
-                                                                                          .setLong(2, 10)
-                                                                                          .newRecord("Trade")
-                                                                                          .setTimestampInMillis(0,
-                                                                                                                time + 50)
-                                                                                          .setDecimal(1, 124, 1)
-                                                                                          .setLong(2, 5)
-                                                                                          .newRecord("Trade")
-                                                                                          .setTimestampInMillis(0,
-                                                                                                                time2)
-                                                                                          .setDecimal(1, 13, 0)
-                                                                                          .setLong(2, 6)
-                                                                                          .buildMultimap();
-
-        TimeSeriesRecord first = new TimeSeriesRecord(0, TimeUnit.MILLISECONDS, FieldType.DECIMAL, FieldType.LONG);
-        first.setTimestampInMillis(0, time);
-        first.setDecimal(1, 125, 1);
-        first.setLong(2, 10);
-
-        TimeSeriesRecord second = new TimeSeriesRecord(0, TimeUnit.MILLISECONDS, FieldType.DECIMAL, FieldType.LONG);
-        second.setDelta(true);
-        second.setTimestampInMillis(0, 50);
-        second.setDecimal(1, -1, 1);
-        second.setLong(2, -5);
-
-        TimeSeriesRecord third = new TimeSeriesRecord(0, TimeUnit.MILLISECONDS, FieldType.DECIMAL, FieldType.LONG);
-        third.setTimestampInMillis(0, time2);
-        third.setDecimal(1, 13, 0);
-        third.setLong(2, 6);
-
-        Range<Field> firstRange = MILLISECONDS_TIMESTAMP.range("'2013-11-14'", "'2013-11-15'");
-        Range<Field> secondRange = MILLISECONDS_TIMESTAMP.range("'2013-11-15'", "'2013-11-16'");
-
-        AssertCollections.assertMapContains(multimap.asMap(),
-                                            firstRange,
-                                            asList(first, second),
-                                            secondRange,
-                                            asList(third));
+        AssertCollections.assertListContains(list, first, second, third);
     }
 
     @Test
@@ -320,21 +198,19 @@ public class RecordListBuilderTest {
                                                               .addRecordType(trade)
                                                               .build();
 
-        Multimap<Range<Field>, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition).newRecord("Trade")
-                                                                                          .setTimestampInMillis(0,
-                                                                                                                time + 50)
-                                                                                          .setDecimal(1, 124, -1)
-                                                                                          .setLong(2, 5)
-                                                                                          .newRecord("Trade")
-                                                                                          .setTimestampInMillis(0,
-                                                                                                                time + 120)
-                                                                                          .setDecimal(1, 13, 0)
-                                                                                          .setLong(2, 6)
-                                                                                          .newRecord("Trade")
-                                                                                          .setTimestampInMillis(0, time)
-                                                                                          .setDecimal(1, 125, -1)
-                                                                                          .setLong(2, 10)
-                                                                                          .buildMultimap();
+        List<TimeSeriesRecord> list = new RecordListBuilder(definition).newRecord("Trade")
+                                                                       .setTimestampInMillis(0, time + 50)
+                                                                       .setDecimal(1, 124, -1)
+                                                                       .setLong(2, 5)
+                                                                       .newRecord("Trade")
+                                                                       .setTimestampInMillis(0, time + 120)
+                                                                       .setDecimal(1, 13, 0)
+                                                                       .setLong(2, 6)
+                                                                       .newRecord("Trade")
+                                                                       .setTimestampInMillis(0, time)
+                                                                       .setDecimal(1, 125, -1)
+                                                                       .setLong(2, 10)
+                                                                       .build();
 
         TimeSeriesRecord first = new TimeSeriesRecord(0, TimeUnit.MILLISECONDS, FieldType.DECIMAL, FieldType.LONG);
         first.setTimestampInMillis(0, time);
@@ -353,69 +229,7 @@ public class RecordListBuilderTest {
         third.setDecimal(1, 6, -1);
         third.setLong(2, 1);
 
-        Range<Field> range = MILLISECONDS_TIMESTAMP.range("'2013-11-14'", "'2013-11-15'");
-
-        AssertCollections.assertMapContains(multimap.asMap(), range, asList(first, second, third));
-    }
-
-    @Test
-    public void testWithThreeRecordsOfSameTypeInDisorderWithTwoPartition() {
-
-        long time = parseDateTime("2013-11-14 11:46:00.000");
-        long time2 = parseDateTime("2013-11-15 17:35:00.000");
-
-        RecordTypeDefinition trade = RecordTypeDefinition.newBuilder("Trade")
-                                                         .addDecimalField("price")
-                                                         .addLongField("volume")
-                                                         .build();
-
-        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("DAX")
-                                                              .timeUnit(TimeUnit.MILLISECONDS)
-                                                              .timeZone(TIMEZONE)
-                                                              .partitionType(PartitionType.BY_DAY)
-                                                              .addRecordType(trade)
-                                                              .build();
-
-        Multimap<Range<Field>, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition).newRecord("Trade")
-                                                                                          .setTimestampInMillis(0,
-                                                                                                                time2 + 50)
-                                                                                          .setDecimal(1, 124, -1)
-                                                                                          .setLong(2, 5)
-                                                                                          .newRecord("Trade")
-                                                                                          .setTimestampInMillis(0,
-                                                                                                                time2 + 120)
-                                                                                          .setDecimal(1, 13, 0)
-                                                                                          .setLong(2, 6)
-                                                                                          .newRecord("Trade")
-                                                                                          .setTimestampInMillis(0, time)
-                                                                                          .setDecimal(1, 125, -1)
-                                                                                          .setLong(2, 10)
-                                                                                          .buildMultimap();
-
-        TimeSeriesRecord first = new TimeSeriesRecord(0, TimeUnit.MILLISECONDS, FieldType.DECIMAL, FieldType.LONG);
-        first.setTimestampInMillis(0, time);
-        first.setDecimal(1, 125, -1);
-        first.setLong(2, 10);
-
-        TimeSeriesRecord second = new TimeSeriesRecord(0, TimeUnit.MILLISECONDS, FieldType.DECIMAL, FieldType.LONG);
-        second.setTimestampInMillis(0, time2 + 50);
-        second.setDecimal(1, 124, -1);
-        second.setLong(2, 5);
-
-        TimeSeriesRecord third = new TimeSeriesRecord(0, TimeUnit.MILLISECONDS, FieldType.DECIMAL, FieldType.LONG);
-        third.setDelta(true);
-        third.setTimestampInMillis(0, 70);
-        third.setDecimal(1, 6, -1);
-        third.setLong(2, 1);
-
-        Range<Field> firstRange = MILLISECONDS_TIMESTAMP.range("'2013-11-14'", "'2013-11-15'");
-        Range<Field> secondRange = MILLISECONDS_TIMESTAMP.range("'2013-11-15'", "'2013-11-16'");
-
-        AssertCollections.assertMapContains(multimap.asMap(),
-                                            firstRange,
-                                            asList(first),
-                                            secondRange,
-                                            asList(second, third));
+        AssertCollections.assertListContains(list, first, second, third);
     }
 
     @Test
@@ -443,18 +257,17 @@ public class RecordListBuilderTest {
                                                               .addRecordType(trade)
                                                               .build();
 
-        Multimap<Range<Field>, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition).newRecord("Quote")
-                                                                                          .setTimestampInMillis(0, time)
-                                                                                          .setDecimal(1, 123, 1)
-                                                                                          .setDecimal(2, 125, 1)
-                                                                                          .setLong(3, 6)
-                                                                                          .setLong(4, 14)
-                                                                                          .newRecord("Trade")
-                                                                                          .setTimestampInMillis(0,
-                                                                                                                time + 100)
-                                                                                          .setDecimal(1, 125, 1)
-                                                                                          .setLong(2, 10)
-                                                                                          .buildMultimap();
+        List<TimeSeriesRecord> list = new RecordListBuilder(definition).newRecord("Quote")
+                                                                       .setTimestampInMillis(0, time)
+                                                                       .setDecimal(1, 123, 1)
+                                                                       .setDecimal(2, 125, 1)
+                                                                       .setLong(3, 6)
+                                                                       .setLong(4, 14)
+                                                                       .newRecord("Trade")
+                                                                       .setTimestampInMillis(0, time + 100)
+                                                                       .setDecimal(1, 125, 1)
+                                                                       .setLong(2, 10)
+                                                                       .build();
 
         TimeSeriesRecord expectedQuote = new TimeSeriesRecord(0,
                                                               TimeUnit.MILLISECONDS,
@@ -476,9 +289,7 @@ public class RecordListBuilderTest {
         expectedTrade.setDecimal(1, 125, 1);
         expectedTrade.setLong(2, 10);
 
-        Range<Field> range = MILLISECONDS_TIMESTAMP.range("'2013-11-14'", "'2013-11-15'");
-
-        AssertCollections.assertMapContains(multimap.asMap(), range, asList(expectedQuote, expectedTrade));
+        AssertCollections.assertListContains(list, expectedQuote, expectedTrade);
     }
 
     @Test
@@ -511,45 +322,40 @@ public class RecordListBuilderTest {
                                                               .addRecordType(exchangeState)
                                                               .build();
 
-        Multimap<Range<Field>, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition).newRecord("ExchangeState")
-                                                                                          .setTimestampInMillis(0, time)
-                                                                                          .setByte(1, 1)
-                                                                                          .newRecord("Quote")
-                                                                                          .setTimestampInMillis(0, time)
-                                                                                          .setDecimal(1, 123, -1)
-                                                                                          .setDecimal(2, 125, -1)
-                                                                                          .setLong(3, 6)
-                                                                                          .setLong(4, 14)
-                                                                                          .newRecord("Trade")
-                                                                                          .setTimestampInMillis(0,
-                                                                                                                time + 5)
-                                                                                          .setDecimal(1, 125, -1)
-                                                                                          .setLong(2, 10)
-                                                                                          .newRecord("Quote")
-                                                                                          .setTimestampInMillis(0,
-                                                                                                                time + 15)
-                                                                                          .setDecimal(1, 123, -1)
-                                                                                          .setDecimal(2, 125, -1)
-                                                                                          .setLong(3, 6)
-                                                                                          .setLong(4, 4)
-                                                                                          .newRecord("Trade")
-                                                                                          .setTimestampInMillis(0,
-                                                                                                                time + 50)
-                                                                                          .setDecimal(1, 124, -1)
-                                                                                          .setLong(2, 5)
-                                                                                          .newRecord("Trade")
-                                                                                          .setTimestampInMillis(0,
-                                                                                                                time + 120)
-                                                                                          .setDecimal(1, 13, 0)
-                                                                                          .setLong(2, 6)
-                                                                                          .newRecord("Quote")
-                                                                                          .setTimestampInMillis(0,
-                                                                                                                time + 150)
-                                                                                          .setDecimal(1, 123, -1)
-                                                                                          .setDecimal(2, 125, -1)
-                                                                                          .setLong(3, 6)
-                                                                                          .setLong(4, 4)
-                                                                                          .buildMultimap();
+        List<TimeSeriesRecord> list = new RecordListBuilder(definition).newRecord("ExchangeState")
+                                                                       .setTimestampInMillis(0, time)
+                                                                       .setByte(1, 1)
+                                                                       .newRecord("Quote")
+                                                                       .setTimestampInMillis(0, time)
+                                                                       .setDecimal(1, 123, -1)
+                                                                       .setDecimal(2, 125, -1)
+                                                                       .setLong(3, 6)
+                                                                       .setLong(4, 14)
+                                                                       .newRecord("Trade")
+                                                                       .setTimestampInMillis(0, time + 5)
+                                                                       .setDecimal(1, 125, -1)
+                                                                       .setLong(2, 10)
+                                                                       .newRecord("Quote")
+                                                                       .setTimestampInMillis(0, time + 15)
+                                                                       .setDecimal(1, 123, -1)
+                                                                       .setDecimal(2, 125, -1)
+                                                                       .setLong(3, 6)
+                                                                       .setLong(4, 4)
+                                                                       .newRecord("Trade")
+                                                                       .setTimestampInMillis(0, time + 50)
+                                                                       .setDecimal(1, 124, -1)
+                                                                       .setLong(2, 5)
+                                                                       .newRecord("Trade")
+                                                                       .setTimestampInMillis(0, time + 120)
+                                                                       .setDecimal(1, 13, 0)
+                                                                       .setLong(2, 6)
+                                                                       .newRecord("Quote")
+                                                                       .setTimestampInMillis(0, time + 150)
+                                                                       .setDecimal(1, 123, -1)
+                                                                       .setDecimal(2, 125, -1)
+                                                                       .setLong(3, 6)
+                                                                       .setLong(4, 4)
+                                                                       .build();
 
         TimeSeriesRecord firstES = new TimeSeriesRecord(2, TimeUnit.MILLISECONDS, FieldType.BYTE);
         firstES.setTimestampInMillis(0, time);
@@ -610,149 +416,13 @@ public class RecordListBuilderTest {
         thirdQuote.setLong(3, 0);
         thirdQuote.setLong(4, 0);
 
-        Range<Field> range = MILLISECONDS_TIMESTAMP.range("'2013-11-14'", "'2013-11-15'");
-
-        AssertCollections.assertMapContains(multimap.asMap(),
-                                            range,
-                                            asList(firstES,
-                                                   firstQuote,
-                                                   firstTrade,
-                                                   secondQuote,
-                                                   secondTrade,
-                                                   thirdTrade,
-                                                   thirdQuote));
-    }
-
-    @Test
-    public void testWithMultipleRecordsOfDifferentTypeAndTwoPartition() {
-
-        long time = parseDateTime("2013-11-14 11:46:00.000");
-        long time2 = parseDateTime("2013-11-15 17:35:00.000");
-
-        RecordTypeDefinition trade = RecordTypeDefinition.newBuilder("Trade")
-                                                         .addDecimalField("price")
-                                                         .addLongField("volume")
-                                                         .build();
-
-        RecordTypeDefinition quote = RecordTypeDefinition.newBuilder("Quote")
-                                                         .addDecimalField("bidPrice")
-                                                         .addDecimalField("askPrice")
-                                                         .addLongField("bidVolume")
-                                                         .addLongField("askVolume")
-                                                         .build();
-
-        RecordTypeDefinition exchangeState = RecordTypeDefinition.newBuilder("ExchangeState")
-                                                                 .addByteField("status")
-                                                                 .build();
-
-        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("DAX")
-                                                              .timeUnit(TimeUnit.MILLISECONDS)
-                                                              .timeZone(TIMEZONE)
-                                                              .partitionType(PartitionType.BY_DAY)
-                                                              .addRecordType(trade)
-                                                              .addRecordType(quote)
-                                                              .addRecordType(exchangeState)
-                                                              .build();
-
-        Multimap<Range<Field>, TimeSeriesRecord> multimap = new RecordListMultimapBuilder(definition)
-                                                                        .newRecord("ExchangeState")
-                                                                        .setTimestampInMillis(0, time)
-                                                                        .setByte(1, 1)
-                                                                        .newRecord("Quote")
-                                                                        .setTimestampInMillis(0, time)
-                                                                        .setDecimal(1, 123, -1)
-                                                                        .setDecimal(2, 125, -1)
-                                                                        .setLong(3, 6)
-                                                                        .setLong(4, 14)
-                                                                        .newRecord("Trade")
-                                                                        .setTimestampInMillis(0, time + 5)
-                                                                        .setDecimal(1, 125, -1)
-                                                                        .setLong(2, 10)
-                                                                        .newRecord("Quote")
-                                                                        .setTimestampInMillis(0, time + 15)
-                                                                        .setDecimal(1, 123, -1)
-                                                                        .setDecimal(2, 125, -1)
-                                                                        .setLong(3, 6)
-                                                                        .setLong(4, 4)
-                                                                        .newRecord("Trade")
-                                                                        .setTimestampInMillis(0, time2 + 50)
-                                                                        .setDecimal(1, 124, -1)
-                                                                        .setLong(2, 5)
-                                                                        .newRecord("Trade")
-                                                                        .setTimestampInMillis(0, time2 + 120)
-                                                                        .setDecimal(1, 13, 0)
-                                                                        .setLong(2, 6)
-                                                                        .newRecord("Quote")
-                                                                        .setTimestampInMillis(0, time2 + 150)
-                                                                        .setDecimal(1, 123, -1)
-                                                                        .setDecimal(2, 125, -1)
-                                                                        .setLong(3, 6)
-                                                                        .setLong(4, 4)
-                                                                        .buildMultimap();
-
-        TimeSeriesRecord firstES = new TimeSeriesRecord(2, TimeUnit.MILLISECONDS, FieldType.BYTE);
-        firstES.setTimestampInMillis(0, time);
-        firstES.setByte(1, 1);
-
-        TimeSeriesRecord firstQuote = new TimeSeriesRecord(1,
-                                                              TimeUnit.MILLISECONDS,
-                                                              FieldType.DECIMAL,
-                                                              FieldType.DECIMAL,
-                                                              FieldType.LONG,
-                                                              FieldType.LONG);
-        firstQuote.setTimestampInMillis(0, time);
-        firstQuote.setDecimal(1, 123, -1);
-        firstQuote.setDecimal(2, 125, -1);
-        firstQuote.setLong(3, 6);
-        firstQuote.setLong(4, 14);
-
-        TimeSeriesRecord firstTrade = new TimeSeriesRecord(0,
-                                                              TimeUnit.MILLISECONDS,
-                                                              FieldType.DECIMAL,
-                                                              FieldType.LONG);
-        firstTrade.setTimestampInMillis(0, time + 5);
-        firstTrade.setDecimal(1, 125, -1);
-        firstTrade.setLong(2, 10);
-
-        TimeSeriesRecord secondQuote = new TimeSeriesRecord(1,
-                                             TimeUnit.MILLISECONDS,
-                                             FieldType.DECIMAL,
-                                             FieldType.DECIMAL,
-                                             FieldType.LONG,
-                                             FieldType.LONG);
-        secondQuote.setDelta(true);
-        secondQuote.setTimestampInMillis(0, 15);
-        secondQuote.setDecimal(1, 0, -1);
-        secondQuote.setDecimal(2, 0, -1);
-        secondQuote.setLong(3, 0);
-        secondQuote.setLong(4, -10);
-
-        TimeSeriesRecord secondTrade = new TimeSeriesRecord(0, TimeUnit.MILLISECONDS, FieldType.DECIMAL, FieldType.LONG);
-        secondTrade.setTimestampInMillis(0, time2 + 50);
-        secondTrade.setDecimal(1, 124, -1);
-        secondTrade.setLong(2, 5);
-
-        TimeSeriesRecord thirdTrade = new TimeSeriesRecord(0, TimeUnit.MILLISECONDS, FieldType.DECIMAL, FieldType.LONG);
-        thirdTrade.setDelta(true);
-        thirdTrade.setTimestampInMillis(0, 70);
-        thirdTrade.setDecimal(1, 6, -1);
-        thirdTrade.setLong(2, 1);
-
-        TimeSeriesRecord thirdQuote = new TimeSeriesRecord(1,
-                                             TimeUnit.MILLISECONDS,
-                                             FieldType.DECIMAL,
-                                             FieldType.DECIMAL,
-                                             FieldType.LONG,
-                                             FieldType.LONG);
-        thirdQuote.setTimestampInMillis(0, time2 + 150);
-        thirdQuote.setDecimal(1, 123, -1);
-        thirdQuote.setDecimal(2, 125, -1);
-        thirdQuote.setLong(3, 6);
-        thirdQuote.setLong(4, 4);
-        
-        Range<Field> firstRange = MILLISECONDS_TIMESTAMP.range("'2013-11-14'", "'2013-11-15'");
-        Range<Field> secondRange = MILLISECONDS_TIMESTAMP.range("'2013-11-15'", "'2013-11-16'");
-
-        AssertCollections.assertMapContains(multimap.asMap(), firstRange, asList(firstES, firstQuote, firstTrade, secondQuote), secondRange, asList(secondTrade, thirdTrade, thirdQuote));
+        AssertCollections.assertListContains(list,
+                                             firstES,
+                                             firstQuote,
+                                             firstTrade,
+                                             secondQuote,
+                                             secondTrade,
+                                             thirdTrade,
+                                             thirdQuote);
     }
 }
