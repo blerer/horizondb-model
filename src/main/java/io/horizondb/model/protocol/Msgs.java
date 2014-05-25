@@ -61,7 +61,7 @@ public final class Msgs {
      */
     public static Msg<?> newCreateTimeSeriesResponse(Msg<?> request) {
         
-        return Msg.emptyMsg(MsgHeader.newResponseHeader(request.getHeader(), 0, 0));
+        return Msg.emptyMsg(MsgHeader.newResponseHeader(request.getHeader(), OpCode.NOOP, 0, 0));
     }
     
     /**
@@ -85,7 +85,7 @@ public final class Msgs {
      */
     public static Msg<?> newGetTimeSeriesResponse(Msg<?> request, TimeSeriesDefinition definition) {
         
-        return Msg.newResponseMsg(request.getHeader(), new GetTimeSeriesResponsePayload(definition));
+        return Msg.newResponseMsg(request.getHeader(), OpCode.GET_TIMESERIES, new GetTimeSeriesResponsePayload(definition));
     }
         
     /**
@@ -112,7 +112,7 @@ public final class Msgs {
      */
     public static Msg<?> newBulkWriteResponse(Msg<?> request) {
         
-        return Msg.emptyMsg(MsgHeader.newResponseHeader(request.getHeader(), 0, 0));
+        return Msg.emptyMsg(MsgHeader.newResponseHeader(request.getHeader(), OpCode.NOOP, 0, 0));
     }
     
     /**

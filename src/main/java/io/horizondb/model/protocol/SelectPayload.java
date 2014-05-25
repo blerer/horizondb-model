@@ -19,16 +19,12 @@ import io.horizondb.io.ByteReader;
 import io.horizondb.io.ByteWriter;
 import io.horizondb.io.encoding.VarInts;
 import io.horizondb.io.serialization.Parser;
-import io.horizondb.model.core.Field;
-import io.horizondb.model.core.util.SerializationUtils;
+import io.horizondb.model.core.Predicate;
+import io.horizondb.model.core.predicates.Predicates;
 
 import java.io.IOException;
 
 import javax.annotation.concurrent.Immutable;
-
-import com.google.common.collect.Range;
-
-import static io.horizondb.model.core.util.SerializationUtils.parseRangeFrom;
 
 /**
  * A query used to request data from the server.
@@ -37,25 +33,25 @@ import static io.horizondb.model.core.util.SerializationUtils.parseRangeFrom;
  * 
  */
 @Immutable
-public final class QueryPayload implements Payload {
+public final class SelectPayload implements Payload {
 
     /**
      * The parser instance.
      */
-    private static final Parser<QueryPayload> PARSER = new Parser<QueryPayload>() {
+    private static final Parser<SelectPayload> PARSER = new Parser<SelectPayload>() {
 
         /**
          * {@inheritDoc}
          */
         @Override
-        public QueryPayload parseFrom(ByteReader reader) throws IOException {
+        public SelectPayload parseFrom(ByteReader reader) throws IOException {
 
             String databaseName = VarInts.readString(reader);
             String seriesName = VarInts.readString(reader);
             
-            Range<Field> range = parseRangeFrom(reader);
+            Predicate predicate = Predicates.parseFrom(reader);
 
-            return new QueryPayload(databaseName, seriesName, range);
+            return new SelectPayload(databaseName, seriesName, predicate);
         }
     };
 
@@ -70,18 +66,18 @@ public final class QueryPayload implements Payload {
     private final String seriesName;
 
     /**
-     * The time range for which data must be returned from the partition.
+     * The predicate used to select the record that must be returned.
      */
-    private final Range<Field> timeRange;
+    private final Predicate predicate;
 
     /**
      * @param timeRange
      */
-    public QueryPayload(String databaseName, String seriesName, Range<Field> timeRange) {
+    public SelectPayload(String databaseName, String seriesName, Predicate predicate) {
 
         this.databaseName = databaseName;
         this.seriesName = seriesName;
-        this.timeRange = timeRange;
+        this.predicate = predicate;
     }
 
     /**
@@ -103,31 +99,31 @@ public final class QueryPayload implements Payload {
     }
 
     /**
-     * Returns the time range for which data must be returned.
+     * Returns the predicate used to select the record that must be returned.
      * 
-     * @return the time range for which data must be returned.
+     * @return the predicate used to select the record that must be returned.
      */
-    public Range<Field> getTimeRange() {
-        return this.timeRange;
+    public Predicate getPredicate() {
+        return this.predicate;
     }
 
     /**
-     * Creates a new <code>QueryPayload</code> by reading the data from the specified reader.
+     * Creates a new <code>SelectPayload</code> by reading the data from the specified reader.
      * 
      * @param reader the reader to read from.
      * @throws IOException if an I/O problem occurs
      */
-    public static QueryPayload parseFrom(ByteReader reader) throws IOException {
+    public static SelectPayload parseFrom(ByteReader reader) throws IOException {
 
         return getParser().parseFrom(reader);
     }
 
     /**
-     * Returns the parser that can be used to deserialize <code>QueryPayload</code> instances.
+     * Returns the parser that can be used to deserialize <code>SelectPayload</code> instances.
      * 
-     * @return the parser that can be used to deserialize <code>QueryPayload</code> instances.
+     * @return the parser that can be used to deserialize <code>SelectPayload</code> instances.
      */
-    public static Parser<QueryPayload> getParser() {
+    public static Parser<SelectPayload> getParser() {
 
         return PARSER;
     }
@@ -139,7 +135,7 @@ public final class QueryPayload implements Payload {
     public int computeSerializedSize() {
         return VarInts.computeStringSize(this.databaseName) 
                 + VarInts.computeStringSize(this.seriesName) 
-                + SerializationUtils.computeRangeSerializedSize(this.timeRange);
+                + Predicates.computeSerializedSize(this.predicate);
     }
 
     /**
@@ -150,6 +146,6 @@ public final class QueryPayload implements Payload {
         
         VarInts.writeString(writer, this.databaseName);
         VarInts.writeString(writer, this.seriesName);
-        SerializationUtils.writeRange(writer, this.timeRange);
+        Predicates.write(writer, this.predicate);
     }
 }

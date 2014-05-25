@@ -17,78 +17,59 @@ package io.horizondb.model.protocol;
 
 import io.horizondb.io.ByteReader;
 import io.horizondb.io.ByteWriter;
-import io.horizondb.io.encoding.VarInts;
 import io.horizondb.io.serialization.Parser;
-import io.horizondb.model.schema.TimeSeriesDefinition;
+import io.horizondb.model.schema.DatabaseDefinition;
 
 import java.io.IOException;
 
 import javax.annotation.concurrent.Immutable;
 
 /**
- * <code>Payload</code> used to request a time series creation.
+ * <code>Payload</code> used to request a database creation.
  * 
  * @author Benjamin
  *
  */
 @Immutable
-public final class CreateTimeSeriesRequestPayload implements Payload {
+public final class CreateDatabasePayload implements Payload {
     
     /**
      * The parser instance.
      */
-    private static final Parser<CreateTimeSeriesRequestPayload> PARSER = new Parser<CreateTimeSeriesRequestPayload>() {
+    private static final Parser<CreateDatabasePayload> PARSER = new Parser<CreateDatabasePayload>() {
 
         /**
          * {@inheritDoc}
          */
         @Override
-        public CreateTimeSeriesRequestPayload parseFrom(ByteReader reader) throws IOException {
+        public CreateDatabasePayload parseFrom(ByteReader reader) throws IOException {
 
-            String databaseName = VarInts.readString(reader);    
-            TimeSeriesDefinition definition = TimeSeriesDefinition.parseFrom(reader);
+            DatabaseDefinition definition = DatabaseDefinition.parseFrom(reader);
             
-            return new CreateTimeSeriesRequestPayload(databaseName, definition);
+            return new CreateDatabasePayload(definition);
         }
     };
     
     /**
-     * The name of the database were the time series must be created.
+     * The database definition.
      */
-    private final String databaseName;
-    
-    /**
-     * The time series definition
-     */
-    private final TimeSeriesDefinition definition;
+    private final DatabaseDefinition definition;
         
     /**
-     * Creates a new payload for a message of type <code>CREATE_TIMESERIES</code>.
+     * Creates a new payload for a message of type <code>CREATE_DATABASE</code>.
      * 
-     * @param databaseName the name of the database were the time series must be created
-     * @param definition the definition of the time series to create.
+     * @param definition the definition of the database to create.
      */
-    public CreateTimeSeriesRequestPayload(String databaseName, TimeSeriesDefinition definition) {
-        
-        this.databaseName = databaseName;
+    public CreateDatabasePayload(DatabaseDefinition definition) {
         this.definition = definition;
     }
 
     /**
-     * Returns the name of the database were the time series must be created.
+     * Returns the database definition.    
      * 
-     * @return the name of the database were the time series must be created.
+     * @return the database definition. 
      */
-    public String getDatabaseName() {
-        return this.databaseName;
-    }
-
-    /**
-     * Returns the definition of the time series to create.
-     * 
-     * @return the definition of the time series to create.
-     */
-    public TimeSeriesDefinition getDefinition() {
+    public DatabaseDefinition getDefinition() {
         return this.definition;
     }
 
@@ -98,7 +79,7 @@ public final class CreateTimeSeriesRequestPayload implements Payload {
      * @param reader the reader to read from.
      * @throws IOException if an I/O problem occurs
      */
-    public static CreateTimeSeriesRequestPayload parseFrom(ByteReader reader) throws IOException {
+    public static CreateDatabasePayload parseFrom(ByteReader reader) throws IOException {
 
         return getParser().parseFrom(reader);
     }
@@ -107,7 +88,7 @@ public final class CreateTimeSeriesRequestPayload implements Payload {
      * Returns the parser that can be used to deserialize <code>CreateDatabaseRequestPayload</code> instances.
      * @return the parser that can be used to deserialize <code>CreateDatabaseRequestPayload</code> instances.
      */
-    public static Parser<CreateTimeSeriesRequestPayload> getParser() {
+    public static Parser<CreateDatabasePayload> getParser() {
 
         return PARSER;
     }
@@ -117,7 +98,7 @@ public final class CreateTimeSeriesRequestPayload implements Payload {
      */
     @Override
     public int computeSerializedSize() {
-        return VarInts.computeStringSize(this.databaseName) + this.definition.computeSerializedSize();
+        return this.definition.computeSerializedSize();
     }
 
     /**
@@ -125,8 +106,6 @@ public final class CreateTimeSeriesRequestPayload implements Payload {
      */
     @Override
     public void writeTo(ByteWriter writer) throws IOException {
-        
-        VarInts.writeString(writer, this.databaseName);
         this.definition.writeTo(writer);
     }
 }

@@ -66,8 +66,6 @@ public class SerializationUtilsTest {
         Range<Field> result = SerializationUtils.parseRangeFrom(crcReader);
         
         assertEquals(range, result);
-
-        System.out.println(crcReader.readChecksum());
     }
     
 }

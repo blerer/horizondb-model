@@ -33,7 +33,7 @@ public enum OpCode implements Serializable {
     /**
      * The operation code returned by the server when the message could not be deserialized.
      */
-    UNKNOWN_OPERATION(0) {
+    ERROR(0) {
 
         /**
          * {@inheritDoc}
@@ -54,6 +54,66 @@ public enum OpCode implements Serializable {
         }
     },
 
+    /**
+     * The operation code to request the creation of a database.
+     */
+    CREATE_DATABASE(1) {
+
+        @Override
+        public Parser<?> getPayloadParser(boolean request) {
+
+            return CreateDatabasePayload.getParser();
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public boolean isMutation() {
+            return false;
+        }
+    },
+    
+    /**
+     * The operation code to request the use of an other database.
+     */
+    USE_DATABASE(2) {
+
+        @Override
+        public Parser<?> getPayloadParser(boolean request) {
+
+            return UseDatabasePayload.getParser();
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public boolean isMutation() {
+            return false;
+        }
+    },
+    
+    /**
+     * The operation code to request a time series.
+     */
+    CREATE_TIMESERIES(3) {
+
+        @Override
+        public Parser<?> getPayloadParser(boolean request) {
+
+            return CreateTimeSeriesPayload.getParser();
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public boolean isMutation() {
+            return false;
+        }
+    },
+    
     /**
      * The operation code to request a time series.
      */
@@ -104,6 +164,26 @@ public enum OpCode implements Serializable {
         }
     },
 
+    /**
+     * The operation code to execute a selection on the server.
+     */
+    SELECT(6) {
+
+        @Override
+        public Parser<?> getPayloadParser(boolean request) {
+
+            return SelectPayload.getParser();
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public boolean isMutation() {
+            return false;
+        }
+    },
+    
     /**
      * The operation code to execute an HQL query on the server.
      */
@@ -182,9 +262,7 @@ public enum OpCode implements Serializable {
         public boolean isMutation() {
             return false;
         }
-    };
-    
-    
+    };   
 
     /**
      * The parser instance.
@@ -203,15 +281,15 @@ public enum OpCode implements Serializable {
 
             for (int i = 0; i < values.length; i++) {
 
-                OpCode fieldType = values[i];
+                OpCode opCode = values[i];
 
-                if (fieldType.b == code) {
+                if (opCode.b == code) {
 
-                    return fieldType;
+                    return opCode;
                 }
             }
 
-            throw new IllegalStateException("The byte " + code + " does not match any field type");
+            throw new IllegalStateException("The byte " + code + " does not match any OpCode");
         }
     };
 
@@ -273,6 +351,16 @@ public enum OpCode implements Serializable {
      * otherwise.
      */
     public abstract boolean isMutation();
+    
+    /**
+     * Returns <code>true</code> if the message contains an HQL query, <code>false</code> otherwise.
+     * 
+     * @return <code>true</code> if the message contains an HQL query, <code>false</code> otherwise.
+     */
+    public boolean isHql() {
+        
+        return this == HQL_QUERY;
+    }
 
     /**
      * Returns the parser that can be used to parse the payload of this operation.

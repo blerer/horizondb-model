@@ -172,7 +172,7 @@ public final class MsgHeader implements Serializable {
      */
     public static MsgHeader newResponseHeader(int status, int payloadLength) {
 
-        return new MsgHeader(RESPONSE_MAGIC_NUMBER, OpCode.UNKNOWN_OPERATION, status, payloadLength, 0); // Cannot do
+        return new MsgHeader(RESPONSE_MAGIC_NUMBER, OpCode.ERROR, status, payloadLength, 0); // Cannot do
                                                                                                          // better.
     }
 
@@ -278,6 +278,19 @@ public final class MsgHeader implements Serializable {
      */
     public long getOpaque() {
         return this.opaque;
+    }
+    
+    /**
+     * Converts the specified header into the specified one.
+     * 
+     * @param opCode the new operation code of the header
+     * @param payloadLength the new payload length
+     * @return the converted header.
+     */
+    public MsgHeader convertTo(OpCode opCode, int payloadLength) {
+        
+        return new MsgHeader(this.magicNumber, opCode, this.status, payloadLength, this.opaque);
+        
     }
 
     /**

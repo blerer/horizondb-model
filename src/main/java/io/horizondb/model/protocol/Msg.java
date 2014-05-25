@@ -77,14 +77,29 @@ public final class Msg<T extends Serializable> implements Serializable {
      */
     private final T payload;
 
+    /**
+     * Creates a new request message with the specified operation code and the specified payload.
+     * 
+     * @param opCode the operation code
+     * @param payload the payload
+     * @return a new request message with the specified operation code and the specified payload.
+     */
     public static <S extends Serializable> Msg<S> newRequestMsg(OpCode opCode, S payload) {
 
         return new Msg<S>(MsgHeader.newRequestHeader(opCode, payload.computeSerializedSize()), payload);
     }
 
-    public static <S extends Serializable> Msg<S> newResponseMsg(MsgHeader header, S payload) {
+    /**
+     * Creates a new request message which is a conversion from another request message.
+     * 
+     * @param header the request header of the original request
+     * @param opCode the operation code
+     * @param payload the payload
+     * @return a new request message with the specified operation code and the specified payload.
+     */
+    public static <S extends Serializable> Msg<S> newRequestMsg(MsgHeader header, OpCode opCode, S payload) {
 
-        return new Msg<S>(MsgHeader.newResponseHeader(header, 0, payload.computeSerializedSize()), payload);
+        return new Msg<S>(header.convertTo(opCode, payload.computeSerializedSize()), payload);
     }
 
     public static <S extends Serializable> Msg<S> newResponseMsg(MsgHeader header, OpCode opCode, S payload) {
@@ -103,7 +118,14 @@ public final class Msg<T extends Serializable> implements Serializable {
         return new Msg<ErrorPayload>(MsgHeader.newResponseHeader(errorPayload.getCode(), errorPayload.computeSerializedSize()), errorPayload);
     }
 
-    public static <S extends Serializable> Msg<S> newMsg(MsgHeader header, S payload) {
+    /**
+     * Creates a new message with the specified header and payload.
+     * 
+     * @param header the message header
+     * @param payload the message payload
+     * @return a new message with the specified header and payload
+     */
+    private static <S extends Serializable> Msg<S> newMsg(MsgHeader header, S payload) {
 
         return new Msg<S>(header, payload);
     }
@@ -137,6 +159,16 @@ public final class Msg<T extends Serializable> implements Serializable {
         return getHeader().isMutation();
     }
 
+    /**
+     * Returns the operation code associated to this message.
+     * 
+     * @return the operation code associated to this message.
+     */
+    public OpCode getOpCode() {
+        
+        return this.header.getOpCode();
+    }
+    
     /**
      * Returns <code>true</code> if the message contains a payload, <code>false</code> otherwise.
      * 

@@ -170,9 +170,7 @@ public class BinaryTimeSeriesRecord extends AbstractTimeSeriesRecord {
     
         TimeSeriesRecord timeSeriesRecord = new TimeSeriesRecord(getType(), deepCopy(getFields()));
         timeSeriesRecord.setDelta(isDelta());        
-        
-        System.out.println(timeSeriesRecord.isDelta());
-        
+
         return timeSeriesRecord;
     }
 
