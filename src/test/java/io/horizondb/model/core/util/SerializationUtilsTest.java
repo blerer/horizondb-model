@@ -14,6 +14,9 @@
 package io.horizondb.model.core.util;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import io.horizondb.io.Buffer;
 import io.horizondb.io.buffers.Buffers;
@@ -66,6 +69,34 @@ public class SerializationUtilsTest {
         Range<Field> result = SerializationUtils.parseRangeFrom(crcReader);
         
         assertEquals(range, result);
+        assertTrue(crcReader.readChecksum());
     }
     
+    @Test
+    public void testWriteStringList() throws IOException {
+        
+        List<String> list = Arrays.asList("A", "B", "C");
+
+        Buffer buffer = Buffers.allocate(SerializationUtils.computeStringListSerializedSize(list)); 
+        
+        SerializationUtils.writeStringList(buffer, list);
+        
+        List<String> result = SerializationUtils.parseStringListFrom(buffer);
+        
+        assertEquals(list, result);
+    }
+    
+    @Test
+    public void testWriteEmptyStringList() throws IOException {
+        
+        List<String> list = Collections.emptyList();
+
+        Buffer buffer = Buffers.allocate(SerializationUtils.computeStringListSerializedSize(list)); 
+        
+        SerializationUtils.writeStringList(buffer, list);
+        
+        List<String> result = SerializationUtils.parseStringListFrom(buffer);
+        
+        assertEquals(list, result);
+    }
 }

@@ -124,7 +124,13 @@ public final class Msgs {
      */
     public static Msg<HqlQueryPayload> newHqlQueryMsg(String database, String query) {
         
-        return Msg.newRequestMsg(OpCode.HQL_QUERY, new HqlQueryPayload(database, query));
+        String databaseName = database;
+        
+        if (databaseName == null) {
+            databaseName = "";
+        }
+        
+        return Msg.newRequestMsg(OpCode.HQL_QUERY, new HqlQueryPayload(databaseName, query));
     }
     
     /**

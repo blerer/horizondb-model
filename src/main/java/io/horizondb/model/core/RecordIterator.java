@@ -29,6 +29,35 @@ import java.util.NoSuchElementException;
 public interface RecordIterator extends Closeable {
 
     /**
+     * An empty record iterator.
+     */
+    static final RecordIterator EMPTY_ITERATOR = new RecordIterator() {
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public void close() throws IOException {
+            }
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public boolean hasNext() throws IOException {
+                return false;
+            }
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public Record next() throws IOException {
+                throw new NoSuchElementException();
+            }
+    };
+    
+    /**
      * Returns <code>true</code> if the iteration has more records.
      * 
      * @return <code>true</code> if the iteration has more records.

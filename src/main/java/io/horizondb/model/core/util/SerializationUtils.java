@@ -14,12 +14,16 @@
 package io.horizondb.model.core.util;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import com.google.common.collect.BoundType;
 import com.google.common.collect.Range;
 
 import io.horizondb.io.ByteReader;
 import io.horizondb.io.ByteWriter;
+import io.horizondb.io.encoding.VarInts;
 import io.horizondb.model.core.Field;
 import io.horizondb.model.schema.FieldType;
 
@@ -158,6 +162,64 @@ public final class SerializationUtils {
         writeBoundType(writer, range.lowerBoundType());
         writeField(writer, range.upperEndpoint());
         writeBoundType(writer, range.upperBoundType());
+    }
+    
+    /**
+     * Computes the serialized size of the specified list of <code>String</code>. 
+     * 
+     * @param list the list of <code>String</code> to serialize
+     * @return the serialized size of the specified list of <code>String</code>
+     */
+    public static int computeStringListSerializedSize(List<String> list) {
+        
+        int size = VarInts.computeUnsignedIntSize(list.size());
+        
+        for (int i = 0, m = list.size(); i < m; i++) {
+            size += VarInts.computeStringSize(list.get(i));
+        }
+        
+        return size;
+    }
+    
+    /**
+     * Serializes the specified list of <code>String</code>s into the specified writer.
+     * @param writer the writer to write to
+     * @param list the list of <code>String</code>s to serialize
+     * 
+     * @throws IOException if an I/O problem occurs
+     */
+    public static void writeStringList(ByteWriter writer, List<String> list) throws IOException {
+        
+        VarInts.writeUnsignedInt(writer, list.size());
+        
+        for (int i = 0, m = list.size(); i < m; i++) {
+            VarInts.writeString(writer, list.get(i));
+        }
+    }
+    
+    /**
+     * Deserializes a list of <code>String</code>s from the specified reader.
+     * 
+     * @param reader the reader to read from
+     * @return the deserialized list of <code>String</code>s
+     * @throws IOException if an I/O problem occurs
+     */
+    public static List<String> parseStringListFrom(ByteReader reader) throws IOException {
+        
+        int size = VarInts.readUnsignedInt(reader);
+        
+        if (size == 0) {
+            
+            return Collections.emptyList();
+        }
+        
+        List<String> list = new ArrayList<>(size);
+        
+        for (int i = 0; i < size; i++) {
+            list.add(VarInts.readString(reader));
+        }
+        
+        return list;
     }
     
     /**

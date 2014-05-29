@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
@@ -292,7 +293,7 @@ public final class TimeSeriesDefinition implements Serializable {
                 
         if (type >= this.recordTypes.size()) {
             
-            throw new IllegalArgumentException("No records have not been defined with the index " + type 
+            throw new NoSuchElementException("No records have not been defined with the index " + type 
                                                + " within the " + this.name + " time series.");
         }
         

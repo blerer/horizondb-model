@@ -262,6 +262,46 @@ public enum OpCode implements Serializable {
         public boolean isMutation() {
             return false;
         }
+    },
+    
+    /**
+     * The operation code use to insert data.
+     */
+    INSERT(11) {
+
+        @Override
+        public Parser<?> getPayloadParser(boolean request) {
+
+            return InsertPayload.getParser();
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public boolean isMutation() {
+            return true;
+        }
+    },
+
+    /**
+     * The operation code use to describe returned data.
+     */
+    DATA_HEADER(12) {
+
+        @Override
+        public Parser<?> getPayloadParser(boolean request) {
+
+            return DataHeaderPayload.getParser();
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public boolean isMutation() {
+            return false;
+        }
     };   
 
     /**
