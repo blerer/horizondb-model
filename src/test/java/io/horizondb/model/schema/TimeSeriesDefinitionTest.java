@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
@@ -146,7 +147,7 @@ public class TimeSeriesDefinitionTest {
             
             definition.getFieldIndex(2, "bestBid");
             fail();
-        } catch (IllegalArgumentException e) {
+        } catch (NoSuchElementException e) {
             assertTrue(true);
         }
         
