@@ -20,7 +20,6 @@ import io.horizondb.model.core.records.TimeSeriesRecord;
 import io.horizondb.model.schema.TimeSeriesDefinition;
 
 import java.io.IOException;
-import java.util.NoSuchElementException;
 
 import static org.apache.commons.lang.Validate.notNull;
 
@@ -30,7 +29,7 @@ import static org.apache.commons.lang.Validate.notNull;
  * @author Benjamin
  *
  */
-public final class FilteringRecordIterator implements RecordIterator {
+public final class FilteringRecordIterator extends AbstractRecordIterator<Record> {
 
     /**
      * The decorated iterator.
@@ -41,16 +40,6 @@ public final class FilteringRecordIterator implements RecordIterator {
      * The filter.
      */
     private final Filter<Record> filter;
-
-    /**
-     * The record to return on the call to next.
-     */
-    private Record next;
-
-    /**
-     * <code>true</code> if no more records need to be returned, <code>false</code> otherwise.
-     */
-    private boolean endOfRecords;
 
     /**
      * The records used to store not returned data.
@@ -81,21 +70,9 @@ public final class FilteringRecordIterator implements RecordIterator {
         this.iterator.close();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public boolean hasNext() throws IOException {
-
-        if (this.endOfRecords) {
-            return false;
-        }
-
-        if (this.next != null) {
-
-            return true;
-        }
-
+    protected void computeNext() throws IOException {
+        
         while (this.iterator.hasNext()) {
 
             Record record = this.iterator.next();
@@ -107,12 +84,12 @@ public final class FilteringRecordIterator implements RecordIterator {
                 if (record.isDelta() && this.addToRecord[type]) {
 
                     this.records[type].add(record);
-                    this.next = this.records[type];
+                    setNext(this.records[type]);
                     this.addToRecord[type] = false;
 
                 } else {
 
-                    this.next = record;
+                    setNext(record);
                 }
 
                 break;
@@ -120,7 +97,7 @@ public final class FilteringRecordIterator implements RecordIterator {
 
             if (this.filter.isDone()) {
 
-                this.endOfRecords = true;
+                done();
                 break;
             }
 
@@ -131,26 +108,5 @@ public final class FilteringRecordIterator implements RecordIterator {
                 this.addToRecord[type] = true;
             }
         }
-
-        return this.next != null;
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Record next() throws IOException {
-
-        if (!hasNext()) {
-
-            throw new NoSuchElementException("No more elements are available.");
-        }
-
-        Record record = this.next;
-
-        this.next = null;
-
-        return record;
-    }
-
 }

@@ -39,13 +39,24 @@ public final class RecordUtils {
 
         for (Record record : records) {
 
-            int serializedSize = record.computeSerializedSize();
-            size += 1 + VarInts.computeUnsignedIntSize(serializedSize) + serializedSize;
+            size += computeSerializedSize(record);
         }
 
         return size;
     }
 
+    /**
+     * Computes the serialized size of the specified records including its type and length.
+     * 
+     * @param record the record
+     * @return the serialized size of the specified record including its type and length.
+     */
+    public static int computeSerializedSize(Record record) {
+
+        int serializedSize = record.computeSerializedSize();
+        return 1 + VarInts.computeUnsignedIntSize(serializedSize) + serializedSize;
+    }
+    
     /**
      * writes the specified list of records to the specified writer.
      * 
@@ -56,13 +67,23 @@ public final class RecordUtils {
 
         for (Record record : records) {
 
-            int serializedSize = record.computeSerializedSize();
-            writer.writeByte(record.getType());
-            VarInts.writeUnsignedInt(writer, serializedSize);
-            record.writeTo(writer);
+            writeRecord(writer, record);
         }
     }
 
+    /**
+     * @param writer
+     * @param record
+     * @throws IOException
+     */
+    public static void writeRecord(ByteWriter writer, Record record) throws IOException {
+        
+        int serializedSize = record.computeSerializedSize();
+        writer.writeByte(record.getType());
+        VarInts.writeUnsignedInt(writer, serializedSize);
+        record.writeTo(writer);
+    }
+    
     /**
      * Must not be instantiated.
      */

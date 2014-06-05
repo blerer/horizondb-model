@@ -18,6 +18,7 @@ package io.horizondb.model.core.records;
 import io.horizondb.io.BitSet;
 import io.horizondb.io.Buffer;
 import io.horizondb.io.ByteWriter;
+import io.horizondb.io.ReadableBuffer;
 import io.horizondb.io.buffers.Buffers;
 import io.horizondb.io.encoding.VarInts;
 import io.horizondb.model.core.Field;
@@ -58,7 +59,7 @@ public class TimeSeriesRecord extends AbstractTimeSeriesRecord implements Compar
     /**
 	 * 
 	 */
-    TimeSeriesRecord(int recordType, Field... fields) {
+    public TimeSeriesRecord(int recordType, Field... fields) {
 
         super(recordType, fields);
     }
@@ -232,6 +233,18 @@ public class TimeSeriesRecord extends AbstractTimeSeriesRecord implements Compar
      * Sets the specified field to the specified timestamp value. 
      * 
      * @param index the field index
+     * @param timestamp the timestamp value
+     * @param unit the timestamp unit
+     */
+    public void setTimestamp(int index, long timestamp, TimeUnit unit) {
+
+        getField(index).setTimestamp(timestamp, unit);
+    }
+    
+    /**
+     * Sets the specified field to the specified timestamp value. 
+     * 
+     * @param index the field index
      * @param timestamp the timestamp value in nanoseconds.
      */
     public void setTimestampInNanos(int index, long timestamp) {
@@ -399,10 +412,7 @@ public class TimeSeriesRecord extends AbstractTimeSeriesRecord implements Compar
         
         BinaryTimeSeriesRecord binaryRecord = new BinaryTimeSeriesRecord(getType(), deepCopy(getFields()));
         
-        Buffer buffer = Buffers.allocate(computeSerializedSize());
-        writeTo(buffer);
-        
-        binaryRecord.fill(buffer);
+        binaryRecord.fill(toBuffer());
         
         return binaryRecord;
     }
@@ -476,5 +486,18 @@ public class TimeSeriesRecord extends AbstractTimeSeriesRecord implements Compar
     @Override
     public int compareTo(TimeSeriesRecord o) {
         return Long.compare(this.getTimestampInNanos(0), o.getTimestampInNanos(0));
+    }
+    
+    /**
+     * Converts this records into a buffer. 
+     * 
+     * @return a buffer containing the serialized version of this record
+     * @throws IOException if an I/O problem occurs. 
+     */
+    private ReadableBuffer toBuffer() throws IOException {
+        
+        Buffer buffer = Buffers.allocate(computeSerializedSize());
+        writeTo(buffer);
+        return buffer;
     }
 }

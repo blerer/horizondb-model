@@ -15,9 +15,9 @@ package io.horizondb.model.core.predicates;
 
 import java.util.TimeZone;
 
-import io.horizondb.model.Globals;
 import io.horizondb.model.core.Predicate;
 import io.horizondb.model.core.Field;
+import io.horizondb.model.core.Record;
 import io.horizondb.model.core.fields.ImmutableField;
 import io.horizondb.model.schema.TimeSeriesDefinition;
 import org.apache.commons.lang.builder.EqualsBuilder;
@@ -63,7 +63,7 @@ public abstract class FieldPredicate implements Predicate {
      */
     protected final boolean isTimestamp() {
         
-        return Globals.TIMESTAMP_FIELD.equals(this.fieldName);
+        return Record.TIMESTAMP_FIELD_NAME.equals(this.fieldName);
     }
     
     /**

@@ -39,7 +39,7 @@ public enum OpCode implements Serializable {
          * {@inheritDoc}
          */
         @Override
-        public Parser<?> getPayloadParser(boolean request) {
+        public Parser<?> getPayloadParser() {
 
             // Does not exists within a request
             return ErrorPayload.getParser();
@@ -60,7 +60,7 @@ public enum OpCode implements Serializable {
     CREATE_DATABASE(1) {
 
         @Override
-        public Parser<?> getPayloadParser(boolean request) {
+        public Parser<?> getPayloadParser() {
 
             return CreateDatabasePayload.getParser();
         }
@@ -80,7 +80,7 @@ public enum OpCode implements Serializable {
     USE_DATABASE(2) {
 
         @Override
-        public Parser<?> getPayloadParser(boolean request) {
+        public Parser<?> getPayloadParser() {
 
             return UseDatabasePayload.getParser();
         }
@@ -100,7 +100,7 @@ public enum OpCode implements Serializable {
     CREATE_TIMESERIES(3) {
 
         @Override
-        public Parser<?> getPayloadParser(boolean request) {
+        public Parser<?> getPayloadParser() {
 
             return CreateTimeSeriesPayload.getParser();
         }
@@ -113,56 +113,6 @@ public enum OpCode implements Serializable {
             return false;
         }
     },
-    
-    /**
-     * The operation code to request a time series.
-     */
-    GET_TIMESERIES(4) {
-
-        @Override
-        public Parser<?> getPayloadParser(boolean request) {
-
-            if (request) {
-
-                return GetTimeSeriesRequestPayload.getParser();
-            }
-
-            return GetTimeSeriesResponsePayload.getParser();
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public boolean isMutation() {
-            return false;
-        }
-    },
-
-    /**
-     * The operation code to perform a bulk write.
-     */
-    BULK_WRITE(5) {
-
-        @Override
-        public Parser<?> getPayloadParser(boolean request) {
-
-            if (request) {
-
-                return BinaryBulkWritePayload.getParser();
-            }
-
-            return Parser.NOOP_PARSER;
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public boolean isMutation() {
-            return true;
-        }
-    },
 
     /**
      * The operation code to execute a selection on the server.
@@ -170,7 +120,7 @@ public enum OpCode implements Serializable {
     SELECT(6) {
 
         @Override
-        public Parser<?> getPayloadParser(boolean request) {
+        public Parser<?> getPayloadParser() {
 
             return SelectPayload.getParser();
         }
@@ -190,7 +140,7 @@ public enum OpCode implements Serializable {
     HQL_QUERY(7) {
 
         @Override
-        public Parser<?> getPayloadParser(boolean request) {
+        public Parser<?> getPayloadParser() {
 
             return HqlQueryPayload.getParser();
         }
@@ -210,7 +160,7 @@ public enum OpCode implements Serializable {
     NOOP(8) {
 
         @Override
-        public Parser<?> getPayloadParser(boolean request) {
+        public Parser<?> getPayloadParser() {
 
             return Parser.NOOP_PARSER;
         }
@@ -230,7 +180,7 @@ public enum OpCode implements Serializable {
     SET_DATABASE(9) {
 
         @Override
-        public Parser<?> getPayloadParser(boolean request) {
+        public Parser<?> getPayloadParser() {
 
             return SetDatabasePayload.getParser();
         }
@@ -250,7 +200,7 @@ public enum OpCode implements Serializable {
     DATA_CHUNK(10) {
 
         @Override
-        public Parser<?> getPayloadParser(boolean request) {
+        public Parser<?> getPayloadParser() {
 
             return DataChunkPayload.getParser();
         }
@@ -270,7 +220,7 @@ public enum OpCode implements Serializable {
     INSERT(11) {
 
         @Override
-        public Parser<?> getPayloadParser(boolean request) {
+        public Parser<?> getPayloadParser() {
 
             return InsertPayload.getParser();
         }
@@ -290,7 +240,7 @@ public enum OpCode implements Serializable {
     DATA_HEADER(12) {
 
         @Override
-        public Parser<?> getPayloadParser(boolean request) {
+        public Parser<?> getPayloadParser() {
 
             return DataHeaderPayload.getParser();
         }
@@ -405,8 +355,7 @@ public enum OpCode implements Serializable {
     /**
      * Returns the parser that can be used to parse the payload of this operation.
      * 
-     * @param request <code>true</code> if the message is a request, <code>false</code> otherwise.
      * @return the parser that can be used to parse the payload of this operation.
      */
-    public abstract Parser<?> getPayloadParser(boolean request);
+    public abstract Parser<?> getPayloadParser();
 }

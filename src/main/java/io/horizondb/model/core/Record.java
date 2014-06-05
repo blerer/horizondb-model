@@ -32,6 +32,21 @@ import java.io.PrintStream;
 public interface Record extends Serializable {
 
     /**
+     * The name of the field used to store the time series timestamp.
+     */
+    String TIMESTAMP_FIELD_NAME = "timestamp";
+    
+    /**
+     * The index of the field used to store the time series timestamp.
+     */
+    int TIMESTAMP_FIELD_INDEX = 0;
+    
+    /**
+     * The block header type.
+     */
+    byte BLOCK_HEADER_TYPE = Byte.MIN_VALUE;
+    
+    /**
      * Checks if this record is a delta that must be resolved from the previous record or a full record.
      * 
      * @return <code>true</code> if this record is a delta, <code>false</code> otherwise.

@@ -190,7 +190,7 @@ public class BinaryTimeSeriesRecord extends AbstractTimeSeriesRecord {
 
         return this.bufferSize;
     }
-    
+
     /**    
      * {@inheritDoc}
      */

@@ -1,6 +1,4 @@
 /**
- * Copyright 2013 Benjamin Lerer
- * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,7 +26,6 @@ import io.horizondb.model.schema.TimeSeriesDefinition;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.NoSuchElementException;
 
 import static org.apache.commons.lang.Validate.notNull;
 
@@ -38,7 +35,7 @@ import static org.apache.commons.lang.Validate.notNull;
  * @author Benjamin
  * 
  */
-public final class BinaryTimeSeriesRecordIterator implements RecordIterator {
+public final class BinaryTimeSeriesRecordIterator extends AbstractRecordIterator<BinaryTimeSeriesRecord> {
 
     /**
      * The records per type.
@@ -55,31 +52,27 @@ public final class BinaryTimeSeriesRecordIterator implements RecordIterator {
         this.reader = reader;
     }
 
-    /**
+    /**    
      * {@inheritDoc}
      */
     @Override
-    public boolean hasNext() throws IOException {
-        return this.reader.isReadable();
-    }
+    protected void computeNext() throws IOException {
+        
+        while (this.reader.isReadable()) {
+            
+            int type = this.reader.readByte();
+            int length = VarInts.readUnsignedInt(this.reader);
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public BinaryTimeSeriesRecord next() throws IOException {
+            ReadableBuffer slice = this.reader.slice(length);
 
-        if (!this.reader.isReadable()) {
+            if (type != Record.BLOCK_HEADER_TYPE) {
+                
+                setNext(this.records[type].fill(slice));
+                return;
+            }    
+        } 
 
-            throw new NoSuchElementException("No more elements are available.");
-        }
-
-        int type = this.reader.readByte();
-        int length = VarInts.readUnsignedInt(this.reader);
-
-        ReadableBuffer slice = this.reader.slice(length);
-
-        return this.records[type].fill(slice);
+        done();
     }
 
     /**
@@ -92,7 +85,6 @@ public final class BinaryTimeSeriesRecordIterator implements RecordIterator {
             ((Closeable) this.reader).close();
         }
     }
-    
 
     /**
      * Creates a new <code>Builder</code> to build instances of <code>BinaryTimeSeriesRecordIterator</code>.

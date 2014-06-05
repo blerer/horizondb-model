@@ -36,7 +36,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
  * @author Benjamin
  * 
  */
-public final class LongField extends AbstractField {
+public final class LongField extends AbstractCounterField {
 
     /**
      * The field maximum value.
@@ -95,7 +95,7 @@ public final class LongField extends AbstractField {
     @Override
     public void add(Field field) {
 
-        this.value += ((LongField) field).value;
+        this.value += field.getLong();
     }
 
     /**

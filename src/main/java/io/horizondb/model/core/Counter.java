@@ -11,19 +11,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.horizondb.model;
+package io.horizondb.model.core;
 
 /**
- * The model constants.
+ * A simple counter.
  * 
  * @author Benjamin
- *
  */
-public final class Globals {
+public interface Counter {
 
     /**
-     * The name of the column used to store the time series timestamp.
+     * Increments the counter by one.
      */
-    public static final String TIMESTAMP_FIELD = "timestamp";
-    
+    void increment();
 }

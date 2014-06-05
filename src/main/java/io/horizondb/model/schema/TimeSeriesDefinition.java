@@ -21,8 +21,10 @@ import io.horizondb.io.encoding.VarInts;
 import io.horizondb.io.serialization.Parser;
 import io.horizondb.io.serialization.Serializable;
 import io.horizondb.io.serialization.Serializables;
-import io.horizondb.model.Globals;
 import io.horizondb.model.core.Field;
+import io.horizondb.model.core.Record;
+import io.horizondb.model.core.fields.ByteField;
+import io.horizondb.model.core.fields.IntegerField;
 import io.horizondb.model.core.fields.TimestampField;
 import io.horizondb.model.core.records.BinaryTimeSeriesRecord;
 import io.horizondb.model.core.records.TimeSeriesRecord;
@@ -219,6 +221,25 @@ public final class TimeSeriesDefinition implements Serializable {
     }
 
     /**
+     * Returns a new block header.
+     * @return a new block header.
+     */
+    public TimeSeriesRecord newBlockHeader() {
+
+        Field[] fields = new Field[4 + getNumberOfRecordTypes()];
+        fields[0] = new TimestampField(this.timeUnit);
+        fields[1] = new TimestampField(this.timeUnit);
+        fields[2] = new IntegerField();
+        fields[3] = new ByteField();
+        
+        for (int i = 4, m = fields.length; i < m; i++) {
+            fields[i] = new IntegerField();
+        }
+                
+        return new TimeSeriesRecord(Record.BLOCK_HEADER_TYPE, fields);
+    }
+    
+    /**
      * Returns new field instance for the specified fieldName. 
      * 
      * @param fieldName the field name
@@ -226,7 +247,7 @@ public final class TimeSeriesDefinition implements Serializable {
      */
     public Field newField(String fieldName) {
         
-        if (Globals.TIMESTAMP_FIELD.equals(fieldName)) {
+        if (Record.TIMESTAMP_FIELD_NAME.equals(fieldName)) {
             return new TimestampField(getTimeUnit());
         }
         

@@ -35,7 +35,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
  * @author Benjamin
  * 
  */
-public class ByteField extends AbstractField {
+public class ByteField extends AbstractCounterField {
 
     /**
      * The field maximum value.

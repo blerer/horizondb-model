@@ -96,7 +96,6 @@ public interface Field extends Comparable<Field>, Serializable {
      * 
      * @param timestamp the timestamp value.
      * @param unit the timestamp unit.
-     * @throws TypeConversionException if this field does not accept nanoseconds timestamp values.
      */
     void setTimestamp(long timestamp, TimeUnit unit);
 

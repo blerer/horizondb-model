@@ -21,8 +21,8 @@ import io.horizondb.io.encoding.VarInts;
 import io.horizondb.io.serialization.Parser;
 import io.horizondb.io.serialization.Serializable;
 import io.horizondb.io.serialization.Serializables;
-import io.horizondb.model.Globals;
 import io.horizondb.model.core.Field;
+import io.horizondb.model.core.Record;
 import io.horizondb.model.core.records.BinaryTimeSeriesRecord;
 import io.horizondb.model.core.records.TimeSeriesRecord;
 
@@ -156,7 +156,7 @@ public class RecordTypeDefinition implements Serializable {
      */
     public int getFieldIndex(String fieldName) {
         
-        if (Globals.TIMESTAMP_FIELD.equals(fieldName)) {
+        if (Record.TIMESTAMP_FIELD_NAME.equals(fieldName)) {
             return 0;
         }
         

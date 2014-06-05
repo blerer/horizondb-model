@@ -61,7 +61,7 @@ public final class Msg<T extends Serializable> implements Serializable {
  
             OpCode opCode = header.getOpCode();
 
-            Parser<?> payloadParser = opCode.getPayloadParser(header.isRequestHeader());
+            Parser<?> payloadParser = opCode.getPayloadParser();
 
             return newMsg(header, payloadParser.parseFrom(reader));
         }

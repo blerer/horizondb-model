@@ -36,7 +36,7 @@ import org.apache.commons.lang.builder.ToStringStyle;
  * @author Benjamin
  * 
  */
-public class IntegerField extends AbstractField {
+public class IntegerField extends AbstractCounterField {
 
     /**
      * The field maximum value.
@@ -47,6 +47,16 @@ public class IntegerField extends AbstractField {
      * The field minimum value.
      */
     private static final Field MIN_VALUE = ImmutableField.of(new IntegerField(Integer.MIN_VALUE));
+    
+    /**
+     * An immutable field of value one.
+     */
+    public static final Field ZERO = ImmutableField.of(new IntegerField(0));
+    
+    /**
+     * An immutable field of value one.
+     */
+    public static final Field ONE = ImmutableField.of(new IntegerField(1));
     
     /**
      * The field value.
@@ -91,7 +101,7 @@ public class IntegerField extends AbstractField {
     @Override
     public void add(Field field) {
 
-        this.value += ((IntegerField) field).value;
+        this.value += field.getInt();
     }
 
     /**
@@ -100,7 +110,7 @@ public class IntegerField extends AbstractField {
     @Override
     public void subtract(Field field) {
 
-        this.value -= ((IntegerField) field).value;
+        this.value -= field.getInt();
     }
 
     /**
