@@ -41,14 +41,14 @@ import static org.apache.commons.lang.Validate.notNull;
 public final class TimestampField extends AbstractField {
     
     /**
-     * The field maximum value.
+     * The field maximum value: 9999-12-31 23:59:59.999 GMT
      */
-    private static final Field MAX_VALUE = ImmutableField.of(new TimestampField(Long.MAX_VALUE, TimeUnit.MILLISECONDS));
+    public static final Field MAX_VALUE = ImmutableField.of(new TimestampField(253402300799999L, TimeUnit.MILLISECONDS));
     
     /**
-     * The field minimum value.
+     * The field minimum value: 0000-01-01 00:00:00.000 GMT
      */
-    private static final Field MIN_VALUE = ImmutableField.of(new TimestampField(Long.MIN_VALUE, TimeUnit.MILLISECONDS));
+    public static final Field MIN_VALUE = ImmutableField.of(new TimestampField(-62167392000000L, TimeUnit.MILLISECONDS));
         
     /**
      * The time unit.

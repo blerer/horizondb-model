@@ -13,10 +13,12 @@
  */
 package io.horizondb.model.core.util;
 
+import java.util.Calendar;
+
 import org.junit.Test;
 
 import static io.horizondb.model.core.util.TimeUtils.EUROPE_BERLIN_TIMEZONE;
-
+import static io.horizondb.model.core.util.TimeUtils.parseDateTime;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -38,4 +40,87 @@ public class TimeUtilsTest {
         assertEquals(1399147894150L, time);
     }
 
+    @Test
+    public void testTruncateMilliseconds() {
+
+        long time = parseDateTime(EUROPE_BERLIN_TIMEZONE, "2013-11-16 09:12:35.670");
+
+        Calendar calendar = toCalendar(time);
+        TimeUtils.truncate(calendar, Calendar.MILLISECOND);
+        
+        assertEquals(parseDateTime(EUROPE_BERLIN_TIMEZONE, "2013-11-16 09:12:35.670"), calendar.getTimeInMillis());
+    }
+    
+    @Test
+    public void testTruncateSeconds() {
+
+        long time = parseDateTime(EUROPE_BERLIN_TIMEZONE, "2013-11-16 09:12:35.670");
+
+        Calendar calendar = toCalendar(time);
+        TimeUtils.truncate(calendar, Calendar.SECOND);
+        
+        assertEquals(parseDateTime(EUROPE_BERLIN_TIMEZONE, "2013-11-16 09:12:35.000"), calendar.getTimeInMillis());
+    }
+    
+    @Test
+    public void testTruncateMinutes() {
+
+        long time = parseDateTime(EUROPE_BERLIN_TIMEZONE, "2013-11-16 09:12:35.670");
+
+        Calendar calendar = toCalendar(time);
+        TimeUtils.truncate(calendar, Calendar.MINUTE);
+        
+        assertEquals(parseDateTime(EUROPE_BERLIN_TIMEZONE, "2013-11-16 09:12:00.000"), calendar.getTimeInMillis());
+    }
+    
+    @Test
+    public void testTruncateHours() {
+
+        long time = parseDateTime(EUROPE_BERLIN_TIMEZONE, "2013-11-16 09:12:35.670");
+
+        Calendar calendar = toCalendar(time);
+        TimeUtils.truncate(calendar, Calendar.HOUR_OF_DAY);
+        
+        assertEquals(parseDateTime(EUROPE_BERLIN_TIMEZONE, "2013-11-16 09:00:00.000"), calendar.getTimeInMillis());
+    }
+    
+    @Test
+    public void testTruncateDay() {
+
+        long time = parseDateTime(EUROPE_BERLIN_TIMEZONE, "2013-11-16 09:12:35.670");
+
+        Calendar calendar = toCalendar(time);
+        TimeUtils.truncate(calendar, Calendar.DAY_OF_MONTH);
+        
+        assertEquals(parseDateTime(EUROPE_BERLIN_TIMEZONE, "2013-11-16 00:00:00.000"), calendar.getTimeInMillis());
+    }
+    
+    @Test
+    public void testTruncateMonth() {
+
+        long time = parseDateTime(EUROPE_BERLIN_TIMEZONE, "2013-11-16 09:12:35.670");
+
+        Calendar calendar = toCalendar(time);
+        TimeUtils.truncate(calendar, Calendar.MONTH);
+        
+        assertEquals(parseDateTime(EUROPE_BERLIN_TIMEZONE, "2013-11-01 00:00:00.000"), calendar.getTimeInMillis());
+    }
+    
+    @Test
+    public void testTruncateYear() {
+
+        long time = parseDateTime(EUROPE_BERLIN_TIMEZONE, "2013-11-16 09:12:35.670");
+
+        Calendar calendar = toCalendar(time);
+        TimeUtils.truncate(calendar, Calendar.YEAR);
+        
+        assertEquals(parseDateTime(EUROPE_BERLIN_TIMEZONE, "2013-01-01 00:00:00.000"), calendar.getTimeInMillis());
+    }
+    
+    private static Calendar toCalendar(long timeInMilliseconds) {
+
+        Calendar calendar = Calendar.getInstance(EUROPE_BERLIN_TIMEZONE);
+        calendar.setTimeInMillis(timeInMilliseconds);
+        return calendar;
+    }
 }

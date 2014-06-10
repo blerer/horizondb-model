@@ -17,6 +17,7 @@ import java.util.Arrays;
 
 import io.horizondb.model.core.Predicate;
 import io.horizondb.model.core.Field;
+import io.horizondb.model.core.fields.TimestampField;
 import io.horizondb.model.core.predicates.Predicates;
 import io.horizondb.model.schema.FieldType;
 
@@ -74,11 +75,11 @@ public class AndPredicateTest {
         
         assertFalse(rangeSet.contains(expected));
         
-        expected.setTimestampInMillis(Long.MAX_VALUE);
+        expected.setTimestampInMillis(TimestampField.MAX_VALUE.getTimestampInMillis());
         
         assertTrue(rangeSet.contains(expected));
         
-        expected.setTimestampInMillis(Long.MIN_VALUE);
+        expected.setTimestampInMillis(TimestampField.MIN_VALUE.getTimestampInMillis());
         
         assertFalse(rangeSet.contains(expected));
     }

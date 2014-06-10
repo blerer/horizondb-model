@@ -20,6 +20,9 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.TimeZone;
 
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.Validate;
+
 /**
  * Utility methods to work with date/time.
  * 
@@ -32,6 +35,14 @@ public final class TimeUtils {
      */
     public static final TimeZone EUROPE_BERLIN_TIMEZONE = TimeZone.getTimeZone("Europe/Berlin");
     
+    private static final int[] TRUNCATING_FIELDS = new int[] {Calendar.MILLISECOND, 
+                                                              Calendar.SECOND, 
+                                                              Calendar.MINUTE,
+                                                              Calendar.HOUR_OF_DAY, 
+                                                              Calendar.DAY_OF_MONTH, 
+                                                              Calendar.MONTH,
+                                                              Calendar.YEAR};
+
     /**
      * Parses the specified <code>String</code> representing a date/time.
      * <p>The supported patterns are: 'yyyy-MM-dd', 'yyyy-MM-dd HH:mm:ss' and 
@@ -94,6 +105,28 @@ public final class TimeUtils {
                                            " does not match the expected one: yyyy-MM-dd HH:mm:ss.SSS");
     }
 
+    /**
+     * Truncate this date, leaving the field specified as the most significant field.
+     * 
+     * @param calendar the calendar to truncate
+     * @param field the most significant field
+     */
+    public static void truncate(Calendar calendar, int field) {
+            
+        Validate.isTrue(ArrayUtils.contains(TRUNCATING_FIELDS, field), 
+                        "the specified field cannot be used to truncate the specified calendar");
+        
+        for (int calendarField : TRUNCATING_FIELDS) {
+            
+            if (field == calendarField) {
+                
+                return;
+            }
+
+            calendar.set(calendarField, calendar.getActualMinimum(calendarField));
+        }
+    }
+    
     private TimeUtils() {
 
     }

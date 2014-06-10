@@ -47,7 +47,7 @@ public class PartitionTypeTest {
 
         assertEquals(expected, range);
     }
-
+    
     @Test
     public void testGetPartitionTimeRangeByDayWithStartTime() {
 

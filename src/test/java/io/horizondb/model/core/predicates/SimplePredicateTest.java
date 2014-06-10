@@ -15,6 +15,7 @@ package io.horizondb.model.core.predicates;
 
 import io.horizondb.model.core.Predicate;
 import io.horizondb.model.core.Field;
+import io.horizondb.model.core.fields.TimestampField;
 import io.horizondb.model.core.predicates.Predicates;
 import io.horizondb.model.schema.FieldType;
 
@@ -66,11 +67,11 @@ public class SimplePredicateTest {
         
         assertFalse(rangeSet.contains(expected));
         
-        expected.setTimestampInMillis(Long.MAX_VALUE);
+        expected.setTimestampInMillis(TimestampField.MAX_VALUE.getTimestampInMillis());
         
         assertTrue(rangeSet.contains(expected));
         
-        expected.setTimestampInMillis(Long.MIN_VALUE);
+        expected.setTimestampInMillis(TimestampField.MIN_VALUE.getTimestampInMillis());
         
         assertFalse(rangeSet.contains(expected));
     }
@@ -98,11 +99,11 @@ public class SimplePredicateTest {
         
         assertTrue(rangeSet.contains(expected));
         
-        expected.setTimestampInMillis(Long.MAX_VALUE);
+        expected.setTimestampInMillis(TimestampField.MAX_VALUE.getTimestampInMillis());
         
         assertTrue(rangeSet.contains(expected));
         
-        expected.setTimestampInMillis(Long.MIN_VALUE);
+        expected.setTimestampInMillis(TimestampField.MIN_VALUE.getTimestampInMillis());
         
         assertFalse(rangeSet.contains(expected));
     }
@@ -226,7 +227,7 @@ public class SimplePredicateTest {
         
         assertFalse(rangeSet.contains(expected));
         
-        expected.setTimestampInMillis(Long.MAX_VALUE);
+        expected.setTimestampInMillis(TimestampField.MAX_VALUE.getTimestampInMillis());
         
         assertTrue(rangeSet.contains(expected));
         

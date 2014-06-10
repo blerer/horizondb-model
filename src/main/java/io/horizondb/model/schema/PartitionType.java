@@ -20,13 +20,12 @@ import io.horizondb.io.ByteWriter;
 import io.horizondb.io.serialization.Parser;
 import io.horizondb.io.serialization.Serializable;
 import io.horizondb.model.core.Field;
+import io.horizondb.model.core.util.TimeUtils;
 
 import java.io.IOException;
 import java.util.Calendar;
 
 import javax.annotation.concurrent.Immutable;
-
-import org.apache.commons.lang.time.DateUtils;
 
 import com.google.common.collect.Range;
 
@@ -70,13 +69,13 @@ public enum PartitionType implements Serializable {
 
             calendar.add(Calendar.DAY_OF_MONTH, numberOfDay);
 
-            Calendar cal = DateUtils.truncate(calendar, Calendar.DAY_OF_MONTH);
+            TimeUtils.truncate(calendar, Calendar.DAY_OF_MONTH);
             Field from = FieldType.MILLISECONDS_TIMESTAMP.newField();
-            from.setTimestampInMillis(cal.getTimeInMillis());
+            from.setTimestampInMillis(calendar.getTimeInMillis());
 
-            cal.add(Calendar.DAY_OF_MONTH, 7);
+            calendar.add(Calendar.DAY_OF_MONTH, 7);
             Field to = FieldType.MILLISECONDS_TIMESTAMP.newField();
-            to.setTimestampInMillis(cal.getTimeInMillis());
+            to.setTimestampInMillis(calendar.getTimeInMillis());
 
             return Range.closedOpen(from, to);
         }
@@ -188,14 +187,15 @@ public enum PartitionType implements Serializable {
      */
     private static Range<Field> getPartitionTimeRange(Calendar calendar, int field) {
 
-        Calendar cal = DateUtils.truncate(calendar, field);
+        TimeUtils.truncate(calendar, field);
         Field from = FieldType.MILLISECONDS_TIMESTAMP.newField();
-        from.setTimestampInMillis(cal.getTimeInMillis());
+        from.setTimestampInMillis(calendar.getTimeInMillis());
 
-        cal.add(field, 1);
+        calendar.add(field, 1);
         Field to = FieldType.MILLISECONDS_TIMESTAMP.newField();
-        to.setTimestampInMillis(cal.getTimeInMillis());
+        to.setTimestampInMillis(calendar.getTimeInMillis());
 
         return Range.closedOpen(from, to);
     }
+
 }
