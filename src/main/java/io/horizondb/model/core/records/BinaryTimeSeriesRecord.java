@@ -68,7 +68,7 @@ public class BinaryTimeSeriesRecord extends AbstractTimeSeriesRecord {
     /**
      * 
      */
-    BinaryTimeSeriesRecord(int recordType, Field... fields) {
+    public BinaryTimeSeriesRecord(int recordType, Field... fields) {
 
         super(recordType, fields);
     }

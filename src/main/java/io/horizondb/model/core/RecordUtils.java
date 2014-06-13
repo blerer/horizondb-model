@@ -78,8 +78,8 @@ public final class RecordUtils {
      */
     public static void writeRecord(ByteWriter writer, Record record) throws IOException {
         
-        int serializedSize = record.computeSerializedSize();
         writer.writeByte(record.getType());
+        int serializedSize = record.computeSerializedSize();
         VarInts.writeUnsignedInt(writer, serializedSize);
         record.writeTo(writer);
     }

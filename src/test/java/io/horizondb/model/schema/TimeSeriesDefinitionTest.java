@@ -15,19 +15,11 @@ package io.horizondb.model.schema;
 
 import io.horizondb.io.Buffer;
 import io.horizondb.io.buffers.Buffers;
-import io.horizondb.model.core.Field;
-import io.horizondb.model.schema.FieldType;
-import io.horizondb.model.schema.PartitionType;
-import io.horizondb.model.schema.RecordTypeDefinition;
-import io.horizondb.model.schema.TimeSeriesDefinition;
-import io.horizondb.test.AssertCollections;
 
 import java.io.IOException;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
-import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.Assert;
@@ -35,11 +27,8 @@ import org.junit.Test;
 
 import com.google.common.collect.Range;
 
-import static io.horizondb.model.schema.FieldType.MILLISECONDS_TIMESTAMP;
-
-import static org.junit.Assert.assertNull;
-
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -182,54 +171,6 @@ public class TimeSeriesDefinitionTest {
         assertEquals(FieldType.INTEGER.newField(), definition.newField("volume"));
         assertEquals(FieldType.DECIMAL.newField(), definition.newField("bestBid"));
         assertEquals(FieldType.BYTE.newField(), definition.newField("exchangeState"));
-    }
-
-    
-    @Test
-    public void testSplitRangeWithRangeIncludedWithin2DailyPartition() {
-        
-        RecordTypeDefinition trade = RecordTypeDefinition.newBuilder("Trade")
-                                                         .addField("price", FieldType.DECIMAL)
-                                                         .addField("volume", FieldType.DECIMAL)
-                                                         .addField("aggressorSide", FieldType.BYTE)
-                                                         .build();
-        
-        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("DAX")
-                                                              .timeZone(TimeZone.getTimeZone("CET"))
-                                                              .partitionType(PartitionType.BY_DAY)
-                                                              .addRecordType(trade)
-                                                              .build();
-        
-        Range<Field> range = MILLISECONDS_TIMESTAMP.range("'2013-11-14 12:00:00'", "'2013-11-15 13:00:00'");
-        List<Range<Field>> ranges = definition.splitRange(range);
-        
-        AssertCollections.assertListContains(ranges, 
-                                             MILLISECONDS_TIMESTAMP.range("'2013-11-14 12:00:00'", "'2013-11-15'"),
-                                             MILLISECONDS_TIMESTAMP.range("'2013-11-15'", "'2013-11-15 13:00:00.000'"));
-    }
-    
-    @Test
-    public void testSplitRangeWithRangeIncludedWithin3DailyPartition() {
-        
-        RecordTypeDefinition trade = RecordTypeDefinition.newBuilder("Trade")
-                                                         .addField("price", FieldType.DECIMAL)
-                                                         .addField("volume", FieldType.DECIMAL)
-                                                         .addField("aggressorSide", FieldType.BYTE)
-                                                         .build();
-        
-        TimeSeriesDefinition definition = TimeSeriesDefinition.newBuilder("DAX")
-                                                              .timeZone(TimeZone.getTimeZone("CET"))
-                                                              .partitionType(PartitionType.BY_DAY)
-                                                              .addRecordType(trade)
-                                                              .build();
-        
-        Range<Field> range = MILLISECONDS_TIMESTAMP.range("'2013-11-14 12:00:00'", "'2013-11-16 13:00:00'");
-        List<Range<Field>> ranges = definition.splitRange(range);
-        
-        AssertCollections.assertListContains(ranges, 
-                                             MILLISECONDS_TIMESTAMP.range("'2013-11-14 12:00:00.000'", "'2013-11-15'"),
-                                             MILLISECONDS_TIMESTAMP.range("'2013-11-15'", "'2013-11-16'"),
-                                             MILLISECONDS_TIMESTAMP.range("'2013-11-16'", "'2013-11-16 13:00:00.000'"));
     }
     
     @Test

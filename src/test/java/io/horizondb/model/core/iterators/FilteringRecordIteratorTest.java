@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.horizondb.model.core.records;
+package io.horizondb.model.core.iterators;
 
 import io.horizondb.io.Buffer;
 import io.horizondb.io.buffers.Buffers;
@@ -21,6 +21,7 @@ import io.horizondb.model.core.Filter;
 import io.horizondb.model.core.Record;
 import io.horizondb.model.core.iterators.BinaryTimeSeriesRecordIterator;
 import io.horizondb.model.core.iterators.FilteringRecordIterator;
+import io.horizondb.model.core.records.TimeSeriesRecord;
 import io.horizondb.model.core.util.TimeUtils;
 import io.horizondb.model.schema.DatabaseDefinition;
 import io.horizondb.model.schema.RecordTypeDefinition;

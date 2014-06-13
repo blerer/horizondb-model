@@ -17,6 +17,7 @@ package io.horizondb.model.schema;
 
 import io.horizondb.io.ByteReader;
 import io.horizondb.io.ByteWriter;
+import io.horizondb.io.compression.CompressionType;
 import io.horizondb.io.encoding.VarInts;
 import io.horizondb.io.serialization.Parser;
 import io.horizondb.io.serialization.Serializable;
@@ -49,6 +50,13 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.Range;
 
+import static io.horizondb.io.files.FileUtils.ONE_KB;
+import static io.horizondb.model.core.Record.TIMESTAMP_FIELD_INDEX;
+import static io.horizondb.model.core.records.BlockHeaderUtils.COMPRESSED_BLOCK_SIZE_INDEX;
+import static io.horizondb.model.core.records.BlockHeaderUtils.COMPRESSION_TYPE_INDEX;
+import static io.horizondb.model.core.records.BlockHeaderUtils.LAST_TIMESTAMP_INDEX;
+import static io.horizondb.model.core.records.BlockHeaderUtils.RECORD_COUNTERS_OFFSET;
+import static io.horizondb.model.core.records.BlockHeaderUtils.UNCOMPRESSED_BLOCK_SIZE_INDEX;
 import static org.apache.commons.lang.SystemUtils.LINE_SEPARATOR;
 import static org.apache.commons.lang.Validate.notNull;
 
@@ -75,10 +83,18 @@ public final class TimeSeriesDefinition implements Serializable {
             TimeUnit timestampUnit = TimeUnit.values()[reader.readByte()];
             TimeZone timeZone = TimeZone.getTimeZone(VarInts.readString(reader));
             PartitionType partitionType = PartitionType.parseFrom(reader);
+            int blockSize = VarInts.readUnsignedInt(reader);
+            CompressionType compressionType = CompressionType.parseFrom(reader);
             Serializables<RecordTypeDefinition> recordTypes = Serializables.parseFrom(RecordTypeDefinition.getParser(),
                                                                                       reader);
 
-            return new TimeSeriesDefinition(name, timestampUnit, timeZone, partitionType, recordTypes);
+            return new TimeSeriesDefinition(name,
+                                            timestampUnit,
+                                            timeZone,
+                                            partitionType,
+                                            blockSize,
+                                            compressionType,
+                                            recordTypes);
         }
     };
 
@@ -101,6 +117,16 @@ public final class TimeSeriesDefinition implements Serializable {
      * The partitionType type.
      */
     private final PartitionType partitionType;
+    
+    /**
+     * The block size used within this time series.
+     */
+    private final int blockSizeInBytes;
+    
+    /**
+     * The type of compression used by this time series.
+     */
+    private final CompressionType compressionType;
 
     /**
      * The type of records composing this time series.
@@ -120,7 +146,10 @@ public final class TimeSeriesDefinition implements Serializable {
 
         return VarInts.computeStringSize(this.name)
                 + 1 // TimeUnit
-                + VarInts.computeStringSize(this.timeZone.getID()) + this.partitionType.computeSerializedSize()
+                + VarInts.computeStringSize(this.timeZone.getID()) 
+                + this.partitionType.computeSerializedSize()
+                + VarInts.computeUnsignedIntSize(this.blockSizeInBytes)
+                + this.compressionType.computeSerializedSize()
                 + this.recordTypes.computeSerializedSize();
     }
 
@@ -134,6 +163,8 @@ public final class TimeSeriesDefinition implements Serializable {
         VarInts.writeByte(writer, this.timeUnit.ordinal());
         VarInts.writeString(writer, this.timeZone.getID());
         this.partitionType.writeTo(writer);
+        VarInts.writeUnsignedInt(writer, this.blockSizeInBytes);
+        this.compressionType.writeTo(writer);
         this.recordTypes.writeTo(writer);
     }
 
@@ -226,17 +257,19 @@ public final class TimeSeriesDefinition implements Serializable {
      */
     public TimeSeriesRecord newBlockHeader() {
 
-        Field[] fields = new Field[4 + getNumberOfRecordTypes()];
-        fields[0] = new TimestampField(this.timeUnit);
-        fields[1] = new TimestampField(this.timeUnit);
-        fields[2] = new IntegerField();
-        fields[3] = new ByteField();
-        
-        for (int i = 4, m = fields.length; i < m; i++) {
-            fields[i] = new IntegerField();
-        }
+        Field[] fields = getBlockHeaderFields();
                 
         return new TimeSeriesRecord(Record.BLOCK_HEADER_TYPE, fields);
+    }
+
+    /**
+     * Returns a new binary block header.
+     * 
+     * @return a new binary block header.
+     */
+    public BinaryTimeSeriesRecord newBinaryBlockHeader() {
+
+        return new BinaryTimeSeriesRecord(Record.BLOCK_HEADER_TYPE, getBlockHeaderFields());
     }
     
     /**
@@ -302,6 +335,24 @@ public final class TimeSeriesDefinition implements Serializable {
         }
         
         return index.intValue();
+    }
+
+    /**
+     * Returns the size in bytes of the blocks used by the time series.
+     *     
+     * @return the size in bytes of the blocks used by the time series
+     */
+    public int getBlockSizeInBytes() {
+        return this.blockSizeInBytes;
+    }
+
+    /**
+     * Returns the type of compression used within the time series.
+     * 
+     * @return the type of compression used within the time series
+     */
+    public CompressionType getCompressionType() {
+        return this.compressionType;
     }
 
     /**
@@ -459,6 +510,8 @@ public final class TimeSeriesDefinition implements Serializable {
              builder.timeUnit,
              builder.timeZone,
              builder.partitionType,
+             builder.blockSize,
+             builder.compressionType,
              new Serializables<>(builder.recordTypes));
     }
 
@@ -466,12 +519,16 @@ public final class TimeSeriesDefinition implements Serializable {
             TimeUnit timeUnit,
             TimeZone timeZone,
             PartitionType partitionType,
+            int blockSize,
+            CompressionType compressionType,
             Serializables<RecordTypeDefinition> recordTypes) {
 
         this.name = name;
         this.timeUnit = timeUnit;
         this.timeZone = timeZone;
         this.partitionType = partitionType;
+        this.blockSizeInBytes = blockSize;
+        this.compressionType = compressionType;
         this.recordTypes = recordTypes;
         this.recordTypeIndices = buildRecordTypeIndices(recordTypes);
     }
@@ -518,31 +575,6 @@ public final class TimeSeriesDefinition implements Serializable {
     }
 
     /**
-     * Splits the specified time range per partitions.
-     * 
-     * @param range the range to split
-     * @return the ranges resulting from the split
-     */
-    public List<Range<Field>> splitRange(Range<Field> range) {
-        
-        Range<Field> remaining = range;
-        List<Range<Field>> ranges = new ArrayList<>();
-        
-        Range<Field> partition = getPartitionTimeRange(remaining.lowerEndpoint());
-        
-        while (!partition.encloses(remaining)) {
-            
-            ranges.add(Range.closedOpen(remaining.lowerEndpoint(), partition.upperEndpoint()));
-            remaining = Range.closedOpen(partition.upperEndpoint(), remaining.upperEndpoint());
-            partition = getPartitionTimeRange(remaining.lowerEndpoint());
-        }
-        
-        ranges.add(remaining);
-        
-        return ranges;
-    }
-    
-    /**
      * Returns the HQL query that can be used to create this <code>TimeSeriesDefinition</code>.
      * 
      * @return  the HQL query that can be used to create this <code>TimeSeriesDefinition</code>.
@@ -577,7 +609,28 @@ public final class TimeSeriesDefinition implements Serializable {
         return builder.toString(); 
     }
     
-
+    /**
+     * Returns the fields of the block header.
+     * 
+     * @return the fields of the block header.
+     */
+    private Field[] getBlockHeaderFields() {
+        
+        Field[] fields = new Field[RECORD_COUNTERS_OFFSET + getNumberOfRecordTypes()];
+        fields[TIMESTAMP_FIELD_INDEX] = new TimestampField(this.timeUnit);
+        fields[LAST_TIMESTAMP_INDEX] = new TimestampField(this.timeUnit);
+        fields[COMPRESSED_BLOCK_SIZE_INDEX] = new IntegerField();
+        fields[UNCOMPRESSED_BLOCK_SIZE_INDEX] = new IntegerField();
+        fields[COMPRESSION_TYPE_INDEX] = new ByteField();
+        
+        for (int i = RECORD_COUNTERS_OFFSET, m = fields.length; i < m; i++) {
+            fields[i] = new IntegerField();
+        }
+        return fields;
+    }
+    
+    
+    
     /**
      * Builds instance of <code>TimeSerieDefinition</code>.
      */
@@ -602,6 +655,16 @@ public final class TimeSeriesDefinition implements Serializable {
          * The partitionType type.
          */
         private PartitionType partitionType = PartitionType.BY_DAY;
+        
+        /**
+         * The block size used within this time series.
+         */
+        private int blockSize = 64 * ONE_KB;
+        
+        /**
+         * The type of compression used by this time series.
+         */
+        private CompressionType compressionType = CompressionType.LZ4;
 
         /**
          * The type of records that will be composing the time series.
@@ -660,6 +723,32 @@ public final class TimeSeriesDefinition implements Serializable {
             return this;
         }
 
+        /**
+         * Sets the size of the block used by the time series.
+         * 
+         * @param blockSizeInBytes the size of the block used by the time series.
+         * @return this <code>Builder</code>.
+         */
+        public Builder blockSize(int blockSize) {
+
+            this.blockSize = blockSize;
+            return this;
+        }
+        
+        /**
+         * Sets the type of compression used by the time series.
+         * 
+         * @param compressionType the type of compression used by the time series.
+         * @return this <code>Builder</code>.
+         */
+        public Builder compressionType(CompressionType compressionType) {
+
+            notNull(compressionType, "the compressionType parameter must not be null.");
+
+            this.compressionType = compressionType;
+            return this;
+        }
+        
         /**
          * Adds the specified record type to the type of records that will be composing the time series.
          * 

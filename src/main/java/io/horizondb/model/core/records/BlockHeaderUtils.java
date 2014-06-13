@@ -33,22 +33,27 @@ public final class BlockHeaderUtils {
     /**
      * The index of the last timestamp of the block.
      */
-    private static final int LAST_TIMESTAMP_INDEX = 1;
+    public static final int LAST_TIMESTAMP_INDEX = 1;
     
     /**
-     * The index of block size. 
+     * The index of the compressed block size. 
      */
-    private static final int BLOCK_SIZE_INDEX = 2;
+    public static final int COMPRESSED_BLOCK_SIZE_INDEX = 2;
+    
+    /**
+     * The index of the uncompressed block size. 
+     */
+    public static final int UNCOMPRESSED_BLOCK_SIZE_INDEX = 3;
         
     /**
      * The index of the compression used to compress the block data.
      */
-    private static final int COMPRESSION_TYPE_INDEX = 3;
+    public static final int COMPRESSION_TYPE_INDEX = 4;
 
     /**
      * The offset of the counter indices.
      */
-    private static final int RECORD_COUNTERS_OFFSET = 4;
+    public static final int RECORD_COUNTERS_OFFSET = 5;
 
     /**
      * Sets the first timestamp of the block.
@@ -79,7 +84,7 @@ public final class BlockHeaderUtils {
      * @param record the first record of the block
      * @throws IOException if an I/O problem occurs
      */
-    public static long getFirstTimestampInNanos(TimeSeriesRecord header) {
+    public static long getFirstTimestampInNanos(Record header) throws IOException {
         return header.getTimestampInNanos(TIMESTAMP_FIELD_INDEX);
     }
     
@@ -107,19 +112,64 @@ public final class BlockHeaderUtils {
      * @param timestampInNanos the last in nanoseconds of the block
      * @throws IOException if an I/O problem occurs
      */
-    public static void setLastTimestampInNanos(TimeSeriesRecord header, long timestampInNanos) {
+    public static void setLastTimestampInNanos(TimeSeriesRecord header, long timestampInNanos) throws IOException {
         long delta = timestampInNanos - getFirstTimestampInNanos(header);
         header.setTimestamp(LAST_TIMESTAMP_INDEX, delta, TimeUnit.NANOSECONDS);
     }
     
     /**
-     * Sets the block size.
+     * Returns the last timestamp of the block.
+     * 
+     * @param header the block header 
+     * @return the last timestamp of the block
+     * @throws IOException if an I/O problem occurs
+     */
+    public static long getLastTimestampInNanos(Record header) throws IOException {
+        return getFirstTimestampInNanos(header) + header.getTimestampInNanos(LAST_TIMESTAMP_INDEX);
+    }
+    
+    /**
+     * Sets the compressed block size.
      * 
      * @param header the block header
-     * @param size the new block size
+     * @param size the new compressed block size
      */
-    public static void setBlockSize(TimeSeriesRecord header, int size) {
-        header.setInt(BLOCK_SIZE_INDEX, size);
+    public static void setCompressedBlockSize(TimeSeriesRecord header, int size) {
+        header.setInt(COMPRESSED_BLOCK_SIZE_INDEX, size);
+    }
+
+    /**
+     * Sets the uncompressed block size.
+     * 
+     * @param header the block header
+     * @param size the new uncompressed block size
+     * @throws IOException if an I/O problem occurs
+     */
+    public static void setUncompressedBlockSize(TimeSeriesRecord header, int size) throws IOException {
+        int delta = size - getCompressedBlockSize(header);
+        header.setInt(UNCOMPRESSED_BLOCK_SIZE_INDEX, delta);
+    }
+    
+    /**
+     * Returns the compressed block size.
+     * 
+     * @param header the header
+     * @return the compressed block size
+     * @throws IOException if an I/O problem occurs
+     */
+    public static int getCompressedBlockSize(Record header) throws IOException {
+        return header.getInt(COMPRESSED_BLOCK_SIZE_INDEX);
+    }
+    
+    /**
+     * Returns the uncompressed block size.
+     * 
+     * @param header the header
+     * @return the uncompressed block size
+     * @throws IOException if an I/O problem occurs
+     */
+    public static int getUncompressedBlockSize(Record header) throws IOException {
+        return getCompressedBlockSize(header) + header.getInt(UNCOMPRESSED_BLOCK_SIZE_INDEX);
     }
 
     /**
@@ -150,8 +200,7 @@ public final class BlockHeaderUtils {
      * @param header the block header
      * @return the compression type used to compress the data of the block. 
      */
-    public static void setCompressionType(TimeSeriesRecord header, CompressionType type) {
-        
+    public static void setCompressionType(TimeSeriesRecord header, CompressionType type) {        
         header.setByte(COMPRESSION_TYPE_INDEX, type.toByte());
     }
     
@@ -160,9 +209,9 @@ public final class BlockHeaderUtils {
      * 
      * @param header the block header
      * @return the compression type used to compress the data of the block. 
+     * @throws IOException if an I/O problem occurs
      */
-    public static CompressionType getCompressionType(TimeSeriesRecord header) {
-        
+    public static CompressionType getCompressionType(Record header) throws IOException {
         return CompressionType.toCompressionType(header.getByte(COMPRESSION_TYPE_INDEX));
     }
 
