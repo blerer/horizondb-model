@@ -80,7 +80,7 @@ public final class ImmutableField implements Field {
      * {@inheritDoc}
      */
     @Override
-    public void setByte(int b) {
+    public Field setByte(int b) {
         throw new UnsupportedOperationException();
     }
 
@@ -88,7 +88,7 @@ public final class ImmutableField implements Field {
      * {@inheritDoc}
      */
     @Override
-    public void setInt(int i) {
+    public Field setInt(int i) {
         throw new UnsupportedOperationException();
     }
 
@@ -96,7 +96,7 @@ public final class ImmutableField implements Field {
      * {@inheritDoc}
      */
     @Override
-    public void setLong(long l) {
+    public Field setLong(long l) {
         throw new UnsupportedOperationException();
     }
 
@@ -104,7 +104,7 @@ public final class ImmutableField implements Field {
      * {@inheritDoc}
      */
     @Override
-    public void setDouble(double d) {
+    public Field setDouble(double d) {
         throw new UnsupportedOperationException();
     }
 
@@ -112,7 +112,7 @@ public final class ImmutableField implements Field {
      * {@inheritDoc}
      */
     @Override
-    public void setDecimal(long mantissa, int exponent) {
+    public Field setDecimal(long mantissa, int exponent) {
         throw new UnsupportedOperationException();
     }
 
@@ -120,7 +120,7 @@ public final class ImmutableField implements Field {
      * {@inheritDoc}
      */
     @Override
-    public void setTimestamp(long timestamp, TimeUnit unit) {
+    public Field setTimestamp(long timestamp, TimeUnit unit) {
         throw new UnsupportedOperationException();
     }
 
@@ -128,7 +128,7 @@ public final class ImmutableField implements Field {
      * {@inheritDoc}
      */
     @Override
-    public void setTimestampInNanos(long timestamp) {
+    public Field setTimestampInNanos(long timestamp) {
         throw new UnsupportedOperationException();
     }
 
@@ -136,7 +136,7 @@ public final class ImmutableField implements Field {
      * {@inheritDoc}
      */
     @Override
-    public void setTimestampInMicros(long timestamp) {
+    public Field setTimestampInMicros(long timestamp) {
         throw new UnsupportedOperationException();
     }
 
@@ -144,7 +144,7 @@ public final class ImmutableField implements Field {
      * {@inheritDoc}
      */
     @Override
-    public void setTimestampInMillis(long timestamp) {
+    public Field setTimestampInMillis(long timestamp) {
         throw new UnsupportedOperationException();
     }
 
@@ -152,7 +152,7 @@ public final class ImmutableField implements Field {
      * {@inheritDoc}
      */
     @Override
-    public void setTimestampInSeconds(long timestamp) {
+    public Field setTimestampInSeconds(long timestamp) {
         throw new UnsupportedOperationException();
     }
 
@@ -248,7 +248,7 @@ public final class ImmutableField implements Field {
      * {@inheritDoc}
      */
     @Override
-    public void add(Field field) {
+    public Field add(Field field) {
         throw new UnsupportedOperationException();
     }
 
@@ -292,28 +292,20 @@ public final class ImmutableField implements Field {
         return this;
     }
 
-    /**    
-     * {@inheritDoc}
-     */
-    @Override
-    public Field newInstance(TimeZone timezone, String value) {
-        return ImmutableField.of(this.field.newInstance(timezone, value));
-    }
-
     /**
      * {@inheritDoc}
      */
     @Override
     public Range<Field> range(TimeZone timezone, String from, String to) {
-        return Range.closedOpen(newInstance(timezone, from), 
-                                newInstance(timezone, to));
+        return Range.closedOpen(newInstance().setValueFromString(timezone, from), 
+                                newInstance().setValueFromString(timezone, to));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void subtract(Field field) {
+    public Field subtract(Field field) {
         throw new UnsupportedOperationException();
     }
 
@@ -321,7 +313,7 @@ public final class ImmutableField implements Field {
      * {@inheritDoc}
      */
     @Override
-    public void setValueToZero() {
+    public Field setValueToZero() {
         throw new UnsupportedOperationException();
     }
 
@@ -329,7 +321,7 @@ public final class ImmutableField implements Field {
      * {@inheritDoc}
      */
     @Override
-    public void setValueFromString(TimeZone timeZone, String s) {
+    public Field setValueFromString(TimeZone timeZone, String s) {
         throw new UnsupportedOperationException();
     }
 

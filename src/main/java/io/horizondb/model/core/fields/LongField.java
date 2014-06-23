@@ -85,26 +85,29 @@ public final class LongField extends AbstractCounterField {
      * {@inheritDoc}
      */
     @Override
-    public void setValueToZero() {
+    public Field setValueToZero() {
         this.value = 0;
+        return this;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void add(Field field) {
+    public Field add(Field field) {
 
         this.value += field.getLong();
+        return this;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void subtract(Field field) {
+    public Field subtract(Field field) {
 
         this.value -= ((LongField) field).value;
+        return this;
     }
 
     /**
@@ -161,24 +164,27 @@ public final class LongField extends AbstractCounterField {
      * {@inheritDoc}
      */
     @Override
-    public void setByte(int b) {
+    public Field setByte(int b) {
         setLong(b);
+        return this;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void setInt(int i) {
+    public Field setInt(int i) {
         setLong(i);
+        return this;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void setLong(long l) {
+    public Field setLong(long l) {
         this.value = l;
+        return this;
     }
 
     /**
@@ -225,8 +231,8 @@ public final class LongField extends AbstractCounterField {
      * {@inheritDoc}
      */
     @Override
-    public void setValueFromString(TimeZone timeZone, String s) {
-        setLong(Long.parseLong(s));
+    public Field setValueFromString(TimeZone timeZone, String s) {
+        return setLong(Long.parseLong(s));
     }
     
     /**

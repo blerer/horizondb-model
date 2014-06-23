@@ -122,26 +122,28 @@ public class DecimalField extends AbstractField {
      * {@inheritDoc}
      */
     @Override
-    public void setValueToZero() {
+    public Field setValueToZero() {
         this.mantissa = 0;
         this.exponent = 0;
+        return this;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void add(Field field) {
+    public Field add(Field field) {
 
         DecimalField other = (DecimalField) field;
         add(other.mantissa, other.exponent);
+        return this;
     }
 
     /**    
      * {@inheritDoc}
      */
     @Override
-    public void setDouble(double d) {
+    public Field setDouble(double d) {
         
         int doubleExponent = exponent(d);
         long doubleMantissa = mantissa(d, doubleExponent);
@@ -152,13 +154,14 @@ public class DecimalField extends AbstractField {
         
         this.exponent = (byte) doubleExponent;
         this.mantissa = doubleMantissa;
+        return this;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void subtract(Field field) {
+    public Field subtract(Field field) {
 
         DecimalField other = (DecimalField) field;
 
@@ -170,6 +173,8 @@ public class DecimalField extends AbstractField {
 
             add(-other.mantissa, other.exponent);
         }
+        
+        return this;
     }
 
     /**
@@ -225,37 +230,41 @@ public class DecimalField extends AbstractField {
      * {@inheritDoc}
      */
     @Override
-    public void setByte(int b) {
+    public Field setByte(int b) {
         setDecimal(b, (byte) 0);
+        return this;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void setInt(int i) {
+    public Field setInt(int i) {
         setDecimal(i, (byte) 0);
+        return this;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void setLong(long l) {
+    public Field setLong(long l) {
         setDecimal(l, (byte) 0);
+        return this;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void setDecimal(long mantissa, int exponent) {
+    public Field setDecimal(long mantissa, int exponent) {
 
         Validate.isTrue(exponent <= Byte.MAX_VALUE && exponent >= Byte.MIN_VALUE,
                         "the specified exponent is not a byte value");
 
         this.mantissa = mantissa;
         this.exponent = (byte) exponent;
+        return this;
     }
 
     /**
@@ -354,7 +363,7 @@ public class DecimalField extends AbstractField {
      * {@inheritDoc}
      */
     @Override
-    public void setValueFromString(TimeZone timeZone, String s) {
+    public Field setValueFromString(TimeZone timeZone, String s) {
         
         int exponentIndex = s.indexOf('E');
         
@@ -364,7 +373,7 @@ public class DecimalField extends AbstractField {
             this.exponent = Byte.parseByte(s.substring(exponentIndex + 1));            
         }
         
-        setDouble(Double.parseDouble(s));
+        return setDouble(Double.parseDouble(s));
     }
     
     /**    

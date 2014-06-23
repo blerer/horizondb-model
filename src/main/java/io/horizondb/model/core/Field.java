@@ -54,82 +54,92 @@ public interface Field extends Comparable<Field>, Serializable {
      * Sets the value of this field to the specified byte.
      * 
      * @param b the byte value.
+     * @return this <code>Field</code>
      * @throws TypeConversionException if this field does not accept byte values.
      */
-    void setByte(int b);
+    Field setByte(int b);
 
     /**
      * Sets the value of this field to the specified int.
      * 
      * @param i the int value.
+     * @return this <code>Field</code>
      * @throws TypeConversionException if this field does not accept int values.
      */
-    void setInt(int i);
+    Field setInt(int i);
 
     /**
      * Sets the value of this field to the specified long.
      * 
      * @param l the long value.
+     * @return this <code>Field</code>
      * @throws TypeConversionException if this field does not accept long values.
      */
-    void setLong(long l);
+    Field setLong(long l);
 
     /**
      * Sets the value of this field to the specified double.
      * 
      * @param d the double value.
+     * @return this <code>Field</code>
      * @throws TypeConversionException if this field does not accept double values.
      */
-    void setDouble(double d);
+    Field setDouble(double d);
 
     /**
      * Sets the value of this field to the specified decimal.
      * 
      * @param mantissa the decimal mantissa.
      * @param exponent the decimal exponent.
+     * @return this <code>Field</code>
      * @throws TypeConversionException if this field does not accept decimal values.
      */
-    void setDecimal(long mantissa, int exponent);
+    Field setDecimal(long mantissa, int exponent);
     
     /**
      * Sets the value of this field to the specified timestamp in the specified unit.
      * 
      * @param timestamp the timestamp value.
      * @param unit the timestamp unit.
+     * @return this <code>Field</code>
      */
-    void setTimestamp(long timestamp, TimeUnit unit);
+    Field setTimestamp(long timestamp, TimeUnit unit);
 
     /**
      * Sets the value of this field to the specified nanoseconds timestamp.
      * 
      * @param l the long value.
+     * @return this <code>Field</code>
      * @throws TypeConversionException if this field does not accept nanoseconds timestamp values.
      */
-    void setTimestampInNanos(long timestamp);
+    Field setTimestampInNanos(long timestamp);
 
     /**
      * Sets the value of this field to the specified microseconds timestamp.
      * 
      * @param l the long value.
+     * @return this <code>Field</code>
      * @throws TypeConversionException if this field does not accept microseconds timestamp values.
      */
-    void setTimestampInMicros(long timestamp);
+    Field setTimestampInMicros(long timestamp);
 
     /**
      * Sets the value of this field to the specified milliseconds timestamp.
      * 
      * @param l the long value.
+     * @return this <code>Field</code>
      * @throws TypeConversionException if this field does not accept milliseconds timestamp values.
      */
-    void setTimestampInMillis(long timestamp);
+    Field setTimestampInMillis(long timestamp);
 
     /**
      * Sets the value of this field to the specified seconds timestamp.
      * 
      * @param l the long value.
+     * @return this <code>Field</code>
      * @throws TypeConversionException if this field does not accept seconds timestamp values.
      */
-    void setTimestampInSeconds(long timestamp);
+    Field setTimestampInSeconds(long timestamp);
 
     /**
      * Returns the value of this field as a byte.
@@ -212,8 +222,9 @@ public interface Field extends Comparable<Field>, Serializable {
      * Adds the value of the specified field to this field.
      * 
      * @param field the field for which the value must be added.
+     * @return this field
      */
-    void add(Field field);
+    Field add(Field field);
 
     /**
      * Copies the value of the specified field to this field.
@@ -236,15 +247,6 @@ public interface Field extends Comparable<Field>, Serializable {
      * @return a clone of this field.
      */
     Field newInstance();
-    
-    /**
-     * Creates a new instance of this field with the specified value.
-     * 
-     * @param timezone the time series time zone
-     * @param value the value as a <code>String</code>
-     * @return a new instance of this field with the specified value.
-     */
-    Field newInstance(TimeZone timezone, String value);
 
     /**
      * Creates a range of fields from the field with the <code>from</code> value, inclusive, to the 
@@ -261,13 +263,15 @@ public interface Field extends Comparable<Field>, Serializable {
      * Subtract the value of the specified field from this one.
      * 
      * @param field the field from which the value must be subtracted.
+     * @return this field
      */
-    void subtract(Field field);
+    Field subtract(Field field);
 
     /**
      * Sets the value of the field to zero.
+     * @return this field
      */
-    void setValueToZero();
+    Field setValueToZero();
 
     /**
      * Sets the value from the specified <code>String</code>.
@@ -275,7 +279,7 @@ public interface Field extends Comparable<Field>, Serializable {
      * @param timeZone the time zone used
      * @param s the <code>String</code>
      */
-    void setValueFromString(TimeZone timeZone, String s);
+    Field setValueFromString(TimeZone timeZone, String s);
     
     /**
      * Writes the content of this <code>Field</code> in a readable format into the specified stream.

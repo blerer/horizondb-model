@@ -80,26 +80,29 @@ public class ByteField extends AbstractCounterField {
      * {@inheritDoc}
      */
     @Override
-    public void setValueToZero() {
+    public Field setValueToZero() {
         this.value = 0;
+        return this;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void add(Field field) {
+    public Field add(Field field) {
 
         this.value += field.getByte();
+        return this;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void subtract(Field field) {
+    public Field subtract(Field field) {
 
         this.value -= field.getByte();
+        return this;
     }
 
     /**
@@ -156,8 +159,9 @@ public class ByteField extends AbstractCounterField {
      * {@inheritDoc}
      */
     @Override
-    public void setByte(int b) {
+    public Field setByte(int b) {
         this.value = b;
+        return this;
     }
 
     /**
@@ -204,8 +208,8 @@ public class ByteField extends AbstractCounterField {
      * {@inheritDoc}
      */
     @Override
-    public void setValueFromString(TimeZone timeZone, String s) {
-        setByte(Byte.parseByte(s));
+    public Field setValueFromString(TimeZone timeZone, String s) {
+        return setByte(Byte.parseByte(s));
     }
 
     /**

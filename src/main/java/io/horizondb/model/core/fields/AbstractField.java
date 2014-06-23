@@ -36,7 +36,7 @@ public abstract class AbstractField implements Field {
      * {@inheritDoc}
      */
     @Override
-    public void setByte(int b) {
+    public Field setByte(int b) {
         throw new TypeConversionException("A byte cannot be stored in a field of type " + getType() + ".");
     }
 
@@ -44,7 +44,7 @@ public abstract class AbstractField implements Field {
      * {@inheritDoc}
      */
     @Override
-    public void setInt(int i) {
+    public Field setInt(int i) {
         throw new TypeConversionException("An int cannot be stored in a field of type " + getType() + ".");
     }
 
@@ -52,7 +52,7 @@ public abstract class AbstractField implements Field {
      * {@inheritDoc}
      */
     @Override
-    public void setLong(long l) {
+    public Field setLong(long l) {
         throw new TypeConversionException("A long cannot be stored in a field of type " + getType() + ".");
     }
 
@@ -60,7 +60,7 @@ public abstract class AbstractField implements Field {
      * {@inheritDoc}
      */
     @Override
-    public void setDecimal(long mantissa, int exponent) {
+    public Field setDecimal(long mantissa, int exponent) {
         throw new TypeConversionException("A decimal cannot be stored in a field of type " + getType() + ".");
     }
 
@@ -156,7 +156,7 @@ public abstract class AbstractField implements Field {
      * {@inheritDoc}
      */
     @Override
-    public void setDouble(double d) {
+    public Field setDouble(double d) {
         throw new TypeConversionException("A double cannot be stored in a field of type " + getType() + ".");
     }
 
@@ -164,39 +164,39 @@ public abstract class AbstractField implements Field {
      * {@inheritDoc}
      */
     @Override
-    public final void setTimestampInNanos(long timestamp) {
-        setTimestamp(timestamp, TimeUnit.NANOSECONDS);
+    public final Field setTimestampInNanos(long timestamp) {
+        return setTimestamp(timestamp, TimeUnit.NANOSECONDS);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public final void setTimestampInMicros(long timestamp) {
-        setTimestamp(timestamp, TimeUnit.MICROSECONDS);
+    public final Field setTimestampInMicros(long timestamp) {
+        return setTimestamp(timestamp, TimeUnit.MICROSECONDS);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public final void setTimestampInMillis(long timestamp) {
-        setTimestamp(timestamp, TimeUnit.MILLISECONDS);
+    public final Field setTimestampInMillis(long timestamp) {
+        return setTimestamp(timestamp, TimeUnit.MILLISECONDS);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public final void setTimestampInSeconds(long timestamp) {
-        setTimestamp(timestamp, TimeUnit.SECONDS);
+    public final Field setTimestampInSeconds(long timestamp) {
+        return setTimestamp(timestamp, TimeUnit.SECONDS);
     }
     
     /**
      * {@inheritDoc}
      */
     @Override
-    public void setTimestamp(long timestamp, TimeUnit unit) {
+    public Field setTimestamp(long timestamp, TimeUnit unit) {
 
         throw new TypeConversionException("A timestamp cannot be stored in a field of type " + getType() + ".");
     }
@@ -208,24 +208,13 @@ public abstract class AbstractField implements Field {
     public RangeSet<Field> allValues() {
         return ImmutableRangeSet.of(Range.closed(minValue(), maxValue()));
     }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Field newInstance(TimeZone timezone, String value) {
-        
-        Field field = newInstance();
-        field.setValueFromString(timezone, value);
-        return field;
-    }
 
     /**
      * {@inheritDoc}
      */
     @Override
     public Range<Field> range(TimeZone timezone, String from, String to) {
-        return Range.closedOpen(newInstance(timezone, from), 
-                                newInstance(timezone, to));
+        return Range.closedOpen(newInstance().setValueFromString(timezone, from), 
+                                newInstance().setValueFromString(timezone, to));
     }
 }

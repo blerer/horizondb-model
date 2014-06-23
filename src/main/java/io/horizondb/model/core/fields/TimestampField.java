@@ -32,6 +32,10 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
+import com.google.common.collect.ImmutableRangeSet;
+import com.google.common.collect.Range;
+import com.google.common.collect.RangeSet;
+
 import static org.apache.commons.lang.Validate.notNull;
 
 /**
@@ -50,6 +54,11 @@ public final class TimestampField extends AbstractField {
      */
     public static final Field MIN_VALUE = ImmutableField.of(new TimestampField(-62167392000000L, TimeUnit.MILLISECONDS));
         
+    /**
+     * The range of field going from minimum value to maximum value.
+     */
+    public static final RangeSet<Field> ALL = ImmutableRangeSet.of(Range.closed(MIN_VALUE, MAX_VALUE));
+    
     /**
      * The time unit.
      */
@@ -114,30 +123,33 @@ public final class TimestampField extends AbstractField {
      * {@inheritDoc}
      */
     @Override
-    public void setValueToZero() {
+    public Field setValueToZero() {
         this.sourceTimestamp = 0;
+        return this;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void add(Field field) {
+    public Field add(Field field) {
 
         TimestampField timestampField = (TimestampField) field;
         
         this.sourceTimestamp += this.sourceUnit.convert(timestampField.sourceTimestamp, timestampField.sourceUnit);
+        return this;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void subtract(Field field) {
+    public Field subtract(Field field) {
 
         TimestampField timestampField = (TimestampField) field;
         
         this.sourceTimestamp -= this.sourceUnit.convert(timestampField.sourceTimestamp, timestampField.sourceUnit);
+        return this;
     }
 
     /**
@@ -152,7 +164,7 @@ public final class TimestampField extends AbstractField {
      * {@inheritDoc}
      */
     @Override
-    public void setValueFromString(TimeZone timeZone, String s) {
+    public Field setValueFromString(TimeZone timeZone, String s) {
         
         if (s.startsWith("'") && s.endsWith("'")) {
             
@@ -175,6 +187,8 @@ public final class TimestampField extends AbstractField {
             
             setTimestamp(Long.parseLong(t), getTimeUnit(symbol));
         }
+        
+        return this;
     }
     
     /**
@@ -261,7 +275,7 @@ public final class TimestampField extends AbstractField {
      * {@inheritDoc}
      */
     @Override
-    public void setTimestamp(long sourceTimestamp, TimeUnit unit) {
+    public Field setTimestamp(long sourceTimestamp, TimeUnit unit) {
 
         if (unit.compareTo(this.sourceUnit) < 0) {
 
@@ -270,6 +284,7 @@ public final class TimestampField extends AbstractField {
         }
 
         this.sourceTimestamp = this.sourceUnit.convert(sourceTimestamp, unit);
+        return this;
     }
 
     /**

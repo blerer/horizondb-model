@@ -91,26 +91,29 @@ public class IntegerField extends AbstractCounterField {
      * {@inheritDoc}
      */
     @Override
-    public void setValueToZero() {
+    public Field setValueToZero() {
         this.value = 0;
+        return this;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void add(Field field) {
+    public Field add(Field field) {
 
         this.value += field.getInt();
+        return this;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void subtract(Field field) {
+    public Field subtract(Field field) {
 
         this.value -= field.getInt();
+        return this;
     }
 
     /**
@@ -158,16 +161,18 @@ public class IntegerField extends AbstractCounterField {
      * {@inheritDoc}
      */
     @Override
-    public void setByte(int b) {
+    public Field setByte(int b) {
         setInt(b);
+        return this;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void setInt(int i) {
+    public Field setInt(int i) {
         this.value = i;
+        return this;
     }
 
     /**
@@ -214,8 +219,8 @@ public class IntegerField extends AbstractCounterField {
      * {@inheritDoc}
      */
     @Override
-    public void setValueFromString(TimeZone timeZone, String s) {
-        setInt(Integer.parseInt(s));
+    public Field setValueFromString(TimeZone timeZone, String s) {
+        return setInt(Integer.parseInt(s));
     }
 
     /**    
