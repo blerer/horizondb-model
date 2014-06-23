@@ -21,16 +21,23 @@ import io.horizondb.io.buffers.CompositeBuffer;
 import io.horizondb.io.compression.CompressionType;
 import io.horizondb.io.compression.Decompressor;
 import io.horizondb.io.encoding.VarInts;
+import io.horizondb.model.core.Field;
 import io.horizondb.model.core.Record;
 import io.horizondb.model.core.RecordIterator;
+import io.horizondb.model.core.fields.TimestampField;
 import io.horizondb.model.core.records.BinaryTimeSeriesRecord;
 import io.horizondb.model.schema.TimeSeriesDefinition;
 
 import java.io.Closeable;
 import java.io.IOException;
 
+import com.google.common.collect.Range;
+import com.google.common.collect.RangeSet;
+
 import static io.horizondb.model.core.records.BlockHeaderUtils.getCompressedBlockSize;
 import static io.horizondb.model.core.records.BlockHeaderUtils.getCompressionType;
+import static io.horizondb.model.core.records.BlockHeaderUtils.getFirstTimestampField;
+import static io.horizondb.model.core.records.BlockHeaderUtils.getLastTimestampField;
 import static io.horizondb.model.core.records.BlockHeaderUtils.getUncompressedBlockSize;
 import static org.apache.commons.lang.Validate.notNull;
 
@@ -58,6 +65,11 @@ public final class BinaryTimeSeriesRecordIterator extends AbstractRecordIterator
     private final ByteReader reader;
     
     /**
+     * The timestamp ranges for which data must be returned.
+     */
+    private final RangeSet<Field> rangeSet;
+    
+    /**
      * The decompressor used to uncompress the blocks.
      */
     private Decompressor decompressor;
@@ -69,9 +81,15 @@ public final class BinaryTimeSeriesRecordIterator extends AbstractRecordIterator
 
     public BinaryTimeSeriesRecordIterator(TimeSeriesDefinition definition, ByteReader reader) {
         
+        this(definition, reader, TimestampField.ALL);
+    }
+    
+    public BinaryTimeSeriesRecordIterator(TimeSeriesDefinition definition, ByteReader reader, RangeSet<Field> rangeSet) {
+        
         this.blockHeader = definition.newBinaryBlockHeader();
         this.records = definition.newBinaryRecords();
         this.reader = reader;
+        this.rangeSet = rangeSet;
     }
 
     /**    
@@ -97,6 +115,14 @@ public final class BinaryTimeSeriesRecordIterator extends AbstractRecordIterator
 
                     ReadableBuffer compressedBlock = this.reader.slice(getCompressedBlockSize(this.blockHeader));
                    
+                    Range<Field> range = Range.closed(getFirstTimestampField(this.blockHeader),
+                                                      getLastTimestampField(this.blockHeader));
+                    
+                    if (this.rangeSet.subRangeSet(range).isEmpty()) {
+                        this.blockBuffer = Buffers.EMPTY_BUFFER;
+                        continue;
+                    }
+                    
                     this.blockBuffer = decompress(compressedBlock, getUncompressedBlockSize(this.blockHeader));
 
                     in = getCurrentInput();
@@ -121,7 +147,6 @@ public final class BinaryTimeSeriesRecordIterator extends AbstractRecordIterator
     private static boolean isBlockHeader(int type) {
         return type == Record.BLOCK_HEADER_TYPE;
     }
-
     
     /**
      * Uncompress the specified block.
