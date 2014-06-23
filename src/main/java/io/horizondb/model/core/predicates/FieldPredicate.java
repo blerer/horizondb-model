@@ -103,7 +103,7 @@ public abstract class FieldPredicate implements Predicate {
      */
     protected static final Field newField(Field prototype, TimeZone timeZone, String value) {
         
-        Field field = prototype.newInstance(timeZone, value);        
+        Field field = prototype.newInstance().setValueFromString(timeZone, value);        
         return ImmutableField.of(field);
     }
     
