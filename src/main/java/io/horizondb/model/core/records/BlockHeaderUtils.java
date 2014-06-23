@@ -15,7 +15,9 @@ package io.horizondb.model.core.records;
 
 import io.horizondb.io.compression.CompressionType;
 import io.horizondb.model.core.Counter;
+import io.horizondb.model.core.Field;
 import io.horizondb.model.core.Record;
+import io.horizondb.model.core.fields.ImmutableField;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -78,14 +80,36 @@ public final class BlockHeaderUtils {
     }
     
     /**
-     * Sets the first timestamp of the block.
+     * Gets the first timestamp of the block.
      * 
      * @param header the block header 
-     * @param record the first record of the block
      * @throws IOException if an I/O problem occurs
      */
     public static long getFirstTimestampInNanos(Record header) throws IOException {
         return header.getTimestampInNanos(TIMESTAMP_FIELD_INDEX);
+    }
+    
+    /**
+     * Returns the field containing the first timestamp of the block.
+     * 
+     * @param header the block header 
+     * @throws IOException if an I/O problem occurs
+     */
+    public static Field getFirstTimestampField(Record header) throws IOException {
+        return ImmutableField.of(header.getField(TIMESTAMP_FIELD_INDEX));
+    }
+    
+    /**
+     * Returns the field containing the last timestamp of the block.
+     * 
+     * @param header the block header 
+     * @throws IOException if an I/O problem occurs
+     */
+    public static Field getLastTimestampField(Record header) throws IOException {
+        
+        return header.getField(TIMESTAMP_FIELD_INDEX)
+                     .newInstance()
+                     .add(header.getField(LAST_TIMESTAMP_INDEX));
     }
     
     /**
