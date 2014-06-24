@@ -68,7 +68,7 @@ public enum Operator implements Serializable {
     },
     
     /**
-     * The equal operator: '=' 
+     * The not equal operator: '!=' 
      */
     NE(1) {
         /**
@@ -76,7 +76,7 @@ public enum Operator implements Serializable {
          */
         @Override
         public String toString() {
-            return "=";
+            return "!=";
         }
         
         /**
