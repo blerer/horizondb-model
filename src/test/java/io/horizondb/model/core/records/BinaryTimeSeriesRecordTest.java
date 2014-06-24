@@ -54,16 +54,7 @@ public class BinaryTimeSeriesRecordTest {
         record.setDecimal(2, 145, 1);
         record.setByte(3, 3);
 
-        Buffer reader = Buffers.allocate(100);
-
-        record.writeTo(reader);
-
-        BinaryTimeSeriesRecord binaryRecord = new BinaryTimeSeriesRecord(TYPE,
-                                                                         TimeUnit.NANOSECONDS,
-                                                                         FieldType.MILLISECONDS_TIMESTAMP,
-                                                                         FieldType.DECIMAL,
-                                                                         FieldType.BYTE);
-        binaryRecord.fill(reader);
+        BinaryTimeSeriesRecord binaryRecord = record.toBinaryTimeSeriesRecord();
 
         assertFalse(binaryRecord.isDelta());
         assertEquals(10000000, binaryRecord.getTimestampInNanos(0));
@@ -88,16 +79,7 @@ public class BinaryTimeSeriesRecordTest {
         delta.setDecimal(2, 145, 1);
         delta.setByte(3, 3);
 
-        Buffer reader = Buffers.allocate(100);
-
-        delta.writeTo(reader);
-
-        BinaryTimeSeriesRecord binaryRecord = new BinaryTimeSeriesRecord(TYPE,
-                                                                         TimeUnit.NANOSECONDS,
-                                                                         FieldType.MILLISECONDS_TIMESTAMP,
-                                                                         FieldType.DECIMAL,
-                                                                         FieldType.BYTE);
-        binaryRecord.fill(reader);
+        BinaryTimeSeriesRecord binaryRecord = delta.toBinaryTimeSeriesRecord();
 
         assertTrue(binaryRecord.isDelta());
         assertEquals(10000000, binaryRecord.getTimestampInNanos(0));
@@ -119,16 +101,7 @@ public class BinaryTimeSeriesRecordTest {
         record.setTimestampInNanos(0, 100);
         record.setByte(3, 3);
 
-        Buffer reader = Buffers.allocate(100);
-
-        record.writeTo(reader);
-
-        BinaryTimeSeriesRecord binaryRecord = new BinaryTimeSeriesRecord(TYPE,
-                                                                         TimeUnit.NANOSECONDS,
-                                                                         FieldType.MILLISECONDS_TIMESTAMP,
-                                                                         FieldType.DECIMAL,
-                                                                         FieldType.BYTE);
-        binaryRecord.fill(reader);
+        BinaryTimeSeriesRecord binaryRecord = record.toBinaryTimeSeriesRecord();
 
         assertFalse(binaryRecord.isDelta());
         assertEquals(100, binaryRecord.getTimestampInNanos(0));
@@ -152,16 +125,7 @@ public class BinaryTimeSeriesRecordTest {
         record.setDecimal(2, 145, 1);
         record.setByte(3, 3);
 
-        Buffer reader = Buffers.allocate(100);
-
-        record.writeTo(reader);
-
-        BinaryTimeSeriesRecord binaryRecord = new BinaryTimeSeriesRecord(TYPE,
-                                                                         TimeUnit.NANOSECONDS,
-                                                                         FieldType.MILLISECONDS_TIMESTAMP,
-                                                                         FieldType.DECIMAL,
-                                                                         FieldType.BYTE);
-        binaryRecord.fill(reader);
+        BinaryTimeSeriesRecord binaryRecord = record.toBinaryTimeSeriesRecord();
 
         assertFalse(binaryRecord.isDelta());
         assertEquals(10000000, binaryRecord.getTimestampInNanos(0));
@@ -179,11 +143,7 @@ public class BinaryTimeSeriesRecordTest {
         record.setTimestampInNanos(0, 100);
         record.setByte(3, 3);
 
-        reader = Buffers.allocate(100);
-
-        record.writeTo(reader);
-
-        binaryRecord.fill(reader);
+        binaryRecord = record.toBinaryTimeSeriesRecord();
 
         assertFalse(binaryRecord.isDelta());
         assertEquals(100, binaryRecord.getTimestampInNanos(0));
@@ -309,5 +269,45 @@ public class BinaryTimeSeriesRecordTest {
         assertEquals(145, binaryRecord.getDecimalMantissa(2));
         assertEquals(1, binaryRecord.getDecimalExponent(2));
         assertEquals(3, binaryRecord.getByte(3));
+    }
+    
+    @Test
+    public void testCopyTo() throws IOException {
+
+        TimeSeriesRecord record = new TimeSeriesRecord(TYPE, TimeUnit.MILLISECONDS, FieldType.INTEGER)
+            .setTimestampInMillis(0, 1001L)
+            .setInt(1, 3);
+
+        BinaryTimeSeriesRecord binaryRecord = record.toBinaryTimeSeriesRecord();
+
+        TimeSeriesRecord empty = new TimeSeriesRecord(TYPE, TimeUnit.MILLISECONDS, FieldType.INTEGER);
+
+        binaryRecord.copyTo(empty);
+        
+        TimeSeriesRecord expected = new TimeSeriesRecord(TYPE, TimeUnit.MILLISECONDS, FieldType.INTEGER).setDelta(false)
+                                                                                                        .setTimestampInMillis(0, 1001L)
+                                                                                                        .setInt(1, 3);
+        assertEquals(expected, empty);
+        
+    }
+    
+    @Test
+    public void testCopyToDelta() throws IOException {
+
+        TimeSeriesRecord record = new TimeSeriesRecord(TYPE, TimeUnit.MILLISECONDS, FieldType.INTEGER)
+            .setDelta(true)
+            .setTimestampInMillis(0, 1001L)
+            .setInt(1, 3);
+
+        BinaryTimeSeriesRecord binaryRecord = record.toBinaryTimeSeriesRecord();
+
+        TimeSeriesRecord empty = new TimeSeriesRecord(TYPE, TimeUnit.MILLISECONDS, FieldType.INTEGER);
+
+        binaryRecord.copyTo(empty);
+        
+        TimeSeriesRecord expected = new TimeSeriesRecord(TYPE, TimeUnit.MILLISECONDS, FieldType.INTEGER).setDelta(true)                                                                                             .setTimestampInMillis(0, 1001L)
+                                                                                                        .setInt(1, 3);
+        assertEquals(expected, empty);
+        
     }
 }

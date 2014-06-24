@@ -36,7 +36,7 @@ public class BinaryTimeSeriesRecord extends AbstractTimeSeriesRecord {
      * Returns <code>true</code> if the bitSet has been deserialized, <code>false</code> otherwise.
      */
     private boolean bitSetDeserialized;
-
+    
     /**
      * Specify if this record is a delta or a full record.
      */

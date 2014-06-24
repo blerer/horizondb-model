@@ -214,6 +214,43 @@ public class TimeSeriesRecordTest {
     }
 
     @Test
+    public void testCopyTo() throws IOException {
+
+        TimeSeriesRecord record = new TimeSeriesRecord(TYPE, TimeUnit.MILLISECONDS, FieldType.INTEGER)
+            .setTimestampInMillis(0, 1001L)
+            .setInt(1, 3);
+
+        TimeSeriesRecord empty = new TimeSeriesRecord(TYPE, TimeUnit.MILLISECONDS, FieldType.INTEGER);
+
+        record.copyTo(empty);
+        
+        TimeSeriesRecord expected = new TimeSeriesRecord(TYPE, TimeUnit.MILLISECONDS, FieldType.INTEGER).setDelta(false)
+                                                                                                        .setTimestampInMillis(0, 1001L)
+                                                                                                        .setInt(1, 3);
+        assertEquals(expected, empty);
+        
+    }
+    
+    @Test
+    public void testCopyToDelta() throws IOException {
+
+        TimeSeriesRecord record = new TimeSeriesRecord(TYPE, TimeUnit.MILLISECONDS, FieldType.INTEGER)
+            .setDelta(true)
+            .setTimestampInMillis(0, 1001L)
+            .setInt(1, 3);
+
+        TimeSeriesRecord empty = new TimeSeriesRecord(TYPE, TimeUnit.MILLISECONDS, FieldType.INTEGER);
+
+        record.copyTo(empty);
+        
+        TimeSeriesRecord expected = new TimeSeriesRecord(TYPE, TimeUnit.MILLISECONDS, FieldType.INTEGER).setDelta(true)
+                                                                                                        .setTimestampInMillis(0, 1001L)
+                                                                                                        .setInt(1, 3);
+        assertEquals(expected, empty);
+        
+    }
+    
+    @Test
     public void testAdd() throws IOException {
 
         TimeSeriesRecord sum = new TimeSeriesRecord(TYPE, TimeUnit.MILLISECONDS, FieldType.INTEGER);

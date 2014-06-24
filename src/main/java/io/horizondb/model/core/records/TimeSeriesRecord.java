@@ -38,12 +38,12 @@ import org.apache.commons.lang.builder.ToStringStyle;
  * 
  */
 public class TimeSeriesRecord extends AbstractTimeSeriesRecord implements Comparable<TimeSeriesRecord> {
-
+    
     /**
      * Specify if this record is a delta or a full record.
      */
     private boolean delta;
-
+    
     /**
      * Creates a new <code>TimeSeriesRecord</code> of the specified type.
      * 
@@ -186,9 +186,11 @@ public class TimeSeriesRecord extends AbstractTimeSeriesRecord implements Compar
      * Specify if this record is a delta or a full one.
      * 
      * @param delta the new delta value
+     * @return this <code>TimeSeriesRecord</code>
      */
-    public void setDelta(boolean delta) {
+    public TimeSeriesRecord setDelta(boolean delta) {
         this.delta = delta;
+        return this;
     }
 
     /**
@@ -212,10 +214,12 @@ public class TimeSeriesRecord extends AbstractTimeSeriesRecord implements Compar
      * 
      * @param index the field index
      * @param i the <code>int</code> value
+     * @return this <code>TimeSeriesRecord</code>
      */
-    public void setInt(int index, int i) {
+    public TimeSeriesRecord setInt(int index, int i) {
 
         getField(index).setInt(i);
+        return this;
     }
 
     /**
@@ -223,10 +227,12 @@ public class TimeSeriesRecord extends AbstractTimeSeriesRecord implements Compar
      * 
      * @param index the field index
      * @param l the <code>long</code> value
+     * @return this <code>TimeSeriesRecord</code>
      */
-    public void setLong(int index, long l) {
+    public TimeSeriesRecord setLong(int index, long l) {
 
         getField(index).setLong(l);
+        return this;
     }
 
     /**
@@ -235,10 +241,12 @@ public class TimeSeriesRecord extends AbstractTimeSeriesRecord implements Compar
      * @param index the field index
      * @param timestamp the timestamp value
      * @param unit the timestamp unit
+     * @return this <code>TimeSeriesRecord</code>
      */
-    public void setTimestamp(int index, long timestamp, TimeUnit unit) {
+    public TimeSeriesRecord setTimestamp(int index, long timestamp, TimeUnit unit) {
 
         getField(index).setTimestamp(timestamp, unit);
+        return this;
     }
     
     /**
@@ -246,10 +254,12 @@ public class TimeSeriesRecord extends AbstractTimeSeriesRecord implements Compar
      * 
      * @param index the field index
      * @param timestamp the timestamp value in nanoseconds.
+     * @return this <code>TimeSeriesRecord</code>
      */
-    public void setTimestampInNanos(int index, long timestamp) {
+    public TimeSeriesRecord setTimestampInNanos(int index, long timestamp) {
 
         getField(index).setTimestampInNanos(timestamp);
+        return this;
     }
 
     /**
@@ -257,10 +267,12 @@ public class TimeSeriesRecord extends AbstractTimeSeriesRecord implements Compar
      * 
      * @param index the field index
      * @param timestamp the timestamp value in microseconds.
+     * @return this <code>TimeSeriesRecord</code>
      */
-    public void setTimestampInMicros(int index, long timestamp) {
+    public TimeSeriesRecord setTimestampInMicros(int index, long timestamp) {
 
         getField(index).setTimestampInMicros(timestamp);
+        return this;
     }
 
     /**
@@ -268,10 +280,12 @@ public class TimeSeriesRecord extends AbstractTimeSeriesRecord implements Compar
      * 
      * @param index the field index
      * @param timestamp the timestamp value in milliseconds.
+     * @return this <code>TimeSeriesRecord</code>
      */
-    public void setTimestampInMillis(int index, long timestamp) {
+    public TimeSeriesRecord setTimestampInMillis(int index, long timestamp) {
 
         getField(index).setTimestampInMillis(timestamp);
+        return this;
     }
 
     /**
@@ -279,10 +293,12 @@ public class TimeSeriesRecord extends AbstractTimeSeriesRecord implements Compar
      * 
      * @param index the field index
      * @param timestamp the timestamp value in seconds.
+     * @return this <code>TimeSeriesRecord</code>
      */
-    public void setTimestampInSeconds(int index, long timestamp) {
+    public TimeSeriesRecord setTimestampInSeconds(int index, long timestamp) {
 
         getField(index).setTimestampInSeconds(timestamp);
+        return this;
     }
 
     /**
@@ -290,15 +306,18 @@ public class TimeSeriesRecord extends AbstractTimeSeriesRecord implements Compar
      * 
      * @param index the field index
      * @param b the <code>byte</code> value
+     * @return this <code>TimeSeriesRecord</code>
      */
-    public void setByte(int index, int b) {
+    public TimeSeriesRecord setByte(int index, int b) {
 
         getField(index).setByte(b);
+        return this;
     }
 
-    public void setDecimal(int index, long mantissa, int exponent) {
+    public TimeSeriesRecord setDecimal(int index, long mantissa, int exponent) {
 
         getField(index).setDecimal(mantissa, exponent);
+        return this;
     }
 
     /**
@@ -306,10 +325,12 @@ public class TimeSeriesRecord extends AbstractTimeSeriesRecord implements Compar
      * 
      * @param index the field index
      * @param d the <code>double</code> value
+     * @return this <code>TimeSeriesRecord</code>
      */
-    public void setDouble(int index, double d) {
+    public TimeSeriesRecord setDouble(int index, double d) {
 
         getField(index).setDouble(d);
+        return this;
     }
     
     /**

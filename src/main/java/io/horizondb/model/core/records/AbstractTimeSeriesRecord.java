@@ -170,6 +170,8 @@ abstract class AbstractTimeSeriesRecord implements Record {
     @Override
     public void copyTo(TimeSeriesRecord record) throws IOException {
 
+        record.setDelta(isDelta());
+        
         for (int i = 0; i < this.fields.length; i++) {
             getField(i).copyTo(record.getField(i));
         }
