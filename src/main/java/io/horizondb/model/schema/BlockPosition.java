@@ -46,7 +46,7 @@ public final class BlockPosition implements Serializable {
         public BlockPosition parseFrom(ByteReader reader) throws IOException {
 
             long offset = VarInts.readUnsignedLong(reader);
-            int length = VarInts.readUnsignedInt(reader);
+            long length = VarInts.readUnsignedLong(reader);
             return new BlockPosition(offset, length);
         }
     };
@@ -59,7 +59,7 @@ public final class BlockPosition implements Serializable {
     /**
      * The block length.
      */
-    private final int length;
+    private final long length;
 
     /**
      * Creates a new <code>BlockPosition</code> instance.
@@ -67,7 +67,7 @@ public final class BlockPosition implements Serializable {
      * @param offset the position of the start of the block
      * @param length the block length
      */
-    public BlockPosition(long offset, int length) {
+    public BlockPosition(long offset, long length) {
         this.offset = offset;
         this.length = length;
     }
@@ -84,7 +84,7 @@ public final class BlockPosition implements Serializable {
      * Returns the block length
      * @return the block length
      */
-    public int getLength() {
+    public long getLength() {
         return this.length;
     }
 
@@ -114,7 +114,7 @@ public final class BlockPosition implements Serializable {
     @Override
     public int computeSerializedSize() {
         return VarInts.computeUnsignedLongSize(this.offset) 
-                + VarInts.computeUnsignedIntSize(this.length);
+                + VarInts.computeUnsignedLongSize(this.length);
     }
 
     /**    
@@ -123,7 +123,7 @@ public final class BlockPosition implements Serializable {
     @Override
     public void writeTo(ByteWriter writer) throws IOException {
         VarInts.writeUnsignedLong(writer, this.offset);
-        VarInts.writeUnsignedInt(writer, this.length);
+        VarInts.writeUnsignedLong(writer, this.length);
     }
 
     /**
