@@ -28,6 +28,7 @@ import io.horizondb.model.core.records.TimeSeriesRecord;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -49,8 +50,8 @@ import com.google.common.collect.ImmutableBiMap;
  * 
  */
 @Immutable
-public class RecordTypeDefinition implements Serializable {
-
+public class RecordTypeDefinition implements Iterable<FieldDefinition>, Serializable {
+    
     /**
      * The parser instance.
      */
@@ -103,6 +104,14 @@ public class RecordTypeDefinition implements Serializable {
      */
     public String getName() {
         return this.name;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Iterator<FieldDefinition> iterator() {
+        return this.fields.iterator();
     }
 
     /**
@@ -415,11 +424,21 @@ public class RecordTypeDefinition implements Serializable {
          * @return this <code>Builder</code>.
          */
         public Builder addField(String name, FieldType type) {
-
-            this.fields.add(FieldDefinition.newInstance(name, type));
-            return this;
+            return addField(FieldDefinition.newInstance(name, type));
         }
 
+        /**
+         * Adds the specified field definition to the list of fields of the record type.
+         * 
+         * @param definition the field definition.
+         * @return this <code>Builder</code>.
+         */
+        public Builder addField(FieldDefinition definition) {
+
+            this.fields.add(definition);
+            return this;
+        }
+        
         /**
          * Creates a new <code>RecordTypeDefinition</code> instance.
          * 

@@ -20,6 +20,7 @@ import io.horizondb.io.ByteWriter;
 import io.horizondb.io.encoding.VarInts;
 import io.horizondb.io.serialization.Parser;
 import io.horizondb.model.core.Predicate;
+import io.horizondb.model.core.Projection;
 import io.horizondb.model.core.predicates.Predicates;
 
 import java.io.IOException;
@@ -49,9 +50,10 @@ public final class SelectPayload implements Payload {
             String databaseName = VarInts.readString(reader);
             String seriesName = VarInts.readString(reader);
             
+            Projection projection = Projection.parseFrom(reader);
             Predicate predicate = Predicates.parseFrom(reader);
 
-            return new SelectPayload(databaseName, seriesName, predicate);
+            return new SelectPayload(databaseName, seriesName, projection, predicate);
         }
     };
 
@@ -64,6 +66,11 @@ public final class SelectPayload implements Payload {
      * The time series from which the records must be read.
      */
     private final String seriesName;
+    
+    /**
+     * The projection.
+     */
+    private final Projection projection;
 
     /**
      * The predicate used to select the record that must be returned.
@@ -73,10 +80,11 @@ public final class SelectPayload implements Payload {
     /**
      * @param timeRange
      */
-    public SelectPayload(String databaseName, String seriesName, Predicate predicate) {
+    public SelectPayload(String databaseName, String seriesName, Projection projection, Predicate predicate) {
 
         this.databaseName = databaseName;
         this.seriesName = seriesName;
+        this.projection = projection;
         this.predicate = predicate;
     }
 
@@ -96,6 +104,15 @@ public final class SelectPayload implements Payload {
      */
     public String getSeriesName() {
         return this.seriesName;
+    }
+
+    /**
+     * Returns the projection.
+     * 
+     * @return the projection
+     */
+    public Projection getProjection() {
+        return this.projection;
     }
 
     /**
@@ -135,6 +152,7 @@ public final class SelectPayload implements Payload {
     public int computeSerializedSize() {
         return VarInts.computeStringSize(this.databaseName) 
                 + VarInts.computeStringSize(this.seriesName) 
+                + this.projection.computeSerializedSize()
                 + Predicates.computeSerializedSize(this.predicate);
     }
 
@@ -146,6 +164,7 @@ public final class SelectPayload implements Payload {
         
         VarInts.writeString(writer, this.databaseName);
         VarInts.writeString(writer, this.seriesName);
+        this.projection.writeTo(writer);
         Predicates.write(writer, this.predicate);
     }
 }

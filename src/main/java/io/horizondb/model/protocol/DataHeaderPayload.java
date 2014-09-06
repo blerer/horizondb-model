@@ -18,6 +18,7 @@ package io.horizondb.model.protocol;
 import io.horizondb.io.ByteReader;
 import io.horizondb.io.ByteWriter;
 import io.horizondb.io.serialization.Parser;
+import io.horizondb.model.schema.RecordSetDefinition;
 import io.horizondb.model.schema.TimeSeriesDefinition;
 
 import java.io.IOException;
@@ -50,25 +51,25 @@ public final class DataHeaderPayload implements Payload {
     };
     
     /**
-     * The time series definition.
+     * The record set definition.
      */
-    private final TimeSeriesDefinition definition;
+    private final RecordSetDefinition definition;
         
     /**
      * Creates a new payload for the response to a message of type <code>GET_TIMESERIES</code>.
      * 
-     * @param definition the definition of the time series.
+     * @param definition the definition of the record set.
      */
-    public DataHeaderPayload(TimeSeriesDefinition definition) {
+    public DataHeaderPayload(RecordSetDefinition definition) {
         this.definition = definition;
     }
 
     /**
-     * Returns the time series definition.    
+     * Returns the record set definition.    
      * 
-     * @return the time series definition. 
+     * @return the record set definition. 
      */
-    public TimeSeriesDefinition getDefinition() {
+    public RecordSetDefinition getDefinition() {
         return this.definition;
     }
 

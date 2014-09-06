@@ -22,9 +22,11 @@ import io.horizondb.io.compression.CompressionType;
 import io.horizondb.io.compression.Decompressor;
 import io.horizondb.io.encoding.VarInts;
 import io.horizondb.model.core.Field;
+import io.horizondb.model.core.Filter;
 import io.horizondb.model.core.Record;
 import io.horizondb.model.core.RecordIterator;
 import io.horizondb.model.core.fields.TimestampField;
+import io.horizondb.model.core.filters.Filters;
 import io.horizondb.model.core.records.BinaryTimeSeriesRecord;
 import io.horizondb.model.schema.TimeSeriesDefinition;
 
@@ -86,11 +88,20 @@ public final class BinaryTimeSeriesRecordIterator extends AbstractRecordIterator
     
     public BinaryTimeSeriesRecordIterator(TimeSeriesDefinition definition, ByteReader reader, RangeSet<Field> rangeSet) {
         
+        this(definition, reader, rangeSet, Filters.<String>noop());
+    }
+    
+    public BinaryTimeSeriesRecordIterator(TimeSeriesDefinition definition, 
+                                          ByteReader reader, 
+                                          RangeSet<Field> rangeSet, 
+                                          Filter<String> filter) {
+        
         this.blockHeader = definition.newBinaryBlockHeader();
-        this.records = definition.newBinaryRecords();
+        this.records = definition.newBinaryRecords(filter);
         this.reader = reader;
         this.rangeSet = rangeSet;
     }
+
 
     /**    
      * {@inheritDoc}
@@ -129,8 +140,12 @@ public final class BinaryTimeSeriesRecordIterator extends AbstractRecordIterator
                     
                 } else {
 
-                    setNext(this.records[type].fill(slice));
-                    return;
+                    BinaryTimeSeriesRecord record = this.records[type];
+                    
+                    if (record != null) {
+                        setNext(record.fill(slice));
+                        return;
+                    }
                 }
             }
         }

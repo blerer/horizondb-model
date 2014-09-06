@@ -52,16 +52,16 @@ public final class Filters {
     }
     
     /**
-     * Creates a filter that accept only fields that are equals to the specified one.
+     * Creates a filter that accept only <code>Comparable</code>s that are equals to the specified one.
      * 
-     * @param field the field to which the other fields must be compared
+     * @param comparable the <code>Comparable</code> to which the other <code>Comparable</code>s must be compared
      * @param valuesNeverDecrease <code>true</code> if the value that will be used  
      * as argument to the accept method will never decrease.
-     * @return a filter that accept only fields that are equals to the specified one.
+     * @return a filter that accept only <code>Comparable</code>s that are equals to the specified one.
      */
-    public static Filter<Field> eq(Field field, boolean valuesNeverDecrease) {
+    public static <C extends Comparable<C>> Filter<C> eq(C comparable, boolean valuesNeverDecrease) {
         
-        return new EqualityFilter<Field>(field, valuesNeverDecrease);
+        return new EqualityFilter<C>(comparable, valuesNeverDecrease);
     }
     
     /**
@@ -91,14 +91,14 @@ public final class Filters {
     /**
      * Creates a filter that accept all the field within the specified set.
      * 
-     * @param fields the set of fields that must be accepted.
+     * @param elements the set of fields that must be accepted.
      * @param valuesNeverDecrease <code>true</code> if the value that will be used  
      * as argument to the accept method will never decrease.
      * @return a filter that accept all the field within the specified set.
      */
-    public static Filter<Field> in(SortedSet<Field> fields, boolean valuesNeverDecrease) {
+    public static <C extends Comparable<C>> Filter<C> in(SortedSet<C> elements, boolean valuesNeverDecrease) {
     
-        return new InFilter<>(fields, valuesNeverDecrease);
+        return new InFilter<>(elements, valuesNeverDecrease);
     }
 
     /**

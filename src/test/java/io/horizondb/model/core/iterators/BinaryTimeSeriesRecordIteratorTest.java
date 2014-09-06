@@ -22,6 +22,8 @@ import io.horizondb.model.core.Record;
 import io.horizondb.model.core.RecordIterator;
 import io.horizondb.model.core.RecordListBuilder;
 import io.horizondb.model.core.RecordUtils;
+import io.horizondb.model.core.fields.TimestampField;
+import io.horizondb.model.core.filters.Filters;
 import io.horizondb.model.core.records.BlockHeaderBuilder;
 import io.horizondb.model.core.records.TimeSeriesRecord;
 import io.horizondb.model.core.util.TimeUtils;
@@ -107,6 +109,99 @@ public class BinaryTimeSeriesRecordIteratorTest {
         RecordUtils.writeRecords(buffer, list);
         
         try (RecordIterator readIterator = new BinaryTimeSeriesRecordIterator(def, buffer)) {
+
+            assertTrue(readIterator.hasNext());
+            Record actual = readIterator.next();
+            
+            assertFalse(actual.isDelta());
+            assertEquals(TIME_IN_NANOS + 12000700L, actual.getTimestampInNanos(0));
+            assertEquals(TIME_IN_MILLIS + 12, actual.getTimestampInMillis(1));
+            assertEquals(3, actual.getByte(2));
+
+            assertTrue(readIterator.hasNext());
+            actual = readIterator.next();
+
+            assertTrue(actual.isDelta());
+            assertEquals(1000200, actual.getTimestampInNanos(0));
+            assertEquals(1, actual.getTimestampInMillis(1));
+            assertEquals(0, actual.getByte(2));
+
+            assertTrue(readIterator.hasNext());
+            actual = readIterator.next();
+
+            assertTrue(actual.isDelta());
+            assertEquals(3500, actual.getTimestampInNanos(0));
+            assertEquals(0, actual.getTimestampInMillis(1));
+            assertEquals(-2, actual.getByte(2));
+
+            assertFalse(readIterator.hasNext());
+        }
+    }
+
+    @Test
+    public void testNextWithBlockHeaderAndFilter() throws Exception {
+
+        RecordTypeDefinition recordTypeDefinition = RecordTypeDefinition.newBuilder("exchangeState")
+                                                                        .addField("timestampInMillis",
+                                                                                  FieldType.MILLISECONDS_TIMESTAMP)
+                                                                        .addField("status", FieldType.BYTE)
+                                                                        .build();
+        
+        RecordTypeDefinition tradeDefinition = RecordTypeDefinition.newBuilder("trade")
+                                                                        .addField("timestampInMillis",
+                                                                                  FieldType.MILLISECONDS_TIMESTAMP)
+                                                                        .addField("price", FieldType.DECIMAL)
+                                                                        .build();
+
+        TimeSeriesDefinition def = TimeSeriesDefinition.newBuilder("test")
+                                                       .timeUnit(TimeUnit.NANOSECONDS)
+                                                       .addRecordType(recordTypeDefinition)
+                                                       .addRecordType(tradeDefinition)
+                                                       .build();
+
+        List<TimeSeriesRecord> records = new RecordListBuilder(def).newRecord("exchangeState")
+                                                                   .setTimestampInNanos(0, TIME_IN_NANOS + 12000700)
+                                                                   .setTimestampInMillis(1, TIME_IN_MILLIS + 12)
+                                                                   .setByte(2, 3)
+                                                                   .newRecord("exchangeState")
+                                                                   .setTimestampInNanos(0, TIME_IN_NANOS + 13000900)
+                                                                   .setTimestampInMillis(1, TIME_IN_MILLIS + 13)
+                                                                   .setByte(2, 3)
+                                                                   .newRecord("trade")
+                                                                   .setTimestampInNanos(0, TIME_IN_NANOS + 13001000)
+                                                                   .setTimestampInMillis(1, TIME_IN_MILLIS + 13)
+                                                                   .setDouble(2, 10.0)
+                                                                   .newRecord("exchangeState")
+                                                                   .setTimestampInNanos(0, TIME_IN_NANOS + 13004400)
+                                                                   .setTimestampInMillis(1, TIME_IN_MILLIS + 13)
+                                                                   .setByte(2, 1)
+                                                                   .newRecord("trade")
+                                                                   .setTimestampInNanos(0, TIME_IN_NANOS + 13005000)
+                                                                   .setTimestampInMillis(1, TIME_IN_MILLIS + 13)
+                                                                   .setDouble(2, 15.0)
+                                                                   .build();
+
+        int serializedSize = RecordUtils.computeSerializedSize(records);
+        
+        TimeSeriesRecord blockHeader = new BlockHeaderBuilder(def).firstTimestampInNanos(TIME_IN_NANOS + 12000700)
+                                                                  .lastTimestampInNanos(TIME_IN_NANOS + 13004400)
+                                                                  .compressedBlockSize(serializedSize)
+                                                                  .uncompressedBlockSize(serializedSize)
+                                                                  .recordCount(0, 5)
+                                                                  .build();
+        
+        List<Record> list = new ArrayList<>();
+        list.add(blockHeader);
+        list.addAll(records);
+        
+        Buffer buffer = Buffers.allocate(RecordUtils.computeSerializedSize(blockHeader) + serializedSize);
+
+        RecordUtils.writeRecords(buffer, list);
+        
+        try (RecordIterator readIterator = new BinaryTimeSeriesRecordIterator(def, 
+                                                                              buffer, 
+                                                                              TimestampField.ALL, 
+                                                                              Filters.eq("exchangeState", false))) {
 
             assertTrue(readIterator.hasNext());
             Record actual = readIterator.next();

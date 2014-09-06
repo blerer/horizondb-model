@@ -15,7 +15,6 @@ package io.horizondb.model.core.filters;
 
 import io.horizondb.model.core.Filter;
 
-import java.io.IOException;
 import java.util.SortedSet;
 
 import static org.apache.commons.lang.Validate.notNull;
@@ -73,7 +72,7 @@ final class InFilter<T extends Comparable<T>> implements Filter<T> {
      * {@inheritDoc}
      */
     @Override
-    public boolean accept(T value) throws IOException {
+    public boolean accept(T value) {
 
         if (!this.set.contains(value)) {
         
