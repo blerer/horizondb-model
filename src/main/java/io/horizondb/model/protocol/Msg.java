@@ -83,8 +83,9 @@ public final class Msg<T extends Serializable> implements Serializable {
      * @param opCode the operation code
      * @param payload the payload
      * @return a new request message with the specified operation code and the specified payload.
+     * @throws IOException if an I/O problem occurs
      */
-    public static <S extends Serializable> Msg<S> newRequestMsg(OpCode opCode, S payload) {
+    public static <S extends Serializable> Msg<S> newRequestMsg(OpCode opCode, S payload) throws IOException {
 
         return new Msg<S>(MsgHeader.newRequestHeader(opCode, payload.computeSerializedSize()), payload);
     }
@@ -96,13 +97,18 @@ public final class Msg<T extends Serializable> implements Serializable {
      * @param opCode the operation code
      * @param payload the payload
      * @return a new request message with the specified operation code and the specified payload.
+     * @throws IOException if an I/O problem occurs
      */
-    public static <S extends Serializable> Msg<S> newRequestMsg(MsgHeader header, OpCode opCode, S payload) {
+    public static <S extends Serializable> Msg<S> newRequestMsg(MsgHeader header,
+                                                                OpCode opCode,
+                                                                S payload) throws IOException {
 
         return new Msg<S>(header.convertTo(opCode, payload.computeSerializedSize()), payload);
     }
 
-    public static <S extends Serializable> Msg<S> newResponseMsg(MsgHeader header, OpCode opCode, S payload) {
+    public static <S extends Serializable> Msg<S> newResponseMsg(MsgHeader header,
+                                                                 OpCode opCode,
+                                                                 S payload) throws IOException {
 
         return new Msg<S>(MsgHeader.newResponseHeader(header, opCode, 0, payload.computeSerializedSize()), payload);
     }

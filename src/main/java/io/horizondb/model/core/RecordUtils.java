@@ -32,8 +32,9 @@ public final class RecordUtils {
      * 
      * @param records the record list
      * @return the serialized size of the specified list of records.
+     * @throws IOException if an I/O problem occurs
      */
-    public static int computeSerializedSize(Iterable<? extends Record> records) {
+    public static int computeSerializedSize(Iterable<? extends Record> records) throws IOException {
 
         int size = 0;
 
@@ -50,8 +51,9 @@ public final class RecordUtils {
      * 
      * @param record the record
      * @return the serialized size of the specified record including its type and length.
+     * @throws IOException if an I/O problem occurs while computing the serialized size
      */
-    public static int computeSerializedSize(Record record) {
+    public static int computeSerializedSize(Record record) throws IOException {
 
         int serializedSize = record.computeSerializedSize();
         return 1 + VarInts.computeUnsignedIntSize(serializedSize) + serializedSize;

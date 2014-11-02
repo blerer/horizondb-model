@@ -116,7 +116,7 @@ public final class CreateTimeSeriesPayload implements Payload {
      * {@inheritDoc}
      */
     @Override
-    public int computeSerializedSize() {
+    public int computeSerializedSize() throws IOException {
         return VarInts.computeStringSize(this.databaseName) + this.definition.computeSerializedSize();
     }
 

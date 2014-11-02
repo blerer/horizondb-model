@@ -97,7 +97,7 @@ public final class DataHeaderPayload implements Payload {
      * {@inheritDoc}
      */
     @Override
-    public int computeSerializedSize() {
+    public int computeSerializedSize() throws IOException {
         return this.definition.computeSerializedSize();
     }
 

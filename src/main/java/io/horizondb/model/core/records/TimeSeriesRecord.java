@@ -87,6 +87,32 @@ public class TimeSeriesRecord extends AbstractTimeSeriesRecord implements Compar
      * {@inheritDoc}
      */
     @Override
+    public int getFieldLengthInBytes(int index) {
+        return getField(index).computeSerializedSize();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ReadableBuffer getFieldBytes(int index) throws IOException {
+        Buffer buffer = Buffers.allocate(getFieldLengthInBytes(index));
+        getField(index).writeTo(buffer);
+        return buffer;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isBinary() {
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public boolean isDelta() {
         return this.delta;
     }

@@ -106,7 +106,7 @@ public final class DefaultRecordSetDefinition implements RecordSetDefinition {
      * {@inheritDoc}
      */
     @Override
-    public int computeSerializedSize() {
+    public int computeSerializedSize() throws IOException {
 
         return  1 // TimeUnit
                 + VarInts.computeStringSize(this.timeZone.getID()) 

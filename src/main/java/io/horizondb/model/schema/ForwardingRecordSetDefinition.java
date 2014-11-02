@@ -44,7 +44,7 @@ abstract class ForwardingRecordSetDefinition implements RecordSetDefinition {
      * {@inheritDoc}
      */
     @Override
-    public int computeSerializedSize() {
+    public int computeSerializedSize() throws IOException {
         return delegate().computeSerializedSize();
     }
 

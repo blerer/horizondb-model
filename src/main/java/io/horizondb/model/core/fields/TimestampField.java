@@ -349,7 +349,7 @@ public final class TimestampField extends AbstractField {
     public Field minValue() {
         return MIN_VALUE;
     }
-    
+
     /**
      * Creates a <code>TimestampField</code> with the specified value.
      * 

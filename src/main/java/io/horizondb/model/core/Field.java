@@ -234,7 +234,7 @@ public interface Field extends Comparable<Field>, Serializable {
     void copyTo(Field field);
 
     /**
-     * Reads the field value from the specified <code>ByteReader</code>.
+     * Reads the field value from the specified <code>Buffer</code>.
      * 
      * @param reader the reader to read from.
      * @throws IOException if an I/O problem occurs.
@@ -309,4 +309,10 @@ public interface Field extends Comparable<Field>, Serializable {
      * @return a <code>RangeSet</code> that contains all the values that this field can have.
      */
     RangeSet<Field> allValues();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    int computeSerializedSize();
 }

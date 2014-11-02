@@ -15,6 +15,8 @@
  */
 package io.horizondb.model.protocol;
 
+import java.io.IOException;
+
 import io.horizondb.io.serialization.Serializable;
 
 /**
@@ -77,8 +79,9 @@ public final class Msgs {
      * @param database the name of the database on which the query must be executed
      * @param query the HQL query to execute
      * @return a new message to request execution of the specified HQL query
+     * @throws IOException if an I/O problem occurs
      */
-    public static Msg<HqlQueryPayload> newHqlQueryMsg(String database, String query) {
+    public static Msg<HqlQueryPayload> newHqlQueryMsg(String database, String query) throws IOException {
         
         String databaseName = database;
         

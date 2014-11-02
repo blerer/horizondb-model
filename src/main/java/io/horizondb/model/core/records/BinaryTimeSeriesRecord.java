@@ -20,7 +20,6 @@ import io.horizondb.io.ByteWriter;
 import io.horizondb.io.ReadableBuffer;
 import io.horizondb.io.encoding.VarInts;
 import io.horizondb.model.core.Field;
-import io.horizondb.model.core.Record;
 import io.horizondb.model.schema.FieldType;
 
 import java.io.IOException;
@@ -58,11 +57,17 @@ public class BinaryTimeSeriesRecord extends AbstractTimeSeriesRecord {
     private int bufferSize;
 
     /**
+     * the field position within the buffer.
+     */
+    private int[] fieldPositions;
+    
+    /**
 	 * 
 	 */
     public BinaryTimeSeriesRecord(int recordType, TimeUnit timestampUnit, FieldType... fieldTypes) {
 
         super(recordType, timestampUnit, fieldTypes);
+        this.fieldPositions = new int[fieldTypes.length + 2];
     }
 
     /**
@@ -71,8 +76,17 @@ public class BinaryTimeSeriesRecord extends AbstractTimeSeriesRecord {
     public BinaryTimeSeriesRecord(int recordType, Field... fields) {
 
         super(recordType, fields);
+        this.fieldPositions = new int[fields.length + 1];
     }
-    
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isBinary() {
+        return true;
+    }
+
     /**
      * Copy constructor.
      * 
@@ -88,13 +102,14 @@ public class BinaryTimeSeriesRecord extends AbstractTimeSeriesRecord {
         this.buffer = record.buffer.duplicate();
         this.buffer.readerIndex(record.buffer.readerIndex());
         this.bufferSize = record.bufferSize;
+        this.fieldPositions = new int[record.fields.length];
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Record newInstance() {
+    public BinaryTimeSeriesRecord newInstance() {
         return new BinaryTimeSeriesRecord(this);
     }
 
@@ -121,15 +136,30 @@ public class BinaryTimeSeriesRecord extends AbstractTimeSeriesRecord {
 
     /**
      * {@inheritDoc}
-     * 
-     * @throws IOException
      */
     @Override
     public Field getField(int index) throws IOException {
 
         deserializedFieldIfNeeded(index);
-
         return this.fields[index];
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int getFieldLengthInBytes(int index) throws IOException {
+        deserializedFieldIfNeeded(index);
+        return getFieldPosition(index + 1) - getFieldPosition(index);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ReadableBuffer getFieldBytes(int index) throws IOException {
+        deserializedFieldIfNeeded(index);
+        return this.buffer.slice(getFieldPosition(index), getFieldLengthInBytes(index));
     }
 
     /**
@@ -195,20 +225,42 @@ public class BinaryTimeSeriesRecord extends AbstractTimeSeriesRecord {
      * {@inheritDoc}
      */
     @Override
-    protected BitSet getBitSet() throws IOException {   
+    public BitSet getBitSet() throws IOException {   
         
         deserializedBitSetIfNeeded();
         return this.bitSet;
     }
 
     /**
-     * @param index
-     * @throws IOException
+     * Returns the length of the <code>BitSet</code> in bytes.
+     * 
+     * @return the length of the <code>BitSet</code> in bytes
+     * @throws IOException if the <code>BitSet</code> cannot be deserialized
+     */
+    public int getBitSetLengthInBytes() throws IOException  {
+        
+        deserializedBitSetIfNeeded();
+        return this.fieldPositions[0];
+    }
+    
+    /**
+     * Returns the underlying buffer.
+     * 
+     * @return the underlying buffer.
+     */
+    ReadableBuffer getBuffer() {
+        return this.buffer;
+    }
+    
+    /**
+     * Deserializes the specified <code>Field</code> if it has not already been deserialized.
+     * 
+     * @param index the field index
+     * @throws IOException if a problem occurs while deserializing the <code>Field</code>.
      */
     private void deserializedFieldIfNeeded(int index) throws IOException {
 
         deserializedBitSetIfNeeded();
-
         while (this.deserializationIndex <= index) {
 
             if (this.bitSet.readBit()) {
@@ -218,12 +270,14 @@ public class BinaryTimeSeriesRecord extends AbstractTimeSeriesRecord {
             }
 
             this.deserializationIndex++;
+            this.fieldPositions[this.deserializationIndex] = this.buffer.readerIndex();
         }
     }
 
     /**
-     * @throws IOException
+     * Deserializes the <code>BitSet</code> if it has not already been deserialized.
      * 
+     * @throws IOException if a problem occurs while deserializing the <code>BitSet</code>.
      */
     private void deserializedBitSetIfNeeded() throws IOException {
 
@@ -232,8 +286,18 @@ public class BinaryTimeSeriesRecord extends AbstractTimeSeriesRecord {
             this.buffer.readerIndex(0);
             this.bitSet.fill(VarInts.readUnsignedLong(this.buffer));
             this.delta = this.bitSet.readBit();
+            this.fieldPositions[0] = this.buffer.readerIndex();
             this.bitSetDeserialized = true;
         }
+    }
+
+    /**
+     * Returns the position of the field with the specified index.
+     * @param index the field index.
+     */
+    private int getFieldPosition(int index) {
+
+        return this.fieldPositions[index];
     }
 
     /**

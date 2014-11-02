@@ -144,5 +144,4 @@ public interface RecordSetDefinition extends Iterable<RecordTypeDefinition>, Ser
      * @return the definition of the record type with the specified index.
      */
     RecordTypeDefinition getRecordType(int index);
-
 }

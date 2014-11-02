@@ -52,4 +52,10 @@ public interface Predicate extends Serializable {
      * @return a record filter corresponding to this predicate.
      */
     Filter<Record> toFilter(TimeSeriesDefinition definition);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    int computeSerializedSize();
 }

@@ -17,20 +17,16 @@ package io.horizondb.model.core.records;
 
 import io.horizondb.io.BitSet;
 import io.horizondb.model.core.Field;
-import io.horizondb.model.core.Record;
 import io.horizondb.model.core.fields.TimestampField;
 import io.horizondb.model.schema.FieldType;
-import io.horizondb.model.schema.TimeSeriesDefinition;
 
-import java.io.IOException;
-import java.io.PrintStream;
 import java.util.concurrent.TimeUnit;
 
 /**
  * @author Benjamin
  * 
  */
-abstract class AbstractTimeSeriesRecord implements Record {
+abstract class AbstractTimeSeriesRecord extends AbstractRecord {
 
     /**
      * The type of this record.
@@ -77,155 +73,8 @@ abstract class AbstractTimeSeriesRecord implements Record {
      * {@inheritDoc}
      */
     @Override
-    public int getByte(int index) throws IOException {
-
-        return getField(index).getByte();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int getInt(int index) throws IOException {
-
-        return getField(index).getInt();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public long getLong(int index) throws IOException {
-
-        return getField(index).getLong();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public double getDouble(int index) throws IOException {
-
-        return getField(index).getDouble();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public long getTimestampInNanos(int index) throws IOException {
-
-        return getField(index).getTimestampInNanos();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public long getTimestampInMicros(int index) throws IOException {
-
-        return getField(index).getTimestampInMicros();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public long getTimestampInMillis(int index) throws IOException {
-
-        return getField(index).getTimestampInMillis();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public long getTimestampInSeconds(int index) throws IOException {
-
-        return getField(index).getTimestampInSeconds();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public long getDecimalMantissa(int index) throws IOException {
-
-        return getField(index).getDecimalMantissa();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public byte getDecimalExponent(int index) throws IOException {
-
-        return getField(index).getDecimalExponent();
-    }
-
-    /**
-     * 
-     * {@inheritDoc}
-     */
-    @Override
-    public void copyTo(TimeSeriesRecord record) throws IOException {
-
-        record.setDelta(isDelta());
-        
-        for (int i = 0; i < this.fields.length; i++) {
-            getField(i).copyTo(record.getField(i));
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final void writePrettyPrint(TimeSeriesDefinition definition, PrintStream stream) throws IOException {
-
-        stream.append('[').append(definition.getRecordName(getType())).append(']');
-        stream.append('[').append(Integer.toString(computeSerializedSize())).append(']');
-        
-        BitSet bitSet = getBitSet().duplicate();
-        bitSet.readerIndex(1);    
-        
-        stream.append('[').append(bitSet.toString()).append(']');
-        
-        for (int i = 0, m = this.fields.length; i < m; i++) {
-            
-            Field field = getField(i);
-            
-            if (bitSet.readBit()) {
-                                
-                stream.append('[')
-                      .append(definition.getFieldName(getType(), i))
-                      .append(" = ");
-                
-                field.writePrettyPrint(stream);
-                
-                stream.append(']');
-            }
-        }
-    }
-    
-    protected abstract BitSet getBitSet() throws IOException;
-    
-    /**
-     * Creates a deep copy of the specified fields.
-     * 
-     * @param fields the fields
-     * @return a deep copy of the specified fields.
-     */
-    protected static Field[] deepCopy(Field[] fields) {
-
-        Field[] copy = new Field[fields.length];
-
-        for (int i = 0; i < fields.length; i++) {
-            Field field = fields[i];
-            copy[i] = field.newInstance();
-        }
-
-        return copy;
+    public final int getNumberOfFields() {
+        return this.fields.length;
     }
 
     /**

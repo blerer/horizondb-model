@@ -118,7 +118,7 @@ public class RecordTypeDefinition implements Iterable<FieldDefinition>, Serializ
      * {@inheritDoc}
      */
     @Override
-    public int computeSerializedSize() {
+    public int computeSerializedSize() throws IOException{
 
         return VarInts.computeStringSize(this.name) + this.fields.computeSerializedSize();
     }

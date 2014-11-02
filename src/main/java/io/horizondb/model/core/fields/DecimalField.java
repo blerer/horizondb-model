@@ -206,7 +206,7 @@ public class DecimalField extends AbstractField {
     public void readFrom(ByteReader reader) throws IOException {
 
         this.mantissa = VarInts.readLong(reader);
-        this.exponent = (byte) VarInts.readByte(reader);
+        this.exponent = reader.readByte();
     }
 
     /**

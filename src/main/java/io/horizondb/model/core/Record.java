@@ -15,6 +15,8 @@
  */
 package io.horizondb.model.core;
 
+import io.horizondb.io.BitSet;
+import io.horizondb.io.ReadableBuffer;
 import io.horizondb.io.serialization.Serializable;
 import io.horizondb.model.core.records.BinaryTimeSeriesRecord;
 import io.horizondb.model.core.records.TimeSeriesRecord;
@@ -47,6 +49,22 @@ public interface Record extends Serializable {
     byte BLOCK_HEADER_TYPE = Byte.MIN_VALUE;
     
     /**
+     * Checks if this record is a binary record.
+     * 
+     * @return <code>true</code> if this record is a binary record, <code>false</code>
+     * otherwise.
+     */
+    boolean isBinary();
+    
+    /**
+     * Returns the bit set used to track the position of the zero value fields.
+     * 
+     * @return the bit set used to track the position of the zero value fields.
+     * @throws IOException if an I/O problem occurs.
+     */
+    BitSet getBitSet() throws IOException;
+    
+    /**
      * Checks if this record is a delta that must be resolved from the previous record or a full record.
      * 
      * @return <code>true</code> if this record is a delta, <code>false</code> otherwise.
@@ -69,6 +87,13 @@ public interface Record extends Serializable {
     int getType();
 
     /**
+     * Returns the number of fields within this record.
+     * 
+     * @return the number of field within this record.
+     */
+    int getNumberOfFields();
+    
+    /**
      * Returns the field at the specified index.
      * 
      * @param index the field index.
@@ -76,6 +101,24 @@ public interface Record extends Serializable {
      * @throws IOException if a problem occurs while trying to retrieve the specified field.
      */
     Field getField(int index) throws IOException;
+
+    /**
+     * Returns the length of the specified <code>Field</code> in bytes.
+     * 
+     * @param index the field index
+     * @return the length of the <code>Field</code> in bytes
+     * @throws IOException if the <code>Field</code> bytes cannot be read
+     */
+    int getFieldLengthInBytes(int index) throws IOException;
+
+    /**
+     * Returns the bytes corresponding to the specified <code>Field</code>.
+     * 
+     * @param index the field index
+     * @return the bytes corresponding to the specified <code>Field</code>
+     * @throws IOException if the <code>Field</code> bytes cannot be read
+     */
+    ReadableBuffer getFieldBytes(int index) throws IOException;
 
     /**
      * Returns all the fields from this record.
