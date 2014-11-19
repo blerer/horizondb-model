@@ -18,16 +18,14 @@ package io.horizondb.model.protocol;
 import io.horizondb.io.ByteReader;
 import io.horizondb.io.ByteWriter;
 import io.horizondb.io.serialization.Parser;
+import io.horizondb.model.schema.DefaultRecordSetDefinition;
 import io.horizondb.model.schema.RecordSetDefinition;
-import io.horizondb.model.schema.TimeSeriesDefinition;
 
 import java.io.IOException;
 
 import javax.annotation.concurrent.Immutable;
 
 /**
- * 
- * @author Benjamin
  *
  */
 @Immutable
@@ -44,7 +42,7 @@ public final class DataHeaderPayload implements Payload {
         @Override
         public DataHeaderPayload parseFrom(ByteReader reader) throws IOException {
 
-            TimeSeriesDefinition definition = TimeSeriesDefinition.parseFrom(reader);
+            RecordSetDefinition definition = DefaultRecordSetDefinition.parseFrom(reader);
             
             return new DataHeaderPayload(definition);
         }

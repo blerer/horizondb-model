@@ -26,8 +26,6 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * A <code>RecordSetDefinition</code> that forward all its call to another <code>RecordSetDefinition</code>.
- * 
- * @author Benjamin
  *
  */
 abstract class ForwardingRecordSetDefinition implements RecordSetDefinition {

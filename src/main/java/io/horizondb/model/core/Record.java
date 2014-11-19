@@ -16,7 +16,7 @@
 package io.horizondb.model.core;
 
 import io.horizondb.io.BitSet;
-import io.horizondb.io.ReadableBuffer;
+import io.horizondb.io.ByteWriter;
 import io.horizondb.io.serialization.Serializable;
 import io.horizondb.model.core.records.BinaryTimeSeriesRecord;
 import io.horizondb.model.core.records.TimeSeriesRecord;
@@ -27,9 +27,6 @@ import java.io.PrintStream;
 
 /**
  * Represents a record from a time series.
- * 
- * @author Benjamin
- * 
  */
 public interface Record extends Serializable {
 
@@ -110,15 +107,6 @@ public interface Record extends Serializable {
      * @throws IOException if the <code>Field</code> bytes cannot be read
      */
     int getFieldLengthInBytes(int index) throws IOException;
-
-    /**
-     * Returns the bytes corresponding to the specified <code>Field</code>.
-     * 
-     * @param index the field index
-     * @return the bytes corresponding to the specified <code>Field</code>
-     * @throws IOException if the <code>Field</code> bytes cannot be read
-     */
-    ReadableBuffer getFieldBytes(int index) throws IOException;
 
     /**
      * Returns all the fields from this record.
@@ -250,4 +238,12 @@ public interface Record extends Serializable {
      * @throws IOException if an I/O problem occurs
      */
     void writePrettyPrint(TimeSeriesDefinition definition, PrintStream stream) throws IOException;
+    
+    /**
+     * Writes the field with the specified index the the specified writer.
+     *
+     * @param index the field index
+     * @param writer the writer to write to
+     */
+    void writeFieldTo(int index, ByteWriter writer) throws IOException;
 }

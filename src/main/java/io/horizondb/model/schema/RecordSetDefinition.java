@@ -23,8 +23,7 @@ import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @author Benjamin
- *
+ * Defines a set of records.
  */
 public interface RecordSetDefinition extends Iterable<RecordTypeDefinition>, Serializable {
 

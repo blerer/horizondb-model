@@ -95,16 +95,6 @@ public class TimeSeriesRecord extends AbstractTimeSeriesRecord implements Compar
      * {@inheritDoc}
      */
     @Override
-    public ReadableBuffer getFieldBytes(int index) throws IOException {
-        Buffer buffer = Buffers.allocate(getFieldLengthInBytes(index));
-        getField(index).writeTo(buffer);
-        return buffer;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public boolean isBinary() {
         return false;
     }
@@ -378,6 +368,14 @@ public class TimeSeriesRecord extends AbstractTimeSeriesRecord implements Compar
      * {@inheritDoc}
      */
     @Override
+    public void writeFieldTo(int index, ByteWriter writer) throws IOException {
+        getField(index).writeTo(writer);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void writeTo(ByteWriter writer) throws IOException {
 
         BitSet bitSet = getBitSet();
@@ -388,7 +386,7 @@ public class TimeSeriesRecord extends AbstractTimeSeriesRecord implements Compar
         for (int i = 0; i < this.fields.length; i++) {
 
             if (bitSet.readBit()) {
-                getField(i).writeTo(writer);
+                writeFieldTo(i, writer);
             }
         }
     }

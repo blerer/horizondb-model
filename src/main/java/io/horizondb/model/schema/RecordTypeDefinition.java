@@ -190,6 +190,15 @@ public class RecordTypeDefinition implements Iterable<FieldDefinition>, Serializ
         return this.fieldIndices.inverse().get(Integer.valueOf(index));
     }
     
+
+    /**
+     * Returns the number of fields.
+     * @return the number of fields.
+     */
+    public int getNumberOfFields() {
+        return this.fields.size();
+    }
+    
     /**
      * {@inheritDoc}
      */

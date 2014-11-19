@@ -18,6 +18,8 @@ import io.horizondb.io.ByteWriter;
 import io.horizondb.io.serialization.Parser;
 import io.horizondb.io.serialization.Serializable;
 import io.horizondb.model.core.filters.Filters;
+import io.horizondb.model.core.iterators.FieldFilteringIterator;
+import io.horizondb.model.core.records.FieldFilter;
 import io.horizondb.model.schema.DefaultRecordSetDefinition;
 import io.horizondb.model.schema.FieldDefinition;
 import io.horizondb.model.schema.RecordSetDefinition;
@@ -42,8 +44,6 @@ import static io.horizondb.io.encoding.VarInts.writeString;
 import static io.horizondb.io.encoding.VarInts.writeUnsignedInt;
 
 /**
- * @author Benjamin
- *
  */
 public final class Projection implements Serializable {
          
@@ -184,8 +184,9 @@ public final class Projection implements Serializable {
     
     public RecordSetDefinition getDefinition(TimeSeriesDefinition timeSeriesDefinition) {
         
-        DefaultRecordSetDefinition.Builder builder = DefaultRecordSetDefinition.newBuilder();
-   
+        DefaultRecordSetDefinition.Builder builder = DefaultRecordSetDefinition.newBuilder()
+                                                                               .timeUnit(timeSeriesDefinition.getTimeUnit())
+                                                                               .timeZone(timeSeriesDefinition.getTimeZone());
         for (RecordTypeDefinition recordType : timeSeriesDefinition) {
             
             if (this.fieldsPerRecords.containsKey(ALL)) {
@@ -212,6 +213,39 @@ public final class Projection implements Serializable {
         }
         
         return builder.build();
+    }
+    
+    public RecordIterator filterFields(TimeSeriesDefinition timeSeriesDefinition, RecordIterator iterator) {
+
+        if (this.fieldsPerRecords.containsKey(ALL)) {
+            return iterator;
+        }
+
+        FieldFilter[] filters = new FieldFilter[timeSeriesDefinition.getNumberOfRecordTypes()];
+        int type = 0;
+        for (String record : this.fieldsPerRecords.keySet()) {
+
+            int recordIndex = timeSeriesDefinition.getRecordTypeIndex(record);
+            List<String> fields = this.fieldsPerRecords.get(record);
+            int[] mapping;
+            if (fields.contains(ALL)) {
+                mapping = new int [timeSeriesDefinition.getRecordType(recordIndex).getNumberOfFields() + 1];
+                for (int i = 0, m = mapping.length; i < m; i++) {
+                    mapping[i] = i;
+                }
+            } else {
+                mapping = new int[fields.size()];
+                for (int i = 0, m = fields.size(); i < m; i++) {
+                    String fieldName = fields.get(i);
+                    int index = timeSeriesDefinition.getFieldIndex(recordIndex, fieldName);
+                    mapping[i] = index;
+                }
+                
+            }
+            filters[recordIndex] = new FieldFilter(type, mapping);
+            type++;
+        }
+        return new FieldFilteringIterator(iterator, filters);
     }
 
     private static ListMultimap<String, String> convertToMultimap(List<String> expressions) {

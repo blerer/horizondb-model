@@ -154,12 +154,23 @@ public class BinaryTimeSeriesRecord extends AbstractTimeSeriesRecord {
     }
 
     /**
-     * {@inheritDoc}
+     * Returns the bytes corresponding to the specified <code>Field</code>.
+     * 
+     * @param index the field index
+     * @return the bytes corresponding to the specified <code>Field</code>
+     * @throws IOException if the <code>Field</code> bytes cannot be read
      */
-    @Override
     public ReadableBuffer getFieldBytes(int index) throws IOException {
         deserializedFieldIfNeeded(index);
         return this.buffer.slice(getFieldPosition(index), getFieldLengthInBytes(index));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void writeFieldTo(int index, ByteWriter writer) throws IOException {
+        writer.transfer(getFieldBytes(index));
     }
 
     /**

@@ -15,7 +15,6 @@ package io.horizondb.model.core.records;
 
 import io.horizondb.io.BitSet;
 import io.horizondb.io.ByteWriter;
-import io.horizondb.io.ReadableBuffer;
 import io.horizondb.io.encoding.VarInts;
 import io.horizondb.model.core.Field;
 import io.horizondb.model.core.Record;
@@ -24,31 +23,52 @@ import java.io.IOException;
 
 /**
  * Decorator that filter the fields of the <code>Record</code> that it decorate.
- * 
- * @author Benjamin
- *
  */
 public class FieldFilter extends AbstractRecord {
-    
+
+    /**
+     * The type of this record.
+     */
+    private final int type;
+
+    /**
+     * The decorated record.
+     */
     private Record record;
-    
+
+    /**
+     * The field mapping between the input and output.
+     */
     private final int[] mapping;
-    
+
+    /**
+     * The bit set.
+     */
     private final BitSet bitSet;
 
     /**
-     * @param mapping
+     * Creates a new <code>FieldFilter</code> instance with the specified mappings.
+     * 
+     * @param type the new record type
+     * @param mapping the field mapping between the input and output.
      */
-    public FieldFilter(int... mapping) {
+    public FieldFilter(int type, int... mapping) {
+        this.type = type;
         this.mapping = mapping;
         this.bitSet = new BitSet(this.mapping.length + 1);
     }
 
+    /**
+     * Decorates the specified record.
+     * 
+     * @param record the record for which the field must be filtered
+     * @return this <code>FieldFilter</code>
+     */
     public FieldFilter wrap(Record record) {
         this.record = record;
         return this;
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -62,7 +82,7 @@ public class FieldFilter extends AbstractRecord {
      */
     @Override
     public Record newInstance() {
-        return new FieldFilter(this.mapping).wrap(this.record.newInstance());
+        return new FieldFilter(this.type, this.mapping).wrap(this.record.newInstance());
     }
 
     /**
@@ -70,7 +90,7 @@ public class FieldFilter extends AbstractRecord {
      */
     @Override
     public int getType() {
-        return this.record.getType();
+        return this.type;
     }
 
     /**
@@ -109,23 +129,15 @@ public class FieldFilter extends AbstractRecord {
      * {@inheritDoc}
      */
     @Override
-    public ReadableBuffer getFieldBytes(int index) throws IOException {
-        return this.record.getFieldBytes(this.mapping[index]);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public Field[] getFields() throws IOException {
-        
+
         Field[] recordFields = this.record.getFields();
         Field[] newFields = new Field[this.mapping.length];
-        
+
         for (int i = 0; i < newFields.length; i++) {
             newFields[i] = recordFields[this.mapping[i]];
         }
-        
+
         return newFields;
     }
 
@@ -170,17 +182,22 @@ public class FieldFilter extends AbstractRecord {
      * {@inheritDoc}
      */
     @Override
+    public void writeFieldTo(int index, ByteWriter writer) throws IOException {
+        this.record.writeFieldTo(this.mapping[index], writer);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void writeTo(ByteWriter writer) throws IOException {
-        
+
         BitSet bitSet = getBitSet().readerIndex(1);
         VarInts.writeUnsignedLong(writer, bitSet.toLong());
+
         for (int i = 0; i < this.mapping.length; i++) {
             if (bitSet.readBit()) {
-                if (this.record.isBinary()) {
-                    writer.transfer(this.record.getFieldBytes(this.mapping[i]));
-                } else {
-                    this.record.getField(this.mapping[i]).writeTo(writer);
-                }
+                writeFieldTo(i, writer);
             }
         }
     }
@@ -190,11 +207,10 @@ public class FieldFilter extends AbstractRecord {
      */
     @Override
     public BitSet getBitSet() throws IOException {
-        
+
         this.bitSet.reset().writeBit(isDelta());
         BitSet original = this.record.getBitSet();
-        for (int i = 0; i < this.mapping.length; i++)
-        {
+        for (int i = 0; i < this.mapping.length; i++) {
             this.bitSet.writeBit(original.getBit(this.mapping[i] + 1));
         }
         return this.bitSet.readerIndex(0);

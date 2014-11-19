@@ -49,8 +49,6 @@ import static org.apache.commons.lang.Validate.notNull;
 
 /**
  * The definition of set of records.
- * 
- * @author Benjamin
  */
 @Immutable
 public final class DefaultRecordSetDefinition implements RecordSetDefinition {

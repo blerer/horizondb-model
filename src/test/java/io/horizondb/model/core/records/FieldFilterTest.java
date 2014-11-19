@@ -57,7 +57,7 @@ public class FieldFilterTest {
 
     private static void testRecordEndingFields(Record record) throws IOException {
 
-        FieldFilter filteringRecord = new FieldFilter(0, 1).wrap(record);
+        FieldFilter filteringRecord = new FieldFilter(TYPE, 0, 1).wrap(record);
 
         assertEquals(2, filteringRecord.getNumberOfFields());
 
@@ -99,7 +99,7 @@ public class FieldFilterTest {
 
     private static void testFilterRecordDeltaEndingFields(Record record) throws IOException {
 
-        FieldFilter filteringRecord = new FieldFilter(0, 1, 2).wrap(record);
+        FieldFilter filteringRecord = new FieldFilter(TYPE, 0, 1, 2).wrap(record);
 
         assertEquals(3, filteringRecord.getNumberOfFields());
 
@@ -145,7 +145,7 @@ public class FieldFilterTest {
 
     private static void testFilterRecordRandomFields(Record record) throws IOException {
 
-        FieldFilter filteringRecord = new FieldFilter(0, 3).wrap(record);
+        FieldFilter filteringRecord = new FieldFilter(TYPE, 0, 3).wrap(record);
 
         assertEquals(2, filteringRecord.getNumberOfFields());
 
@@ -188,7 +188,7 @@ public class FieldFilterTest {
     }
 
     private static void testFilterRecordDeltaRandomFields(Record record) throws IOException {
-        FieldFilter filteringRecord = new FieldFilter(0, 3).wrap(record);
+        FieldFilter filteringRecord = new FieldFilter(TYPE, 0, 3).wrap(record);
 
         assertEquals(2, filteringRecord.getNumberOfFields());
 
@@ -232,7 +232,7 @@ public class FieldFilterTest {
 
     private static void testFilterRecordWithUnorderedFields(Record record) throws IOException {
 
-        FieldFilter filteringRecord = new FieldFilter(3, 0, 2).wrap(record);
+        FieldFilter filteringRecord = new FieldFilter(TYPE, 3, 0, 2).wrap(record);
 
         assertEquals(3, filteringRecord.getNumberOfFields());
 
@@ -278,7 +278,7 @@ public class FieldFilterTest {
 
     private static void testFilterRecordDeltaWithUnorderedFields(Record record) throws IOException {
 
-        FieldFilter filteringRecord = new FieldFilter(3, 0, 2).wrap(record);
+        FieldFilter filteringRecord = new FieldFilter(TYPE, 3, 0, 2).wrap(record);
 
         assertEquals(3, filteringRecord.getNumberOfFields());
 
