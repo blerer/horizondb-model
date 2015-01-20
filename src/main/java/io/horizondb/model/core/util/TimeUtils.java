@@ -18,10 +18,13 @@ package io.horizondb.model.core.util;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.TimeZone;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.Validate;
+
+import static java.lang.String.format;
 
 /**
  * Utility methods to work with date/time.
@@ -68,15 +71,20 @@ public final class TimeUtils {
     public static long parseDateTime(TimeZone timeZone, String dateTime) {
         
         String pattern = getPattern(dateTime);
-        
         SimpleDateFormat format = new SimpleDateFormat(pattern);
         
         Calendar calendar = Calendar.getInstance(timeZone);
         calendar.clear();
+        calendar.setLenient(false);
         
         format.setCalendar(calendar);
         
-        return format.parse(dateTime, new ParsePosition(0)).getTime();
+        Date date = format.parse(dateTime, new ParsePosition(0));
+        
+        if (date == null) {
+            throw new IllegalArgumentException(format("The value %s cannot be parsed into a valid date", dateTime));
+        }
+        return date.getTime();
     }
     
     /**
@@ -101,8 +109,9 @@ public final class TimeUtils {
             return "yyyy-MM-dd HH:mm:ss.SSS";
         }
         
-        throw new IllegalArgumentException("The format of the date/time: " + dateTime + 
-                                           " does not match the expected one: yyyy-MM-dd HH:mm:ss.SSS");
+        throw new IllegalArgumentException(format("The format of the date/time: %s does not match the expected one:" 
+                                                  + " yyyy-MM-dd HH:mm:ss.SSS", 
+                                                  dateTime));
     }
 
     /**

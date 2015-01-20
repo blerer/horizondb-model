@@ -22,8 +22,6 @@ import java.io.IOException;
 
 /**
  * Utility methods to work with records.
- * 
- * @author Benjamin
  */
 public final class RecordUtils {
 
@@ -74,9 +72,10 @@ public final class RecordUtils {
     }
 
     /**
-     * @param writer
-     * @param record
-     * @throws IOException
+     * writes the specified record to the specified writer.
+     * 
+     * @param writer the writer to write to
+     * @param record the record to write
      */
     public static void writeRecord(ByteWriter writer, Record record) throws IOException {
         

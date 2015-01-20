@@ -165,6 +165,16 @@ public final class DefaultRecordSetDefinition implements RecordSetDefinition {
      * {@inheritDoc}
      */
     @Override
+    public BinaryTimeSeriesRecord newBinaryRecord(int index) {
+
+        RecordTypeDefinition recordTypeDefinition = this.recordTypes.get(index);
+        return recordTypeDefinition.newBinaryRecord(index, this.timeUnit);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public TimeSeriesRecord[] newRecords() {
 
         int numberOfTypes = this.recordTypes.size();

@@ -35,6 +35,14 @@ public interface RecordSetDefinition extends Iterable<RecordTypeDefinition>, Ser
     BinaryTimeSeriesRecord[] newBinaryRecords();
 
     /**
+     * Returns a new binary record instance of the specified type.
+     * 
+     * @param index the record index.
+     * @return a new binary record instances of the specified type.
+     */
+    BinaryTimeSeriesRecord newBinaryRecord(int index);
+
+    /**
      * Returns binary records instances corresponding to this time series records.
      * 
      * @param the filter used filter records base on names.

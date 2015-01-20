@@ -21,10 +21,6 @@ import static io.horizondb.model.core.util.TimeUtils.EUROPE_BERLIN_TIMEZONE;
 import static io.horizondb.model.core.util.TimeUtils.parseDateTime;
 import static org.junit.Assert.assertEquals;
 
-/**
- * @author Benjamin
- *
- */
 public class TimeUtilsTest {
 
     @Test
@@ -40,6 +36,16 @@ public class TimeUtilsTest {
         assertEquals(1399147894150L, time);
     }
 
+    @Test(expected=IllegalArgumentException.class)
+    public void testParseDateTimeWithInvalidDateFormat() {
+        TimeUtils.parseDateTime(EUROPE_BERLIN_TIMEZONE, "2014.05.03 22:11:34.150");
+    }
+    
+    @Test(expected=IllegalArgumentException.class)
+    public void testParseDateTimeWithInvalidDate() {
+        TimeUtils.parseDateTime(EUROPE_BERLIN_TIMEZONE, "2014-05-42 22:11:34.150");
+    }
+    
     @Test
     public void testTruncateMilliseconds() {
 

@@ -13,19 +13,16 @@
  */
 package io.horizondb.model.protocol;
 
+import io.horizondb.io.Buffer;
 import io.horizondb.io.ByteReader;
 import io.horizondb.io.ByteWriter;
+import io.horizondb.io.buffers.Buffers;
 import io.horizondb.io.encoding.VarInts;
 import io.horizondb.io.serialization.Parser;
-import io.horizondb.model.core.util.SerializationUtils;
 
 import java.io.IOException;
-import java.util.List;
 
 /**
- * 
- * @author Benjamin
- *
  */
 public final class InsertPayload implements Payload {
    
@@ -42,12 +39,12 @@ public final class InsertPayload implements Payload {
 
             String database = VarInts.readString(reader);
             String timeSeries = VarInts.readString(reader);
-            String recordType = VarInts.readString(reader);
+            int recordType = reader.readByte();
+            int length = VarInts.readUnsignedInt(reader);
+            Buffer buffer = Buffers.allocate(length);
+            buffer.transfer(reader.slice(length));
             
-            List<String> names = SerializationUtils.parseStringListFrom(reader);
-            List<String> values = SerializationUtils.parseStringListFrom(reader);
-            
-            return new InsertPayload(database, timeSeries, recordType, names, values);
+            return new InsertPayload(database, timeSeries, recordType, buffer);
         }
     };
     
@@ -60,42 +57,31 @@ public final class InsertPayload implements Payload {
      * The time series in which the data must be inserted.
      */
     private final String series;
-    
+
     /**
-     * The type of the record that must be inserted.
+     * The record type
      */
-    private final String recordType;
-    
+    private final int recordType;
+
     /**
-     * The name of the fields in which some data must be inserted.
+     * The record data.
      */
-    private final List<String> fieldNames;
-    
-    /**
-     * The field values.
-     */
-    private final List<String> fieldValues;
-           
+    private final Buffer buffer;
+
     /**
      * Creates a new <code>InsertPayload</code>. 
      * 
      * @param database the database in which the data must be inserted
      * @param series the time series in which the data must be inserted
-     * @param recordType the type of the record that must be inserted
-     * @param fieldNames the field name
-     * @param fieldValues the field values
+     * @param recordType the record type
+     * @param buffer the record data
      */
-    public InsertPayload(String database,
-                         String series,
-                         String recordType,
-                         List<String> fieldNames,
-                         List<String> fieldValues) {
+    public InsertPayload(String database, String series, int recordType, Buffer buffer) {
         
         this.database = database;
         this.series = series;
         this.recordType = recordType;
-        this.fieldNames = fieldNames;
-        this.fieldValues = fieldValues;
+        this.buffer = buffer;
     }
 
     /**
@@ -106,10 +92,10 @@ public final class InsertPayload implements Payload {
     public String getDatabase() {
         return this.database;
     }
-    
+
     /**
      * Returns the name of the time series in which the data must be inserted.   
-     * 
+     *
      * @return the name of the time series in which the data must be inserted.  
      */
     public String getSeries() {
@@ -121,26 +107,17 @@ public final class InsertPayload implements Payload {
      * 
      * @return the type of the record that must be inserted.
      */
-    public String getRecordType() {
+    public int getRecordType() {
         return this.recordType;
     }
 
     /**
-     * Returns the name of the fields in which some data must be inserted.
-     * 
-     * @return the name of the fields in which some data must be inserted.
+     * Returns the record data
+     *
+     * @return the buffer the record data
      */
-    public List<String> getFieldNames() {
-        return this.fieldNames;
-    }
-
-    /**
-     * Returns the field values
-     * 
-     * @return the field values
-     */
-    public List<String> getFieldValues() {
-        return this.fieldValues;
+    public Buffer getBuffer() {
+        return this.buffer;
     }
 
     /**
@@ -148,12 +125,13 @@ public final class InsertPayload implements Payload {
      */
     @Override
     public int computeSerializedSize() {
-        
+
+        int length = this.buffer.readableBytes();
         return VarInts.computeStringSize(this.database) 
                 + VarInts.computeStringSize(this.series) 
-                + VarInts.computeStringSize(this.recordType)
-                + SerializationUtils.computeStringListSerializedSize(this.fieldNames)
-                + SerializationUtils.computeStringListSerializedSize(this.fieldValues);
+                + 1
+                + VarInts.computeUnsignedIntSize(length)
+                + length;
     }
 
     /**
@@ -164,9 +142,9 @@ public final class InsertPayload implements Payload {
 
         VarInts.writeString(writer, this.database);
         VarInts.writeString(writer, this.series);
-        VarInts.writeString(writer, this.recordType);
-        SerializationUtils.writeStringList(writer, this.fieldNames);
-        SerializationUtils.writeStringList(writer, this.fieldValues);
+        VarInts.writeByte(writer, this.recordType);
+        VarInts.writeUnsignedInt(writer, this.buffer.readableBytes());
+        writer.transfer(this.buffer);
     }
     
     /**

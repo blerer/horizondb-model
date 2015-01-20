@@ -27,9 +27,6 @@ import org.apache.commons.lang.builder.ToStringStyle;
 
 /**
  * Base class for predicate applying to one field.
- * 
- * @author Benjamin
- *
  */
 public abstract class FieldPredicate implements Predicate {
     
@@ -91,8 +88,7 @@ public abstract class FieldPredicate implements Predicate {
         
         return ImmutableField.of(field);
     }
-    
-    
+
     /**
      * Returns a new field instance with the specified value. 
      * 
@@ -102,11 +98,10 @@ public abstract class FieldPredicate implements Predicate {
      * @return a new field instance with the specified value. 
      */
     protected static final Field newField(Field prototype, TimeZone timeZone, String value) {
-        
-        Field field = prototype.newInstance().setValueFromString(timeZone, value);        
+        Field field = prototype.newInstance().setValueFromString(timeZone, value);
         return ImmutableField.of(field);
     }
-    
+
     /**
      * {@inheritDoc}
      */

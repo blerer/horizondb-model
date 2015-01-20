@@ -66,6 +66,14 @@ abstract class ForwardingRecordSetDefinition implements RecordSetDefinition {
      * {@inheritDoc}
      */
     @Override
+    public BinaryTimeSeriesRecord newBinaryRecord(int index) {
+        return delegate().newBinaryRecord(index);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public BinaryTimeSeriesRecord[] newBinaryRecords(Filter<String> filter) {
         return delegate().newBinaryRecords(filter);
     }
