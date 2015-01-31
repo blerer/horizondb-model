@@ -16,6 +16,7 @@ package io.horizondb.model.protocol;
 import io.horizondb.io.Buffer;
 import io.horizondb.io.ByteReader;
 import io.horizondb.io.ByteWriter;
+import io.horizondb.io.ReadableBuffer;
 import io.horizondb.io.buffers.Buffers;
 import io.horizondb.io.encoding.VarInts;
 import io.horizondb.io.serialization.Parser;
@@ -42,7 +43,7 @@ public final class InsertPayload implements Payload {
             int recordType = reader.readByte();
             int length = VarInts.readUnsignedInt(reader);
             Buffer buffer = Buffers.allocate(length);
-            buffer.transfer(reader.slice(length));
+            buffer.transfer(reader.slice(length)).readerIndex(0);
             
             return new InsertPayload(database, timeSeries, recordType, buffer);
         }
@@ -116,8 +117,8 @@ public final class InsertPayload implements Payload {
      *
      * @return the buffer the record data
      */
-    public Buffer getBuffer() {
-        return this.buffer;
+    public ReadableBuffer getBuffer() {
+        return this.buffer.readerIndex(0);
     }
 
     /**
@@ -126,7 +127,7 @@ public final class InsertPayload implements Payload {
     @Override
     public int computeSerializedSize() {
 
-        int length = this.buffer.readableBytes();
+        int length = this.buffer.readerIndex(0).readableBytes();
         return VarInts.computeStringSize(this.database) 
                 + VarInts.computeStringSize(this.series) 
                 + 1
@@ -139,12 +140,11 @@ public final class InsertPayload implements Payload {
      */
     @Override
     public void writeTo(ByteWriter writer) throws IOException {
-
         VarInts.writeString(writer, this.database);
         VarInts.writeString(writer, this.series);
         VarInts.writeByte(writer, this.recordType);
         VarInts.writeUnsignedInt(writer, this.buffer.readableBytes());
-        writer.transfer(this.buffer);
+        writer.transfer(this.buffer.readerIndex(0));
     }
     
     /**
