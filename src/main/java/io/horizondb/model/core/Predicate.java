@@ -16,16 +16,11 @@ package io.horizondb.model.core;
 import io.horizondb.io.serialization.Serializable;
 import io.horizondb.model.schema.TimeSeriesDefinition;
 
-import java.util.TimeZone;
-
 import com.google.common.collect.RangeSet;
 
 /***
  * Represents a predicate within an HQL statement. A predicate is a condition that can be 
  * evaluated to true/false.
- * 
- * @author Benjamin
- *
  */
 public interface Predicate extends Serializable {
 
@@ -39,11 +34,9 @@ public interface Predicate extends Serializable {
     /**
      * Returns the timestamp range corresponding to this predicate.
      * 
-     * @param prototype the timestamp field used as prototype
-     * @param timeZone the time series time zone
      * @return the timestamp ranges accepted by this predicate.
      */
-    RangeSet<Field> getTimestampRanges(Field prototype, TimeZone timeZone);    
+    RangeSet<Field> getTimestampRanges();    
     
     /**
      * Converts this <code>Predicate</code> into a record filter.

@@ -21,11 +21,11 @@ import io.horizondb.model.core.Field;
 import io.horizondb.model.core.Filter;
 import io.horizondb.model.core.Record;
 import io.horizondb.model.core.fields.ImmutableField;
+import io.horizondb.model.core.fields.TimestampField;
 import io.horizondb.model.core.filters.Filters;
 import io.horizondb.model.schema.TimeSeriesDefinition;
 
 import java.io.IOException;
-import java.util.TimeZone;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -34,8 +34,6 @@ import com.google.common.collect.RangeSet;
 
 /**
  * A simple predicate used to compare a field to given value.
- * 
- * @author Benjamin
  */
 final class SimplePredicate extends FieldPredicate {
     
@@ -57,7 +55,7 @@ final class SimplePredicate extends FieldPredicate {
 
             String fieldName = VarInts.readString(reader);
             Operator operator = Operator.parseFrom(reader);
-            String value = VarInts.readString(reader);
+            Field value = ImmutableField.of(readField(reader));
             
             return new SimplePredicate(fieldName, operator, value);
         }
@@ -79,7 +77,7 @@ final class SimplePredicate extends FieldPredicate {
     /**
      * The value to which the field value must be compared. 
      */
-    private final String value;
+    private final Field value;
 
     /**
      * Creates a new <code>SimplePredicate</code> instance for the specified field.
@@ -88,11 +86,11 @@ final class SimplePredicate extends FieldPredicate {
      * @param operator the operator
      * @param value the value to which the field value must be compared
      */
-    public SimplePredicate(String fieldName, Operator operator, String value) {
+    public SimplePredicate(String fieldName, Operator operator, Field value) {
         
         super(fieldName);
         this.operator = operator;
-        this.value = value;
+        this.value = ImmutableField.of(value);
     }
 
     /**
@@ -108,7 +106,7 @@ final class SimplePredicate extends FieldPredicate {
      * Returns the value to which the field value must be compared.
      * @return the value to which the field value must be compared
      */
-    public String getValue() {
+    public Field getValue() {
         return this.value;
     }
 
@@ -116,16 +114,13 @@ final class SimplePredicate extends FieldPredicate {
      * {@inheritDoc}
      */
     @Override
-    public RangeSet<Field> getTimestampRanges(Field prototype, TimeZone timeZone) {
+    public RangeSet<Field> getTimestampRanges() {
         
         if (!isTimestamp()) {
-            return prototype.allValues();
+            return TimestampField.ALL;
         }
         
-        Field field = prototype.newInstance();
-        field.setValueFromString(timeZone, this.value);
-        
-        return this.operator.getRangeSet(ImmutableField.of(field));
+        return this.operator.getRangeSet(this.value);
     }
 
     /**    
@@ -134,9 +129,7 @@ final class SimplePredicate extends FieldPredicate {
     @Override
     public Filter<Record> toFilter(TimeSeriesDefinition definition) {
 
-        Field field = newField(definition, this.value);
-        
-        Filter<Field> fieldFilter = this.operator.getFilter(field, isTimestamp());
+        Filter<Field> fieldFilter = this.operator.getFilter(this.value, isTimestamp());
         
         return Filters.toRecordFilter(definition, getFieldName(), fieldFilter);
     }
@@ -192,7 +185,7 @@ final class SimplePredicate extends FieldPredicate {
     public int computeSerializedSize() {
         return VarInts.computeStringSize(getFieldName()) 
                 + this.operator.computeSerializedSize()
-                + VarInts.computeStringSize(this.value) ;
+                + computeFieldSerializedSize(this.value);
     }
 
     /**
@@ -200,10 +193,9 @@ final class SimplePredicate extends FieldPredicate {
      */
     @Override
     public void writeTo(ByteWriter writer) throws IOException {
-        
         VarInts.writeString(writer, getFieldName());
         this.operator.writeTo(writer);
-        VarInts.writeString(writer, this.value);
+        writeField(writer, this.value);
     }
     
     /**

@@ -1,6 +1,4 @@
 /**
- * Copyright 2013 Benjamin Lerer
- * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,14 +25,9 @@ import java.util.TimeZone;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.apache.commons.lang.builder.ToStringStyle;
 
 /**
  * <code>Field</code> containing an integer value.
- * 
- * @author Benjamin
- * 
  */
 public class IntegerField extends AbstractCounterField {
 
@@ -236,7 +229,7 @@ public class IntegerField extends AbstractCounterField {
      */
     @Override
     public String toString() {
-        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).append("value", this.value).toString();
+        return Integer.toString(this.value);
     }
 
     /**    

@@ -189,8 +189,6 @@ public final class TimeSeriesDefinition extends ForwardingRecordSetDefinition {
         return this.compressionType;
     }
 
-
-
     /**
      * Creates a new <code>TimeSeriesMetaData</code> by reading the data from the specified reader.
      * 
@@ -234,7 +232,7 @@ public final class TimeSeriesDefinition extends ForwardingRecordSetDefinition {
      * {@inheritDoc}
      */
     @Override
-    protected RecordSetDefinition delegate() {
+    public RecordSetDefinition delegate() {
         return this.recordSetDefinition;
     }
 

@@ -15,23 +15,20 @@ package io.horizondb.model.core.predicates;
 
 import io.horizondb.io.ByteReader;
 import io.horizondb.io.serialization.Parser;
-import io.horizondb.model.core.Predicate;
 import io.horizondb.model.core.Field;
 import io.horizondb.model.core.Filter;
+import io.horizondb.model.core.Predicate;
 import io.horizondb.model.core.Record;
 import io.horizondb.model.core.filters.Filters;
 import io.horizondb.model.schema.TimeSeriesDefinition;
 
 import java.io.IOException;
-import java.util.TimeZone;
 
 import com.google.common.collect.RangeSet;
 import com.google.common.collect.TreeRangeSet;
 
 /**
  * An OR predicate
- * 
- * @author Benjamin
  */
 final class OrPredicate extends LogicalPredicate {
     
@@ -98,10 +95,10 @@ final class OrPredicate extends LogicalPredicate {
      * {@inheritDoc}
      */
     @Override
-    public RangeSet<Field> getTimestampRanges(Field prototype, TimeZone timeZone) {
+    public RangeSet<Field> getTimestampRanges() {
         
-        RangeSet<Field> leftRanges = this.left.getTimestampRanges(prototype, timeZone);
-        RangeSet<Field> rightRanges = this.right.getTimestampRanges(prototype, timeZone);
+        RangeSet<Field> leftRanges = this.left.getTimestampRanges();
+        RangeSet<Field> rightRanges = this.right.getTimestampRanges();
         
         RangeSet<Field> rangeSet = TreeRangeSet.create(leftRanges);
         rangeSet.addAll(rightRanges);

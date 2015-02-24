@@ -1,6 +1,4 @@
 /**
- * Copyright 2013 Benjamin Lerer
- * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,8 +27,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.apache.commons.lang.builder.ToStringStyle;
 
 import com.google.common.collect.ImmutableRangeSet;
 import com.google.common.collect.Range;
@@ -39,8 +35,7 @@ import com.google.common.collect.RangeSet;
 import static org.apache.commons.lang.Validate.notNull;
 
 /**
- * @author Benjamin
- * 
+ * A <code>Field</code> representing a timestamp
  */
 public final class TimestampField extends AbstractField {
     
@@ -301,9 +296,23 @@ public final class TimestampField extends AbstractField {
     @Override
     public String toString() {
 
-        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).append("timestamp", this.sourceTimestamp)
-                                                                          .append("unit", this.sourceUnit)
-                                                                          .toString();
+        return this.sourceTimestamp + getSymbol();
+    }
+
+    /**
+     * Return the symbol associated to the time unit.
+     * @return the symbol associated to the time unit.
+     */
+    private String getSymbol() {
+        
+        switch (this.sourceUnit) {
+            
+            case NANOSECONDS: return "ns";
+            case MICROSECONDS: return "µs";
+            case MILLISECONDS: return "ms";
+            case SECONDS: return "s";
+            default: return this.sourceUnit.toString();
+        }
     }
 
     /**

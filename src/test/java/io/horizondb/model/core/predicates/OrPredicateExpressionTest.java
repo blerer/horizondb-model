@@ -13,40 +13,35 @@
  */
 package io.horizondb.model.core.predicates;
 
-import java.util.Arrays;
-
-import io.horizondb.model.core.Predicate;
 import io.horizondb.model.core.Field;
+import io.horizondb.model.core.Predicate;
 import io.horizondb.model.core.fields.TimestampField;
-import io.horizondb.model.core.predicates.Predicates;
 import io.horizondb.model.schema.FieldType;
 
 import org.junit.Test;
 
 import com.google.common.collect.RangeSet;
+import com.google.common.collect.Sets;
 
-import static io.horizondb.model.core.util.TimeUtils.EUROPE_BERLIN_TIMEZONE;
+import static io.horizondb.model.core.predicates.FieldUtils.toIntField;
+import static io.horizondb.model.core.predicates.FieldUtils.toMillisecondField;
+import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-/**
- * @author Benjamin
- *
- */
 public class OrPredicateExpressionTest {
 
     @Test
     public void testGetTimestampRangesWithNonTimestampField() {
         
-        Predicate left = Predicates.gt("price", "10"); 
-        Predicate right = Predicates.lt("price", "12"); 
-        Field prototype = FieldType.MILLISECONDS_TIMESTAMP.newField();
+        Predicate left = Predicates.gt("price", toIntField("10")); 
+        Predicate right = Predicates.lt("price", toIntField("12")); 
         
         Predicate predicate = Predicates.or(left, right);
         
-        RangeSet<Field> rangeSet = predicate.getTimestampRanges(prototype, EUROPE_BERLIN_TIMEZONE);
-        assertEquals(prototype.allValues(), rangeSet);
+        RangeSet<Field> rangeSet = predicate.getTimestampRanges();
+        assertEquals(TimestampField.ALL, rangeSet);
     }
     
     @Test
@@ -54,15 +49,14 @@ public class OrPredicateExpressionTest {
         
         long timeInMillis = 1399147894150L;
         
-        Predicate left = Predicates.gt("timestamp", timeInMillis + "ms"); 
-        Predicate right = Predicates.lt("price", "12"); 
+        Predicate left = Predicates.gt("timestamp", toMillisecondField(timeInMillis + "ms")); 
+        Predicate right = Predicates.lt("price", toIntField("12")); 
         
         Predicate predicate = Predicates.or(left, right); 
-        Field prototype = FieldType.MILLISECONDS_TIMESTAMP.newField();
+
+        RangeSet<Field> rangeSet = predicate.getTimestampRanges();
         
-        RangeSet<Field> rangeSet = predicate.getTimestampRanges(prototype, EUROPE_BERLIN_TIMEZONE);
-        
-        assertEquals(prototype.allValues(), rangeSet);
+        assertEquals(TimestampField.ALL, rangeSet);
     }
     
     @Test
@@ -70,13 +64,12 @@ public class OrPredicateExpressionTest {
         
         long timeInMillis = 1399147894150L;
         
-        Predicate left = Predicates.gt("timestamp", (timeInMillis + 100) + "ms"); 
-        Predicate rigth = Predicates.lt("timestamp", timeInMillis + "ms"); 
+        Predicate left = Predicates.gt("timestamp", toMillisecondField((timeInMillis + 100) + "ms")); 
+        Predicate rigth = Predicates.lt("timestamp", toMillisecondField(timeInMillis + "ms")); 
         
         Predicate predicate = Predicates.or(left, rigth); 
-        Field prototype = FieldType.MILLISECONDS_TIMESTAMP.newField();
         
-        RangeSet<Field> rangeSet = predicate.getTimestampRanges(prototype, EUROPE_BERLIN_TIMEZONE);
+        RangeSet<Field> rangeSet = predicate.getTimestampRanges();
         
         Field expected = FieldType.MILLISECONDS_TIMESTAMP.newField();
         expected.setTimestampInMillis(timeInMillis + 10);
@@ -109,13 +102,13 @@ public class OrPredicateExpressionTest {
         
         long timeInMillis = 1399147894150L;
         
-        Predicate left = Predicates.lt("timestamp", (timeInMillis + 100) + "ms"); 
-        Predicate rigth = Predicates.gt("timestamp", timeInMillis + "ms"); 
+        Predicate left = Predicates.lt("timestamp", toMillisecondField((timeInMillis + 100) + "ms")); 
+        Predicate rigth = Predicates.gt("timestamp", toMillisecondField(timeInMillis + "ms")); 
         
         Predicate predicate = Predicates.or(left, rigth); 
         Field prototype = FieldType.MILLISECONDS_TIMESTAMP.newField();
         
-        RangeSet<Field> rangeSet = predicate.getTimestampRanges(prototype, EUROPE_BERLIN_TIMEZONE);
+        RangeSet<Field> rangeSet = predicate.getTimestampRanges();
         
         assertEquals(prototype.allValues(), rangeSet);
     }
@@ -125,17 +118,15 @@ public class OrPredicateExpressionTest {
         
         long timeInMillis = 1399147894150L;
         
-        Predicate left = Predicates.in("timestamp", Arrays.asList((timeInMillis - 10) + "ms",
-                                                                     timeInMillis + "ms",
-                                                                     (timeInMillis + 10) + "ms")); 
+        Predicate left = Predicates.in("timestamp", Sets.newTreeSet(asList(toMillisecondField((timeInMillis - 10) + "ms"),
+                                                                                     toMillisecondField(  timeInMillis + "ms"),
+                                                                                                          toMillisecondField((timeInMillis + 10) + "ms")))); 
         
-        Predicate rigth = Predicates.between("timestamp", (timeInMillis - 20) + "ms", (timeInMillis + 20) + "ms");
+        Predicate rigth = Predicates.between("timestamp", toMillisecondField((timeInMillis - 20) + "ms"), toMillisecondField((timeInMillis + 20) + "ms"));
         
         Predicate predicate = Predicates.or(left, rigth);
-        
-        Field prototype = FieldType.MILLISECONDS_TIMESTAMP.newField();
-        
-        RangeSet<Field> rangeSet = predicate.getTimestampRanges(prototype, EUROPE_BERLIN_TIMEZONE);
+
+        RangeSet<Field> rangeSet = predicate.getTimestampRanges();
         
         Field expected = FieldType.MILLISECONDS_TIMESTAMP.newField();
         

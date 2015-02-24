@@ -34,15 +34,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static io.horizondb.model.core.predicates.Predicates.*;
-
+import static io.horizondb.model.core.predicates.FieldUtils.toMillisecondField;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-/**
- * @author Benjamin
- * 
- */
 public class FilteringRecordIteratorTest {
 
     private TimeSeriesDefinition seriesDefinition;
@@ -84,9 +80,9 @@ public class FilteringRecordIteratorTest {
 
         BinaryTimeSeriesRecordIterator iterator = new BinaryTimeSeriesRecordIterator(this.seriesDefinition, buffer);
 
-        Predicate expression = and(ge("timestamp", (timestamp - 100) + "ms"), 
-                                    lt("timestamp", (timestamp + 500) + "ms"));
-        
+        Predicate expression = and(ge("timestamp", toMillisecondField((timestamp - 100) + "ms")),
+                                   lt("timestamp", toMillisecondField((timestamp + 500) + "ms")));
+
         Filter<Record> filter = expression.toFilter(this.seriesDefinition);
 
         try (FilteringRecordIterator filteringIterator = new FilteringRecordIterator(this.seriesDefinition,
@@ -139,9 +135,9 @@ public class FilteringRecordIteratorTest {
 
         BinaryTimeSeriesRecordIterator iterator = new BinaryTimeSeriesRecordIterator(this.seriesDefinition, buffer);
 
-        Predicate expression = and(ge("timestamp", (timestamp + 120) + "ms"), 
-                                    lt("timestamp", (timestamp + 600) + "ms"));
-        
+        Predicate expression = and(ge("timestamp", toMillisecondField((timestamp + 120) + "ms")),
+                                   lt("timestamp", toMillisecondField((timestamp + 600) + "ms")));
+
         Filter<Record> filter = expression.toFilter(this.seriesDefinition);
 
         try (FilteringRecordIterator rangeIterator = new FilteringRecordIterator(this.seriesDefinition,
@@ -179,9 +175,9 @@ public class FilteringRecordIteratorTest {
 
         BinaryTimeSeriesRecordIterator iterator = new BinaryTimeSeriesRecordIterator(this.seriesDefinition, buffer);
 
-        Predicate expression = and(ge("timestamp", (timestamp - 100) + "ms"), 
-                                    le("timestamp", (timestamp + 600) + "ms"));
-        
+        Predicate expression = and(ge("timestamp", toMillisecondField((timestamp - 100) + "ms")),
+                                   le("timestamp", toMillisecondField((timestamp + 600) + "ms")));
+
         Filter<Record> filter = expression.toFilter(this.seriesDefinition);
 
         try (FilteringRecordIterator rangeIterator = new FilteringRecordIterator(this.seriesDefinition,
@@ -268,9 +264,9 @@ public class FilteringRecordIteratorTest {
 
         BinaryTimeSeriesRecordIterator iterator = new BinaryTimeSeriesRecordIterator(this.seriesDefinition, buffer);
 
-        Predicate expression = and(ge("timestamp", (timestamp + 200) + "ms"), 
-                                    lt("timestamp", (timestamp + 400) + "ms"));
-        
+        Predicate expression = and(ge("timestamp", toMillisecondField((timestamp + 200) + "ms")),
+                                   lt("timestamp", toMillisecondField((timestamp + 400) + "ms")));
+
         Filter<Record> filter = expression.toFilter(this.seriesDefinition);
 
         try (FilteringRecordIterator rangeIterator = new FilteringRecordIterator(this.seriesDefinition,
@@ -310,9 +306,9 @@ public class FilteringRecordIteratorTest {
 
         BinaryTimeSeriesRecordIterator iterator = new BinaryTimeSeriesRecordIterator(this.seriesDefinition, buffer);
 
-        Predicate expression = and(ge("timestamp", (timestamp + 80) + "ms"), 
-                                    lt("timestamp", (timestamp + 600) + "ms"));
-        
+        Predicate expression = and(ge("timestamp", toMillisecondField((timestamp + 80) + "ms")),
+                                   lt("timestamp", toMillisecondField((timestamp + 600) + "ms")));
+
         Filter<Record> filter = expression.toFilter(this.seriesDefinition);
 
         try (FilteringRecordIterator rangeIterator = new FilteringRecordIterator(this.seriesDefinition,
@@ -357,9 +353,9 @@ public class FilteringRecordIteratorTest {
 
         BinaryTimeSeriesRecordIterator iterator = new BinaryTimeSeriesRecordIterator(this.seriesDefinition, buffer);
 
-        Predicate expression = and(ge("timestamp", (timestamp - 100) + "ms"), 
-                                    lt("timestamp", (timestamp + 500) + "ms"));
-        
+        Predicate expression = and(ge("timestamp", toMillisecondField((timestamp - 100) + "ms")),
+                                   lt("timestamp", toMillisecondField((timestamp + 500) + "ms")));
+
         Filter<Record> filter = expression.toFilter(this.seriesDefinition);
 
         try (FilteringRecordIterator rangeIterator = new FilteringRecordIterator(this.seriesDefinition,
@@ -411,9 +407,9 @@ public class FilteringRecordIteratorTest {
 
         BinaryTimeSeriesRecordIterator iterator = new BinaryTimeSeriesRecordIterator(this.seriesDefinition, buffer);
 
-        Predicate expression = and(ge("timestamp", (timestamp - 100) + "ms"), 
-                                    lt("timestamp", (timestamp + 500) + "ms"));
-        
+        Predicate expression = and(ge("timestamp", toMillisecondField((timestamp - 100) + "ms")),
+                                   lt("timestamp", toMillisecondField((timestamp + 500) + "ms")));
+
         Filter<Record> filter = expression.toFilter(this.seriesDefinition);
 
         try (FilteringRecordIterator rangeIterator = new FilteringRecordIterator(this.seriesDefinition,
@@ -465,9 +461,9 @@ public class FilteringRecordIteratorTest {
 
         BinaryTimeSeriesRecordIterator iterator = new BinaryTimeSeriesRecordIterator(this.seriesDefinition, buffer);
 
-        Predicate expression = and(ge("timestamp", (timestamp - 100) + "ms"), 
-                                    lt("timestamp", (timestamp + 1) + "ms"));
-        
+        Predicate expression = and(ge("timestamp", toMillisecondField((timestamp - 100) + "ms")),
+                                   lt("timestamp", toMillisecondField((timestamp + 1) + "ms")));
+
         Filter<Record> filter = expression.toFilter(this.seriesDefinition);
 
         try (FilteringRecordIterator rangeIterator = new FilteringRecordIterator(this.seriesDefinition,
@@ -495,9 +491,9 @@ public class FilteringRecordIteratorTest {
 
         BinaryTimeSeriesRecordIterator iterator = new BinaryTimeSeriesRecordIterator(this.seriesDefinition, buffer);
 
-        Predicate expression = and(ge("timestamp", (timestamp + 50) + "ms"), 
-                                    lt("timestamp", (timestamp + 400) + "ms"));
-        
+        Predicate expression = and(ge("timestamp", toMillisecondField((timestamp + 50) + "ms")),
+                                   lt("timestamp", toMillisecondField((timestamp + 400) + "ms")));
+
         Filter<Record> filter = expression.toFilter(this.seriesDefinition);
 
         try (FilteringRecordIterator rangeIterator = new FilteringRecordIterator(this.seriesDefinition,
@@ -532,8 +528,7 @@ public class FilteringRecordIteratorTest {
      * @return the buffer containing only full records.
      * @throws IOException if an I/O problem occurs.
      */
-    private static Buffer
-            createBufferWithOnlyFullRecords(TimeSeriesDefinition seriesDefinition, long timestamp) throws IOException {
+    private static Buffer createBufferWithOnlyFullRecords(TimeSeriesDefinition seriesDefinition, long timestamp) throws IOException {
 
         TimeSeriesRecord[] records = seriesDefinition.newRecords();
 
@@ -573,8 +568,7 @@ public class FilteringRecordIteratorTest {
      * @return the buffer containing deltas.
      * @throws IOException if an I/O problem occurs.
      */
-    private static Buffer
-            createBufferWithDeltas(TimeSeriesDefinition seriesDefinition, long timestamp) throws IOException {
+    private static Buffer createBufferWithDeltas(TimeSeriesDefinition seriesDefinition, long timestamp) throws IOException {
 
         TimeSeriesRecord[] records = seriesDefinition.newRecords();
 
@@ -617,8 +611,7 @@ public class FilteringRecordIteratorTest {
      * @return the buffer containing deltas.
      * @throws IOException if an I/O problem occurs.
      */
-    private static Buffer
-            createBufferWithDeltasAndFullRecords(TimeSeriesDefinition seriesDefinition, long timestamp) throws IOException {
+    private static Buffer createBufferWithDeltasAndFullRecords(TimeSeriesDefinition seriesDefinition, long timestamp) throws IOException {
 
         TimeSeriesRecord[] records = seriesDefinition.newRecords();
 
@@ -661,8 +654,7 @@ public class FilteringRecordIteratorTest {
      * @return the buffer containing deltas.
      * @throws IOException if an I/O problem occurs.
      */
-    private static Buffer
-            createBufferWithTwoRecordTypes(TimeSeriesDefinition seriesDefinition, long timestamp) throws IOException {
+    private static Buffer createBufferWithTwoRecordTypes(TimeSeriesDefinition seriesDefinition, long timestamp) throws IOException {
 
         TimeSeriesRecord[] records = seriesDefinition.newRecords();
 

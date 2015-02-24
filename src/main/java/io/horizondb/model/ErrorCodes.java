@@ -17,9 +17,6 @@ package io.horizondb.model;
 
 /**
  * The error codes.
- * 
- * @author Benjamin
- * 
  */
 public final class ErrorCodes {
 

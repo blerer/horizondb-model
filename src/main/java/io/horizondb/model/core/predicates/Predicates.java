@@ -13,21 +13,20 @@
  */
 package io.horizondb.model.core.predicates;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import io.horizondb.io.ByteReader;
 import io.horizondb.io.ByteWriter;
 import io.horizondb.io.serialization.Parser;
+import io.horizondb.model.core.Field;
 import io.horizondb.model.core.Predicate;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.SortedSet;
 
 /**
  * Factory methods for <code>Predicate</code>s.
- * 
- * @author Benjamin
  */
 public final class Predicates {
 
@@ -80,7 +79,7 @@ public final class Predicates {
      * @param value the value to which the value of the field must be compared
      * @return a simple a predicate
      */
-    public static Predicate simplePredicate(String fieldName, Operator operator, String value) {
+    public static Predicate simplePredicate(String fieldName, Operator operator, Field value) {
         return new SimplePredicate(fieldName, operator, value);
     }
     
@@ -91,7 +90,7 @@ public final class Predicates {
      * @param value the value to which the value of the field must be compared
      * @return an EQUAL predicate
      */
-    public static Predicate eq(String fieldName, String value) {
+    public static Predicate eq(String fieldName, Field value) {
         return simplePredicate(fieldName, Operator.EQ, value);
     }
     
@@ -102,7 +101,7 @@ public final class Predicates {
      * @param value the value to which the value of the field must be compared
      * @return a NOT EQUAL predicate
      */
-    public static Predicate ne(String fieldName, String value) {
+    public static Predicate ne(String fieldName, Field value) {
         return simplePredicate(fieldName, Operator.NE, value);
     }
     
@@ -113,7 +112,7 @@ public final class Predicates {
      * @param value the value to which the value of the field must be compared
      * @return a GREATER THAN predicate
      */
-    public static Predicate gt(String fieldName, String value) {
+    public static Predicate gt(String fieldName, Field value) {
         return simplePredicate(fieldName, Operator.GT, value);
     }
     
@@ -124,7 +123,7 @@ public final class Predicates {
      * @param value the value to which the value of the field must be compared
      * @return a GREATER OR EQUAL predicate
      */
-    public static Predicate ge(String fieldName, String value) {
+    public static Predicate ge(String fieldName, Field value) {
         return simplePredicate(fieldName, Operator.GE, value);
     }
     
@@ -135,7 +134,7 @@ public final class Predicates {
      * @param value the value to which the value of the field must be compared
      * @return a LESS OR EQUAL predicate
      */
-    public static Predicate le(String fieldName, String value) {
+    public static Predicate le(String fieldName, Field value) {
         return simplePredicate(fieldName, Operator.LE, value);
     }
     
@@ -146,7 +145,7 @@ public final class Predicates {
      * @param value the value to which the value of the field must be compared
      * @return a LESS THAN predicate
      */
-    public static Predicate lt(String fieldName, String value) {
+    public static Predicate lt(String fieldName, Field value) {
         return simplePredicate(fieldName, Operator.LT, value);
     }
     
@@ -176,10 +175,10 @@ public final class Predicates {
      * Creates an IN predicate. 
      * 
      * @param fieldName the name of the field
-     * @param values the values
+     * @param values the field values
      * @return the IN predicate
      */
-    public static Predicate in(String fieldName, List<String> values) {
+    public static Predicate in(String fieldName, SortedSet<Field> values) {
         return new InPredicate(fieldName, values, false);
     }
     
@@ -187,10 +186,10 @@ public final class Predicates {
      * Creates a NOT IN predicate. 
      * 
      * @param fieldName the name of the field
-     * @param values the values
+     * @param values the field values
      * @return the NOT IN predicate
      */
-    public static Predicate notIn(String fieldName, List<String> values) {
+    public static Predicate notIn(String fieldName, SortedSet<Field> values) {
         return new InPredicate(fieldName, values, true);
     }
     
@@ -202,7 +201,7 @@ public final class Predicates {
      * @param max the maximum value of the closed range
      * @return a BETWEEN predicate
      */
-    public static Predicate between(String fieldName, String min, String max) {
+    public static Predicate between(String fieldName, Field min, Field max) {
         return new BetweenPredicate(fieldName, min, max, false);
     }
     
@@ -214,7 +213,7 @@ public final class Predicates {
      * @param max the maximum value of the closed range
      * @return a BETWEEN predicate
      */
-    public static Predicate notBetween(String fieldName, String min, String max) {
+    public static Predicate notBetween(String fieldName, Field min, Field max) {
         return new BetweenPredicate(fieldName, min, max, true);
     }
     

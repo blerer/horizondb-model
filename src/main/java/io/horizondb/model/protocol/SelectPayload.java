@@ -22,6 +22,7 @@ import io.horizondb.io.serialization.Parser;
 import io.horizondb.model.core.Predicate;
 import io.horizondb.model.core.Projection;
 import io.horizondb.model.core.predicates.Predicates;
+import io.horizondb.model.core.projections.Projections;
 
 import java.io.IOException;
 
@@ -29,8 +30,6 @@ import javax.annotation.concurrent.Immutable;
 
 /**
  * A query used to request data from the server.
- * 
- * @author Benjamin
  * 
  */
 @Immutable
@@ -50,7 +49,7 @@ public final class SelectPayload implements Payload {
             String databaseName = VarInts.readString(reader);
             String seriesName = VarInts.readString(reader);
             
-            Projection projection = Projection.parseFrom(reader);
+            Projection projection = Projections.parseFrom(reader);
             Predicate predicate = Predicates.parseFrom(reader);
 
             return new SelectPayload(databaseName, seriesName, projection, predicate);
@@ -164,7 +163,7 @@ public final class SelectPayload implements Payload {
         
         VarInts.writeString(writer, this.databaseName);
         VarInts.writeString(writer, this.seriesName);
-        this.projection.writeTo(writer);
+        Projections.writeTo(writer, this.projection);
         Predicates.write(writer, this.predicate);
     }
 }

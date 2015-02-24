@@ -20,19 +20,17 @@ import io.horizondb.io.serialization.Parser;
 import io.horizondb.model.core.Field;
 import io.horizondb.model.core.Filter;
 import io.horizondb.model.core.Record;
+import io.horizondb.model.core.fields.ImmutableField;
+import io.horizondb.model.core.fields.TimestampField;
 import io.horizondb.model.schema.TimeSeriesDefinition;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.SortedSet;
-import java.util.TimeZone;
 import java.util.TreeSet;
 
 import org.apache.commons.lang.text.StrBuilder;
 
 import com.google.common.collect.ImmutableRangeSet;
-import com.google.common.collect.ImmutableRangeSet.Builder;
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeSet;
 
@@ -40,12 +38,8 @@ import static io.horizondb.model.core.filters.Filters.in;
 import static io.horizondb.model.core.filters.Filters.not;
 import static io.horizondb.model.core.filters.Filters.toRecordFilter;
 
-
 /**
  * An IN predicate.
- * 
- * @author Benjamin
- *
  */
 final class InPredicate extends FieldPredicate {
     
@@ -70,12 +64,9 @@ final class InPredicate extends FieldPredicate {
             
             int size = (int) reader.readUnsignedInt();
             
-            List<String> values = new ArrayList<>(size);
-            
+            SortedSet<Field> values = new TreeSet<>();
             for (int i = 0; i < size; i++) {
-                
-                String value = VarInts.readString(reader);
-                values.add(value);
+                values.add(ImmutableField.of(readField(reader)));
             }
             
             return new InPredicate(fieldName, values, notIn);
@@ -85,7 +76,7 @@ final class InPredicate extends FieldPredicate {
     /**
      * The values to which must be field must be compared.
      */
-    private final List<String> values;
+    private final SortedSet<Field> values;
     
     /**
      * <code>true</code> if the operator is a NOT IN operator.
@@ -98,7 +89,7 @@ final class InPredicate extends FieldPredicate {
      * @param fieldName the name of the field
      * @param values the values
      */
-    public InPredicate(String fieldName, List<String> values) {
+    public InPredicate(String fieldName, SortedSet<Field> values) {
         
         this(fieldName, values, false);
     }
@@ -118,7 +109,7 @@ final class InPredicate extends FieldPredicate {
      * @param values the values
      * @param notIn <code>true</code> if the field value must not be within the specified values
      */
-    public InPredicate(String fieldName, List<String> values, boolean notIn) {
+    public InPredicate(String fieldName, SortedSet<Field> values, boolean notIn) {
         
         super(fieldName);
         this.values = values;
@@ -129,15 +120,15 @@ final class InPredicate extends FieldPredicate {
      * {@inheritDoc}
      */
     @Override
-    public RangeSet<Field> getTimestampRanges(Field prototype, TimeZone timeZone) {
+    public RangeSet<Field> getTimestampRanges() {
         
         if (!isTimestamp()) {
-            return prototype.allValues();
+            return TimestampField.ALL;
         }
         
-        Builder<Field> builder = ImmutableRangeSet.builder();
+        ImmutableRangeSet.Builder<Field> builder = ImmutableRangeSet.builder();
  
-        for (Field field : getFields(prototype, timeZone)) {
+        for (Field field : this.values) {
 
             builder.add(Range.closed(field, field));
         }
@@ -151,35 +142,13 @@ final class InPredicate extends FieldPredicate {
         return rangeSet;
     }
 
-    /**
-     * Returns the set of fields to which the field must belong. 
-     * 
-     * @param prototype the prototype used to creates the fields.
-     * @param timeZone
-     * @return
-     */
-    private SortedSet<Field> getFields(Field prototype, TimeZone timeZone) {
-        
-        SortedSet<Field> fields = new TreeSet<>();
-        
-        for (String value : this.values) {
-           
-            Field field = newField(prototype, timeZone, value);            
-            fields.add(field);
-        }
-        return fields;
-    }
-    
     /**    
      * {@inheritDoc}
      */
     @Override
     public Filter<Record> toFilter(TimeSeriesDefinition definition) {
 
-        Field prototype = newField(definition);
-        SortedSet<Field> fields = getFields(prototype, definition.getTimeZone());
-        
-        Filter<Field> fieldFilter = in(fields, isTimestamp());
+        Filter<Field> fieldFilter = in(this.values, isTimestamp());
         
         if (this.notIn) {
             
@@ -218,11 +187,9 @@ final class InPredicate extends FieldPredicate {
         int size = VarInts.computeStringSize(this.getFieldName())   
                 + 1 + VarInts.computeUnsignedIntSize(this.values.size());
         
-        for (int i = 0, m = this.values.size(); i < m; i++) {
-            String value = this.values.get(i);
-            size += VarInts.computeStringSize(value);   
+        for (Field value : this.values) {
+            size += computeFieldSerializedSize(value);  
         }
-        
         return size;
     }
 
@@ -231,14 +198,13 @@ final class InPredicate extends FieldPredicate {
      */
     @Override
     public void writeTo(ByteWriter writer) throws IOException {
-        
+
         VarInts.writeString(writer, getFieldName());
         writer.writeBoolean(this.notIn);
         VarInts.writeUnsignedInt(writer, this.values.size());
 
-        for (int i = 0, m = this.values.size(); i < m; i++) {
-            String value = this.values.get(i);
-            VarInts.writeString(writer, value);
+        for (Field value : this.values) {
+            writeField(writer, value);
         }
     }
     

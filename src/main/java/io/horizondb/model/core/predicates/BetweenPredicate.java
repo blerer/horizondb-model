@@ -25,7 +25,6 @@ import io.horizondb.model.core.fields.TimestampField;
 import io.horizondb.model.schema.TimeSeriesDefinition;
 
 import java.io.IOException;
-import java.util.TimeZone;
 
 import com.google.common.collect.ImmutableRangeSet;
 import com.google.common.collect.Range;
@@ -38,9 +37,6 @@ import static io.horizondb.model.core.filters.Filters.toRecordFilter;
 
 /**
  * A BETWEEN predicate.
- * 
- * @author Benjamin
- *
  */
 final class BetweenPredicate extends FieldPredicate {
         
@@ -62,9 +58,9 @@ final class BetweenPredicate extends FieldPredicate {
 
             String fieldName = VarInts.readString(reader);
             boolean notBetween = reader.readBoolean();
-            String min = VarInts.readString(reader);
-            String max = VarInts.readString(reader);
-            
+            Field min = readField(reader);
+            Field max = readField(reader);
+
             return new BetweenPredicate(fieldName, min, max, notBetween);
         }
     };
@@ -72,12 +68,12 @@ final class BetweenPredicate extends FieldPredicate {
     /**
      * The minimum value of the closed range.
      */
-    private final String min;
+    private final Field min;
     
     /**
      * The maximum value of the closed range.
      */
-    private final String max;
+    private final Field max;
     
     /**
      * <code>true</code> if the predicate is a NOT BETWEEN predicate.
@@ -91,7 +87,7 @@ final class BetweenPredicate extends FieldPredicate {
      * @param min the minimum value of the closed range
      * @param max the maximum value of the closed range
      */
-    public BetweenPredicate(String fieldName, String min, String max) {
+    public BetweenPredicate(String fieldName, Field min, Field max) {
         
         this(fieldName, min, max, false);
     }
@@ -112,11 +108,11 @@ final class BetweenPredicate extends FieldPredicate {
      * @param max the maximum value of the closed range
      * @param notBetween <code>true</code> if the predicate is a NOT BETWEEN predicate
      */
-    public BetweenPredicate(String fieldName, String min, String max, boolean notBetween) {
+    public BetweenPredicate(String fieldName, Field min, Field max, boolean notBetween) {
         
         super(fieldName);
-        this.min = min;
-        this.max = max;
+        this.min = ImmutableField.of(min);
+        this.max = ImmutableField.of(max);
         this.notBetween = notBetween;
     }
 
@@ -124,25 +120,17 @@ final class BetweenPredicate extends FieldPredicate {
      * {@inheritDoc}
      */
     @Override
-    public RangeSet<Field> getTimestampRanges(Field prototype, TimeZone timeZone) {
+    public RangeSet<Field> getTimestampRanges() {
         
         if (!isTimestamp()) {
-            return prototype.allValues();
+            return TimestampField.ALL;
         }
-        
-        TimestampField lower = (TimestampField) prototype.newInstance();
-        lower.setValueFromString(timeZone, this.min);
-        
-        TimestampField upper = (TimestampField) prototype.newInstance();
-        upper.setValueFromString(timeZone, this.max);
-        
-        if (upper.compareTo(lower) < 0) {
+
+        if (this.max.compareTo(this.min) < 0) {
             return ImmutableRangeSet.of();
         }
-        
-        Range<Field> range = Range.<Field>closed(ImmutableField.of(lower), 
-                                                 ImmutableField.of(upper));
-        
+
+        Range<Field> range = Range.<Field>closed(this.min, this.max);
         RangeSet<Field> rangeSet = ImmutableRangeSet.of(range);
         
         if (this.notBetween) {
@@ -158,15 +146,10 @@ final class BetweenPredicate extends FieldPredicate {
     @Override
     public Filter<Record> toFilter(TimeSeriesDefinition definition) {
 
-        Field prototype = newField(definition);
-        
-        Range<Field> range = Range.closed(newField(prototype, definition.getTimeZone(), this.min), 
-                                          newField(prototype, definition.getTimeZone(), this.max));
-        
+        Range<Field> range = Range.closed(this.min, this.max);
         Filter<Field> fieldFilter = range(range, isTimestamp());
         
         if (this.notBetween) {
-            
             fieldFilter = not(fieldFilter);
         }
         
@@ -199,8 +182,8 @@ final class BetweenPredicate extends FieldPredicate {
     public int computeSerializedSize() {
         return VarInts.computeStringSize(getFieldName()) 
                 + 1
-                + VarInts.computeStringSize(this.min)
-                + VarInts.computeStringSize(this.max);
+                + computeFieldSerializedSize(this.min)
+                + computeFieldSerializedSize(this.max);
     }
 
     /**
@@ -211,8 +194,8 @@ final class BetweenPredicate extends FieldPredicate {
         
         VarInts.writeString(writer, getFieldName());
         writer.writeBoolean(this.notBetween);
-        VarInts.writeString(writer, this.min);
-        VarInts.writeString(writer, this.max);
+        writeField(writer, this.min);
+        writeField(writer, this.max);
     }
     
     /**

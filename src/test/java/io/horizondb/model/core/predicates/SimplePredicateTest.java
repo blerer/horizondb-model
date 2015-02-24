@@ -13,35 +13,30 @@
  */
 package io.horizondb.model.core.predicates;
 
-import io.horizondb.model.core.Predicate;
 import io.horizondb.model.core.Field;
+import io.horizondb.model.core.Predicate;
 import io.horizondb.model.core.fields.TimestampField;
-import io.horizondb.model.core.predicates.Predicates;
 import io.horizondb.model.schema.FieldType;
 
 import org.junit.Test;
 
 import com.google.common.collect.RangeSet;
 
-import static io.horizondb.model.core.util.TimeUtils.EUROPE_BERLIN_TIMEZONE;
+import static io.horizondb.model.core.predicates.FieldUtils.toIntField;
+import static io.horizondb.model.core.predicates.FieldUtils.toMillisecondField;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-/**
- * @author Benjamin
- *
- */
 public class SimplePredicateTest {
 
     @Test
     public void testGetTimestampRangesWithNonTimestampField() {
         
-        Predicate predicate = Predicates.gt("price", "10"); 
-        Field prototype = FieldType.MILLISECONDS_TIMESTAMP.newField();
+        Predicate predicate = Predicates.gt("price", toIntField("10")); 
         
-        RangeSet<Field> rangeSet = predicate.getTimestampRanges(prototype, EUROPE_BERLIN_TIMEZONE);
-        assertEquals(prototype.allValues(), rangeSet);
+        RangeSet<Field> rangeSet = predicate.getTimestampRanges();
+        assertEquals(TimestampField.ALL, rangeSet);
     }
     
     @Test
@@ -49,10 +44,9 @@ public class SimplePredicateTest {
         
         long timeInMillis = 1399147894150L;
         
-        Predicate predicate = Predicates.gt("timestamp", timeInMillis + "ms"); 
-        Field prototype = FieldType.MILLISECONDS_TIMESTAMP.newField();
+        Predicate predicate = Predicates.gt("timestamp", toMillisecondField(timeInMillis + "ms")); 
         
-        RangeSet<Field> rangeSet = predicate.getTimestampRanges(prototype, EUROPE_BERLIN_TIMEZONE);
+        RangeSet<Field> rangeSet = predicate.getTimestampRanges();
         
         Field expected = FieldType.MILLISECONDS_TIMESTAMP.newField();
         expected.setTimestampInMillis(timeInMillis + 10);
@@ -81,10 +75,9 @@ public class SimplePredicateTest {
         
         long timeInMillis = 1399147894150L;
         
-        Predicate predicate = Predicates.ge("timestamp", timeInMillis + "ms"); 
-        Field prototype = FieldType.MILLISECONDS_TIMESTAMP.newField();
+        Predicate predicate = Predicates.ge("timestamp", toMillisecondField(timeInMillis + "ms")); 
         
-        RangeSet<Field> rangeSet = predicate.getTimestampRanges(prototype, EUROPE_BERLIN_TIMEZONE);
+        RangeSet<Field> rangeSet = predicate.getTimestampRanges();
         
         Field expected = FieldType.MILLISECONDS_TIMESTAMP.newField();
         expected.setTimestampInMillis(timeInMillis + 10);
@@ -113,10 +106,9 @@ public class SimplePredicateTest {
         
         long timeInMillis = 1399147894150L;
         
-        Predicate predicate = Predicates.le("timestamp", timeInMillis + "ms"); 
-        Field prototype = FieldType.MILLISECONDS_TIMESTAMP.newField();
+        Predicate predicate = Predicates.le("timestamp", toMillisecondField(timeInMillis + "ms")); 
         
-        RangeSet<Field> rangeSet = predicate.getTimestampRanges(prototype, EUROPE_BERLIN_TIMEZONE);
+        RangeSet<Field> rangeSet = predicate.getTimestampRanges();
         
         Field expected = FieldType.MILLISECONDS_TIMESTAMP.newField();
         expected.setTimestampInMillis(timeInMillis + 10);
@@ -145,10 +137,9 @@ public class SimplePredicateTest {
         
         long timeInMillis = 1399147894150L;
         
-        Predicate predicate = Predicates.lt("timestamp", timeInMillis + "ms"); 
-        Field prototype = FieldType.MILLISECONDS_TIMESTAMP.newField();
+        Predicate predicate = Predicates.lt("timestamp", toMillisecondField(timeInMillis + "ms")); 
         
-        RangeSet<Field> rangeSet = predicate.getTimestampRanges(prototype, EUROPE_BERLIN_TIMEZONE);
+        RangeSet<Field> rangeSet = predicate.getTimestampRanges();
         
         Field expected = FieldType.MILLISECONDS_TIMESTAMP.newField();
         expected.setTimestampInMillis(timeInMillis + 10);
@@ -177,10 +168,9 @@ public class SimplePredicateTest {
         
         long timeInMillis = 1399147894150L;
         
-        Predicate predicate = Predicates.eq("timestamp", timeInMillis + "ms"); 
-        Field prototype = FieldType.MILLISECONDS_TIMESTAMP.newField();
+        Predicate predicate = Predicates.eq("timestamp", toMillisecondField(timeInMillis + "ms")); 
         
-        RangeSet<Field> rangeSet = predicate.getTimestampRanges(prototype, EUROPE_BERLIN_TIMEZONE);
+        RangeSet<Field> rangeSet = predicate.getTimestampRanges();
         
         Field expected = FieldType.MILLISECONDS_TIMESTAMP.newField();
         expected.setTimestampInMillis(timeInMillis + 10);
@@ -209,10 +199,9 @@ public class SimplePredicateTest {
         
         long timeInMillis = 1399147894150L;
         
-        Predicate predicate = Predicates.ne("timestamp", timeInMillis + "ms"); 
-        Field prototype = FieldType.MILLISECONDS_TIMESTAMP.newField();
+        Predicate predicate = Predicates.ne("timestamp", toMillisecondField(timeInMillis + "ms")); 
         
-        RangeSet<Field> rangeSet = predicate.getTimestampRanges(prototype, EUROPE_BERLIN_TIMEZONE);
+        RangeSet<Field> rangeSet = predicate.getTimestampRanges();
         
         Field expected = FieldType.MILLISECONDS_TIMESTAMP.newField();
         expected.setTimestampInMillis(timeInMillis + 10);

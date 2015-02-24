@@ -13,6 +13,11 @@
  */
 package io.horizondb.model.core.fields;
 
+import io.horizondb.io.ByteReader;
+import io.horizondb.io.ByteWriter;
+import io.horizondb.model.core.Field;
+import io.horizondb.model.schema.FieldType;
+
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.TimeZone;
@@ -23,17 +28,8 @@ import com.google.common.collect.RangeSet;
 
 import static org.apache.commons.lang.Validate.notNull;
 
-import io.horizondb.io.ByteReader;
-import io.horizondb.io.ByteWriter;
-import io.horizondb.model.core.Field;
-import io.horizondb.model.schema.FieldType;
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.apache.commons.lang.builder.ToStringStyle;
-
 /**
  * Immutable <code>Field</code>.
- * 
- * @author Benjamin
  */
 public final class ImmutableField implements Field {
 
@@ -49,6 +45,9 @@ public final class ImmutableField implements Field {
      * @return an immutable copy of the specified field.
      */
     public static ImmutableField of(Field field) {
+
+        assert !(field instanceof ImmutableField); 
+
         return new ImmutableField(field);
     }
     
@@ -379,9 +378,7 @@ public final class ImmutableField implements Field {
     @Override
     public String toString() {
         
-        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-            .append("field", this.field)
-            .toString();
+        return this.field.toString();
     }
     
     /**

@@ -13,35 +13,32 @@
  */
 package io.horizondb.model.core.predicates;
 
-import java.util.Arrays;
-
-import io.horizondb.model.core.Predicate;
 import io.horizondb.model.core.Field;
-import io.horizondb.model.core.predicates.Predicates;
+import io.horizondb.model.core.Predicate;
+import io.horizondb.model.core.fields.TimestampField;
 import io.horizondb.model.schema.FieldType;
 
 import org.junit.Test;
 
 import com.google.common.collect.RangeSet;
 
-import static io.horizondb.model.core.util.TimeUtils.EUROPE_BERLIN_TIMEZONE;
+import static com.google.common.collect.Sets.newTreeSet;
+import static io.horizondb.model.core.predicates.FieldUtils.toIntField;
+import static io.horizondb.model.core.predicates.FieldUtils.toMillisecondField;
+import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-/**
- * @author Benjamin
- */
 public class InPredicateTest {
 
     @Test
     public void testGetTimestampRangesWithNonTimestampField() {
         
-        Predicate predicate = Predicates.in("price", Arrays.asList("10", "20")); 
-        Field prototype = FieldType.MILLISECONDS_TIMESTAMP.newField();
-        
-        RangeSet<Field> rangeSet = predicate.getTimestampRanges(prototype, EUROPE_BERLIN_TIMEZONE);
-        assertEquals(prototype.allValues(), rangeSet);
+        Predicate predicate = Predicates.in("price", newTreeSet(asList(toIntField("10"), toIntField("20")))); 
+
+        RangeSet<Field> rangeSet = predicate.getTimestampRanges();
+        assertEquals(TimestampField.ALL, rangeSet);
     }
         
     @Test
@@ -49,13 +46,11 @@ public class InPredicateTest {
         
         long timeInMillis = 1399147894150L;
         
-        Predicate predicate = Predicates.in("timestamp", Arrays.asList((timeInMillis - 10) + "ms",
-                                                                    timeInMillis + "ms",
-                                                                    (timeInMillis + 10) + "ms")); 
-        
-        Field prototype = FieldType.MILLISECONDS_TIMESTAMP.newField();
-        
-        RangeSet<Field> rangeSet = predicate.getTimestampRanges(prototype, EUROPE_BERLIN_TIMEZONE);
+        Predicate predicate = Predicates.in("timestamp", newTreeSet(asList(toMillisecondField((timeInMillis - 10) + "ms"),
+                                                                           toMillisecondField(timeInMillis + "ms"),
+                                                                           toMillisecondField((timeInMillis + 10) + "ms")))); 
+
+        RangeSet<Field> rangeSet = predicate.getTimestampRanges();
         
         Field expected = FieldType.MILLISECONDS_TIMESTAMP.newField();
         
@@ -101,13 +96,11 @@ public class InPredicateTest {
         
         long timeInMillis = 1399147894150L;
         
-        Predicate predicate = Predicates.notIn("timestamp", Arrays.asList((timeInMillis - 10) + "ms",
-                                                                       timeInMillis + "ms",
-                                                                       (timeInMillis + 10) + "ms")); 
-        
-        Field prototype = FieldType.MILLISECONDS_TIMESTAMP.newField();
-        
-        RangeSet<Field> rangeSet = predicate.getTimestampRanges(prototype, EUROPE_BERLIN_TIMEZONE);
+        Predicate predicate = Predicates.notIn("timestamp", newTreeSet(asList(toMillisecondField((timeInMillis - 10) + "ms"),
+                                                                              toMillisecondField(timeInMillis + "ms"),
+                                                                              toMillisecondField((timeInMillis + 10) + "ms")))); 
+
+        RangeSet<Field> rangeSet = predicate.getTimestampRanges();
         
         Field expected = FieldType.MILLISECONDS_TIMESTAMP.newField();
         

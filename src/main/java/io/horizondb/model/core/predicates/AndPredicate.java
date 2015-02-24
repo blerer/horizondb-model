@@ -23,7 +23,6 @@ import io.horizondb.model.core.filters.Filters;
 import io.horizondb.model.schema.TimeSeriesDefinition;
 
 import java.io.IOException;
-import java.util.TimeZone;
 
 import com.google.common.collect.ImmutableRangeSet;
 import com.google.common.collect.ImmutableRangeSet.Builder;
@@ -32,8 +31,6 @@ import com.google.common.collect.RangeSet;
 
 /**
  * An AND predicate
- * 
- * @author Benjamin
  */
 final class AndPredicate extends LogicalPredicate {
     
@@ -103,10 +100,10 @@ final class AndPredicate extends LogicalPredicate {
      * {@inheritDoc}
      */
     @Override
-    public RangeSet<Field> getTimestampRanges(Field prototype, TimeZone timeZone) {
+    public RangeSet<Field> getTimestampRanges() {
                 
-        RangeSet<Field> leftRanges = this.left.getTimestampRanges(prototype, timeZone);
-        RangeSet<Field> rightRanges = this.right.getTimestampRanges(prototype, timeZone);
+        RangeSet<Field> leftRanges = this.left.getTimestampRanges();
+        RangeSet<Field> rightRanges = this.right.getTimestampRanges();
         
         Builder<Field> builder = ImmutableRangeSet.builder();    
         

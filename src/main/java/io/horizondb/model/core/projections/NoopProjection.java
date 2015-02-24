@@ -11,67 +11,45 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.horizondb.model.core.predicates;
+package io.horizondb.model.core.projections;
+
+import java.io.IOException;
 
 import io.horizondb.io.ByteReader;
 import io.horizondb.io.ByteWriter;
 import io.horizondb.io.serialization.Parser;
-import io.horizondb.model.core.Field;
 import io.horizondb.model.core.Filter;
-import io.horizondb.model.core.Predicate;
-import io.horizondb.model.core.Record;
-import io.horizondb.model.core.fields.TimestampField;
+import io.horizondb.model.core.Projection;
+import io.horizondb.model.core.RecordIterator;
 import io.horizondb.model.core.filters.Filters;
+import io.horizondb.model.schema.RecordSetDefinition;
 import io.horizondb.model.schema.TimeSeriesDefinition;
 
-import java.io.IOException;
-
-import com.google.common.collect.RangeSet;
-
 /**
- * <code>Predicate</code> that does nothing.
+ * Projection that return all the fields from all the records. 
+ *
  */
-final class NoopPredicate implements Predicate {
-
+public final class NoopProjection implements Projection {
+    
     /**
-     * The type of this predicate.
+     * The type of this projection.
      */
     public static final int TYPE = 0;
     
     /**
      * The parser instance.
      */
-    private static final Parser<NoopPredicate> PARSER = new Parser<NoopPredicate>() {
+    private static final Parser<NoopProjection> PARSER = new Parser<NoopProjection>() {
 
         /**
          * {@inheritDoc}
          */
         @Override
-        public NoopPredicate parseFrom(ByteReader reader) throws IOException {
+        public NoopProjection parseFrom(ByteReader reader) throws IOException {
 
-            return new NoopPredicate();
+            return new NoopProjection();
         }
     };
-    
-    /**
-     * Creates a new <code>NoopPredicate</code> by reading the data from the specified reader.
-     * 
-     * @param reader the reader to read from.
-     * @throws IOException if an I/O problem occurs
-     */
-    public static NoopPredicate parseFrom(ByteReader reader) throws IOException {
-
-        return getParser().parseFrom(reader);
-    }
-
-    /**
-     * Returns the parser that can be used to deserialize <code>NoopPredicate</code> instances.
-     * @return the parser that can be used to deserialize <code>NoopPredicate</code> instances.
-     */
-    public static Parser<NoopPredicate> getParser() {
-
-        return PARSER;
-    }
     
     /**
      * {@inheritDoc}
@@ -80,29 +58,49 @@ final class NoopPredicate implements Predicate {
     public int getType() {
         return TYPE;
     }
+
+    /**
+     * Creates a new <code>NoopProjection</code> by reading the data from the specified reader.
+     * 
+     * @param reader the reader to read from.
+     * @throws IOException if an I/O problem occurs
+     */
+    public static NoopProjection parseFrom(ByteReader reader) throws IOException {
+
+        return getParser().parseFrom(reader);
+    }
+
+    /**
+     * Returns the parser that can be used to deserialize <code>NoopProjection</code> instances.
+     * @return the parser that can be used to deserialize <code>NoopProjection</code> instances.
+     */
+    public static Parser<NoopProjection> getParser() {
+
+        return PARSER;
+    }
     
     /**
      * {@inheritDoc}
      */
     @Override
-    public String toString() {
-        return "";
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public RangeSet<Field> getTimestampRanges() {
-        return TimestampField.ALL;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Filter<Record> toFilter(TimeSeriesDefinition definition) {
+    public Filter<String> getRecordTypeFilter(TimeSeriesDefinition timeSeriesDefinition) {
         return Filters.noop();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public RecordSetDefinition getDefinition(TimeSeriesDefinition timeSeriesDefinition) {
+        return timeSeriesDefinition.delegate();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public RecordIterator filterFields(TimeSeriesDefinition timeSeriesDefinition, RecordIterator iterator) {
+        return iterator;
     }
 
     /**
@@ -118,6 +116,5 @@ final class NoopPredicate implements Predicate {
      */
     @Override
     public void writeTo(ByteWriter writer) throws IOException {
-       
     }
 }
