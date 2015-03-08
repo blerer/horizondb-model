@@ -252,8 +252,27 @@ public enum OpCode implements Serializable {
         public boolean isMutation() {
             return false;
         }
-    };   
+    },   
 
+    DROP_TIMESERIES(14) {
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public boolean isMutation() {
+            return false;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public Parser<?> getPayloadParser() {
+            return DropTimeSeriesPayload.getParser();
+        }
+    };
+    
     /**
      * The parser instance.
      */

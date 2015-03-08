@@ -32,9 +32,6 @@ import org.apache.commons.lang.builder.ToStringStyle;
 
 /**
  * A database definition.
- * 
- * @author Benjamin
- * 
  */
 @Immutable
 public class DatabaseDefinition implements Serializable {
@@ -51,15 +48,21 @@ public class DatabaseDefinition implements Serializable {
         public DatabaseDefinition parseFrom(ByteReader reader) throws IOException {
 
             String name = VarInts.readString(reader);
+            long timestamp = VarInts.readLong(reader);
 
-            return new DatabaseDefinition(name);
+            return new DatabaseDefinition(name, timestamp);
         }
     };
 
     /**
      * The database name.
      */
-    private String name;
+    private final String name;
+
+    /**
+     * The timestamp at which the database was created.
+     */
+    private final long timestamp;
 
     /**
      * Creates a new meta data with the specified name.
@@ -68,7 +71,19 @@ public class DatabaseDefinition implements Serializable {
      */
     public DatabaseDefinition(String name) {
 
+        this(name, System.currentTimeMillis());
+    }
+    
+    /**
+     * Creates a new meta data with the specified name.
+     * 
+     * @param name the database name.
+     * @param timestamp the timestamp at which the database was created.
+     */
+    public DatabaseDefinition(String name, long timestamp) {
+
         this.name = name;
+        this.timestamp = timestamp;
     }
 
     /**
@@ -101,6 +116,14 @@ public class DatabaseDefinition implements Serializable {
     }
 
     /**
+     * Returns the creation time.
+     * @return the creation time.
+     */
+    public long getTimestamp() {
+        return this.timestamp;
+    }
+
+    /**
      * Returns a new time series builder.
      * 
      * @param seriesName the name of the new time series
@@ -116,7 +139,8 @@ public class DatabaseDefinition implements Serializable {
      */
     @Override
     public int computeSerializedSize() {
-        return VarInts.computeStringSize(this.name);
+        return VarInts.computeStringSize(this.name)
+                + VarInts.computeLongSize(this.timestamp);
     }
 
     /**
@@ -125,6 +149,7 @@ public class DatabaseDefinition implements Serializable {
     @Override
     public void writeTo(ByteWriter writer) throws IOException {
         VarInts.writeString(writer, this.name);
+        VarInts.writeLong(writer, this.timestamp);
     }
 
     /**
@@ -147,7 +172,8 @@ public class DatabaseDefinition implements Serializable {
      */
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(235543691, -72117241).append(this.name).toHashCode();
+        return new HashCodeBuilder(235543691, -72117241).append(this.name)
+                                                        .toHashCode();
     }
 
     /**
@@ -155,7 +181,9 @@ public class DatabaseDefinition implements Serializable {
      */
     @Override
     public String toString() {
-        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).append("name", this.name).toString();
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).append("name", this.name)
+                                                                          .append("timestamp", this.timestamp)
+                                                                          .toString();
     }
 
 }

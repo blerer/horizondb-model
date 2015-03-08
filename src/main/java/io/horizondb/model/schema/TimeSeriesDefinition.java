@@ -54,8 +54,6 @@ import static org.apache.commons.lang.Validate.notNull;
 
 /**
  * The definition of a time series stored in the databaseName.
- * 
- * @author Benjamin
  */
 @Immutable
 public final class TimeSeriesDefinition extends ForwardingRecordSetDefinition {
@@ -72,12 +70,14 @@ public final class TimeSeriesDefinition extends ForwardingRecordSetDefinition {
         public TimeSeriesDefinition parseFrom(ByteReader reader) throws IOException {
 
             String name = VarInts.readString(reader);
+            long timestamp = VarInts.readLong(reader);
             RecordSetDefinition recordSetDefinition = DefaultRecordSetDefinition.parseFrom(reader);
             PartitionType partitionType = PartitionType.parseFrom(reader);
             int blockSize = VarInts.readUnsignedInt(reader);
             CompressionType compressionType = CompressionType.parseFrom(reader);
 
             return new TimeSeriesDefinition(name,
+                                            timestamp,
                                             recordSetDefinition,
                                             partitionType,
                                             blockSize,
@@ -90,6 +90,11 @@ public final class TimeSeriesDefinition extends ForwardingRecordSetDefinition {
      */
     private final String name;
 
+    /**
+     * The time at which the series was created.
+     */
+    private final long timestamp;
+    
     /**
      * The definition of the record set.
      */
@@ -117,6 +122,7 @@ public final class TimeSeriesDefinition extends ForwardingRecordSetDefinition {
     public int computeSerializedSize() throws IOException {
 
         return VarInts.computeStringSize(this.name)
+                + VarInts.computeLongSize(this.timestamp)
                 + super.computeSerializedSize()
                 + this.partitionType.computeSerializedSize()
                 + VarInts.computeUnsignedIntSize(this.blockSizeInBytes)
@@ -130,6 +136,7 @@ public final class TimeSeriesDefinition extends ForwardingRecordSetDefinition {
     public void writeTo(ByteWriter writer) throws IOException {
 
         VarInts.writeString(writer, this.name);
+        VarInts.writeLong(writer, this.timestamp);
         super.writeTo(writer);
         this.partitionType.writeTo(writer);
         VarInts.writeUnsignedInt(writer, this.blockSizeInBytes);
@@ -237,6 +244,14 @@ public final class TimeSeriesDefinition extends ForwardingRecordSetDefinition {
     }
 
     /**
+     * Returns the creation timestamp.
+     * @return the creation timestamp
+     */
+    public long getTimestamp() {
+        return this.timestamp;
+    }
+
+    /**
      * Creates a new <code>Builder</code> instance.
      * 
      * @param name the time series name
@@ -259,8 +274,7 @@ public final class TimeSeriesDefinition extends ForwardingRecordSetDefinition {
             return false;
         }
         TimeSeriesDefinition rhs = (TimeSeriesDefinition) object;
-        return new EqualsBuilder()
-                                  .append(this.name, rhs.name)
+        return new EqualsBuilder().append(this.name, rhs.name)
                                   .append(this.recordSetDefinition, rhs.recordSetDefinition)
                                   .append(this.partitionType, rhs.partitionType)
                                   .append(this.blockSizeInBytes, rhs.blockSizeInBytes)
@@ -287,11 +301,26 @@ public final class TimeSeriesDefinition extends ForwardingRecordSetDefinition {
     @Override
     public String toString() {
         return new ToStringBuilder(this).append("name", this.name)
+                                        .append("timestamp", this.timestamp)
                                         .append("recordSetDefinition", this.recordSetDefinition)
                                         .append("partitionType", this.partitionType)
                                         .append("compressionType", this.compressionType)
                                         .append("blockSizeInBytes", this.blockSizeInBytes)
                                         .toString();
+    }
+
+    /**
+     * Duplicates this <code>TimeSeriesDefinition</code> changing the timestamp.
+     * @return a copy of this <code>TimeSeriesDefinition</code> with a new timestamp.
+     */
+    public TimeSeriesDefinition newInstance() {
+
+        return new TimeSeriesDefinition(this.name, 
+                                        System.currentTimeMillis(),
+                                        this.recordSetDefinition,
+                                        this.partitionType,
+                                        this.blockSizeInBytes,
+                                        this.compressionType);
     }
     
     /**
@@ -302,6 +331,7 @@ public final class TimeSeriesDefinition extends ForwardingRecordSetDefinition {
     private TimeSeriesDefinition(Builder builder) {
 
         this(builder.name,
+             System.currentTimeMillis(),
              builder.builder.build(),
              builder.partitionType,
              builder.blockSize,
@@ -309,12 +339,14 @@ public final class TimeSeriesDefinition extends ForwardingRecordSetDefinition {
     }
 
     private TimeSeriesDefinition(String name,
-            RecordSetDefinition recordSetDefinition,
-            PartitionType partitionType,
-            int blockSize,
-            CompressionType compressionType) {
+                                 long timestamp,
+                                 RecordSetDefinition recordSetDefinition,
+                                 PartitionType partitionType,
+                                 int blockSize,
+                                 CompressionType compressionType) {
 
         this.name = name;
+        this.timestamp = timestamp;
         this.recordSetDefinition = recordSetDefinition;
         this.partitionType = partitionType;
         this.blockSizeInBytes = blockSize;
@@ -376,9 +408,7 @@ public final class TimeSeriesDefinition extends ForwardingRecordSetDefinition {
         }
         return fields;
     }
-    
-    
-    
+
     /**
      * Builds instance of <code>TimeSerieDefinition</code>.
      */
