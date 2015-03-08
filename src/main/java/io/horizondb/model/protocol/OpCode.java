@@ -254,6 +254,25 @@ public enum OpCode implements Serializable {
         }
     },   
 
+    DROP_DATABASE(13) {
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public boolean isMutation() {
+            return false;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public Parser<?> getPayloadParser() {
+            return DropDatabasePayload.getParser();
+        }
+    },
+
     DROP_TIMESERIES(14) {
 
         /**
