@@ -22,6 +22,8 @@ import io.horizondb.model.core.fields.ImmutableField;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+import com.google.common.collect.Range;
+
 import static io.horizondb.model.core.Record.TIMESTAMP_FIELD_INDEX;
 
 /**
@@ -98,7 +100,17 @@ public final class BlockHeaderUtils {
     public static Field getFirstTimestampField(Record header) throws IOException {
         return ImmutableField.of(header.getField(TIMESTAMP_FIELD_INDEX));
     }
-    
+
+    /**
+     * Returns the time range that contains the block.
+     *
+     * @param header the block header 
+     * @return the time range that contains the block.
+     */
+    public static Range<Field> getRange(Record header) throws IOException {
+        return Range.closed(getFirstTimestampField(header), getLastTimestampField(header));
+    }
+
     /**
      * Returns the field containing the last timestamp of the block.
      * 
