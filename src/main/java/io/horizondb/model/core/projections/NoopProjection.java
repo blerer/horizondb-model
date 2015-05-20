@@ -13,17 +13,18 @@
  */
 package io.horizondb.model.core.projections;
 
-import java.io.IOException;
-
 import io.horizondb.io.ByteReader;
 import io.horizondb.io.ByteWriter;
 import io.horizondb.io.serialization.Parser;
 import io.horizondb.model.core.Filter;
 import io.horizondb.model.core.Projection;
-import io.horizondb.model.core.RecordIterator;
+import io.horizondb.model.core.Record;
+import io.horizondb.model.core.ResourceIterator;
 import io.horizondb.model.core.filters.Filters;
 import io.horizondb.model.schema.RecordSetDefinition;
 import io.horizondb.model.schema.TimeSeriesDefinition;
+
+import java.io.IOException;
 
 /**
  * Projection that return all the fields from all the records. 
@@ -99,7 +100,8 @@ public final class NoopProjection implements Projection {
      * {@inheritDoc}
      */
     @Override
-    public RecordIterator filterFields(TimeSeriesDefinition timeSeriesDefinition, RecordIterator iterator) {
+    public ResourceIterator<? extends Record> filterFields(TimeSeriesDefinition timeSeriesDefinition,
+                                                           ResourceIterator<? extends Record> iterator) {
         return iterator;
     }
 

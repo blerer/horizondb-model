@@ -434,11 +434,12 @@ public class TimeSeriesRecord extends AbstractTimeSeriesRecord implements Compar
      * @param record
      * @throws IOException
      */
-    public void add(Record record) throws IOException {
+    public TimeSeriesRecord add(Record record) throws IOException {
 
         for (int i = 0; i < this.fields.length; i++) {
             getField(i).add(record.getField(i));
         }
+        return this;
     }
 
     /**

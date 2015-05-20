@@ -24,7 +24,7 @@ import io.horizondb.io.encoding.VarInts;
 import io.horizondb.model.core.Field;
 import io.horizondb.model.core.Filter;
 import io.horizondb.model.core.Record;
-import io.horizondb.model.core.RecordIterator;
+import io.horizondb.model.core.ResourceIterator;
 import io.horizondb.model.core.fields.TimestampField;
 import io.horizondb.model.core.filters.Filters;
 import io.horizondb.model.core.records.BinaryTimeSeriesRecord;
@@ -49,7 +49,7 @@ import static org.apache.commons.lang.Validate.notNull;
  * @author Benjamin
  * 
  */
-public final class BinaryTimeSeriesRecordIterator extends AbstractRecordIterator<BinaryTimeSeriesRecord> {
+public final class BinaryTimeSeriesRecordIterator extends AbstractResourceIterator<BinaryTimeSeriesRecord> {
 
     /**
      * The block header record.
@@ -392,7 +392,7 @@ public final class BinaryTimeSeriesRecordIterator extends AbstractRecordIterator
          */
         public final BinaryTimeSeriesRecordIterator build() {
 
-            try (RecordIterator iterator = this.builder.build()) {
+            try (ResourceIterator<Record> iterator = this.builder.build()) {
 
                 CompositeBuffer compositeBuffer = new CompositeBuffer();
 
@@ -400,7 +400,7 @@ public final class BinaryTimeSeriesRecordIterator extends AbstractRecordIterator
 
                     Record next = iterator.next();
                     
-                    compositeBuffer.add(toBuffer(next));
+                    compositeBuffer.addBytes(toBuffer(next));
                 }
                 return new BinaryTimeSeriesRecordIterator(this.definition, compositeBuffer);
                 

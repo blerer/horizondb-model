@@ -19,11 +19,12 @@ import io.horizondb.io.buffers.Buffers;
 import io.horizondb.io.compression.CompressionType;
 import io.horizondb.model.core.Field;
 import io.horizondb.model.core.Record;
-import io.horizondb.model.core.RecordIterator;
 import io.horizondb.model.core.RecordListBuilder;
 import io.horizondb.model.core.RecordUtils;
+import io.horizondb.model.core.ResourceIterator;
 import io.horizondb.model.core.fields.TimestampField;
 import io.horizondb.model.core.filters.Filters;
+import io.horizondb.model.core.records.BinaryTimeSeriesRecord;
 import io.horizondb.model.core.records.BlockHeaderBuilder;
 import io.horizondb.model.core.records.TimeSeriesRecord;
 import io.horizondb.model.core.util.TimeUtils;
@@ -42,7 +43,6 @@ import com.google.common.collect.Range;
 import com.google.common.collect.RangeSet;
 
 import static io.horizondb.model.schema.FieldType.NANOSECONDS_TIMESTAMP;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -108,7 +108,7 @@ public class BinaryTimeSeriesRecordIteratorTest {
 
         RecordUtils.writeRecords(buffer, list);
         
-        try (RecordIterator readIterator = new BinaryTimeSeriesRecordIterator(def, buffer)) {
+        try (ResourceIterator<BinaryTimeSeriesRecord> readIterator = new BinaryTimeSeriesRecordIterator(def, buffer)) {
 
             assertTrue(readIterator.hasNext());
             Record actual = readIterator.next();
@@ -198,10 +198,11 @@ public class BinaryTimeSeriesRecordIteratorTest {
 
         RecordUtils.writeRecords(buffer, list);
         
-        try (RecordIterator readIterator = new BinaryTimeSeriesRecordIterator(def, 
-                                                                              buffer, 
-                                                                              TimestampField.ALL, 
-                                                                              Filters.eq("exchangeState", false))) {
+        try (ResourceIterator<BinaryTimeSeriesRecord> readIterator = new BinaryTimeSeriesRecordIterator(def,
+                                                                                                        buffer,
+                                                                                                        TimestampField.ALL,
+                                                                                                        Filters.eq("exchangeState",
+                                                                                                                   false))) {
 
             assertTrue(readIterator.hasNext());
             Record actual = readIterator.next();
@@ -297,7 +298,7 @@ public class BinaryTimeSeriesRecordIteratorTest {
 
         RecordUtils.writeRecords(buffer, list);
         
-        try (RecordIterator readIterator = new BinaryTimeSeriesRecordIterator(def, buffer)) {
+        try (ResourceIterator<BinaryTimeSeriesRecord> readIterator = new BinaryTimeSeriesRecordIterator(def, buffer)) {
 
             assertTrue(readIterator.hasNext());
             Record actual = readIterator.next();
@@ -406,7 +407,7 @@ public class BinaryTimeSeriesRecordIteratorTest {
         
         RangeSet<Field> rangeSet = ImmutableRangeSet.of(Range.closed(from, to)); 
         
-        try (RecordIterator readIterator = new BinaryTimeSeriesRecordIterator(def, buffer, rangeSet)) {
+        try (ResourceIterator<BinaryTimeSeriesRecord> readIterator = new BinaryTimeSeriesRecordIterator(def, buffer, rangeSet)) {
 
             assertTrue(readIterator.hasNext());
             Record actual = readIterator.next();
@@ -491,7 +492,7 @@ public class BinaryTimeSeriesRecordIteratorTest {
         
         RangeSet<Field> rangeSet = ImmutableRangeSet.of(Range.closed(from, to)); 
         
-        try (RecordIterator readIterator = new BinaryTimeSeriesRecordIterator(def, buffer, rangeSet)) {
+        try (ResourceIterator<BinaryTimeSeriesRecord> readIterator = new BinaryTimeSeriesRecordIterator(def, buffer, rangeSet)) {
 
             assertTrue(readIterator.hasNext());
             Record actual = readIterator.next();
@@ -592,7 +593,7 @@ public class BinaryTimeSeriesRecordIteratorTest {
         
         RangeSet<Field> rangeSet = ImmutableRangeSet.of(Range.closed(from, to)); 
         
-        try (RecordIterator readIterator = new BinaryTimeSeriesRecordIterator(def, buffer, rangeSet)) {
+        try (ResourceIterator<BinaryTimeSeriesRecord> readIterator = new BinaryTimeSeriesRecordIterator(def, buffer, rangeSet)) {
             
             assertFalse(readIterator.hasNext());
         }
@@ -672,7 +673,7 @@ public class BinaryTimeSeriesRecordIteratorTest {
         RecordUtils.writeRecord(buffer, secondBlockHeader);
         buffer.transfer(compressedSecondBlock);
         
-        try (RecordIterator readIterator = new BinaryTimeSeriesRecordIterator(def, buffer)) {
+        try (ResourceIterator<BinaryTimeSeriesRecord> readIterator = new BinaryTimeSeriesRecordIterator(def, buffer)) {
 
             assertTrue(readIterator.hasNext());
             Record actual = readIterator.next();
@@ -724,7 +725,7 @@ public class BinaryTimeSeriesRecordIteratorTest {
                                                        .addRecordType(recordTypeDefinition)
                                                        .build();
         
-        try (RecordIterator readIterator = new BinaryTimeSeriesRecordIterator(def, Buffers.EMPTY_BUFFER)) {
+        try (ResourceIterator<BinaryTimeSeriesRecord> readIterator = new BinaryTimeSeriesRecordIterator(def, Buffers.EMPTY_BUFFER)) {
 
             assertFalse(readIterator.hasNext());
         }

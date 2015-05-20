@@ -15,7 +15,7 @@ package io.horizondb.model.core.iterators;
 
 import io.horizondb.model.core.Filter;
 import io.horizondb.model.core.Record;
-import io.horizondb.model.core.RecordIterator;
+import io.horizondb.model.core.ResourceIterator;
 import io.horizondb.model.core.records.TimeSeriesRecord;
 import io.horizondb.model.schema.TimeSeriesDefinition;
 
@@ -29,12 +29,12 @@ import static org.apache.commons.lang.Validate.notNull;
  * @author Benjamin
  *
  */
-public final class FilteringRecordIterator extends AbstractRecordIterator<Record> {
+public final class FilteringRecordIterator extends AbstractResourceIterator<Record> {
 
     /**
      * The decorated iterator.
      */
-    private final RecordIterator iterator;
+    private final ResourceIterator<? extends Record> iterator;
 
     /**
      * The filter.
@@ -51,7 +51,9 @@ public final class FilteringRecordIterator extends AbstractRecordIterator<Record
      */
     private boolean[] addToRecord;
 
-    public FilteringRecordIterator(TimeSeriesDefinition definition, RecordIterator iterator, Filter<Record> filter) {
+    public FilteringRecordIterator(TimeSeriesDefinition definition,
+                                   ResourceIterator<? extends Record> iterator,
+                                   Filter<Record> filter) {
 
         notNull(iterator, "the iterator parameter must not be null.");
         notNull(filter, "the filter parameter must not be null.");

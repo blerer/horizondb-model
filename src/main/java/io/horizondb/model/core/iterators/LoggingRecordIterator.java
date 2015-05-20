@@ -19,15 +19,13 @@ import java.io.PrintStream;
 import static org.apache.commons.lang.Validate.notNull;
 
 import io.horizondb.model.core.Record;
-import io.horizondb.model.core.RecordIterator;
+import io.horizondb.model.core.ResourceIterator;
 import io.horizondb.model.schema.TimeSeriesDefinition;
 
 /**
  * <code>RecordIterator</code> decorator that logs all the records that it returns.
- * 
- * @author Benjamin
  */
-public final class LoggingRecordIterator implements RecordIterator {
+public final class LoggingRecordIterator implements ResourceIterator<Record> {
 
     /**
      * The definition of the time series associated to the record iterator. 
@@ -37,7 +35,7 @@ public final class LoggingRecordIterator implements RecordIterator {
     /**
      * The decorated record iterator.
      */
-    private final RecordIterator iterator;
+    private final ResourceIterator<? extends Record> iterator;
     
     /**
      * The stream to which the records must be logged.
@@ -51,7 +49,7 @@ public final class LoggingRecordIterator implements RecordIterator {
      * @param definition the definition of the time series associated to the record iterator
      * @param iterator the decorated iterator
      */
-    public LoggingRecordIterator(TimeSeriesDefinition definition, RecordIterator iterator) {
+    public LoggingRecordIterator(TimeSeriesDefinition definition, ResourceIterator<? extends Record> iterator) {
     
         this(definition, iterator, System.out);
     }    
@@ -64,7 +62,9 @@ public final class LoggingRecordIterator implements RecordIterator {
      * @param iterator the decorated iterator
      * @param stream the stream to which the records returned must be logged
      */
-    public LoggingRecordIterator(TimeSeriesDefinition definition, RecordIterator iterator, PrintStream stream) {
+    public LoggingRecordIterator(TimeSeriesDefinition definition,
+                                 ResourceIterator<? extends Record> iterator,
+                                 PrintStream stream) {
         
         notNull(definition, "the definition parameter must not be null.");
         notNull(iterator, "the iterator parameter must not be null.");

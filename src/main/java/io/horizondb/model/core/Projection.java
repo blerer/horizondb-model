@@ -51,7 +51,8 @@ public interface Projection extends Serializable {
      * @param iterator the record iterator
      * @return an iterator which will filter out the unwanted fields 
      */
-    RecordIterator filterFields(TimeSeriesDefinition timeSeriesDefinition, RecordIterator iterator);
+    ResourceIterator<? extends Record> filterFields(TimeSeriesDefinition timeSeriesDefinition,
+                                                    ResourceIterator<? extends Record> iterator);
     
     /**
      * {@inheritDoc}

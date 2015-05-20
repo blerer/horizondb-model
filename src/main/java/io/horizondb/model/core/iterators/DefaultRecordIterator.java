@@ -16,8 +16,8 @@
 package io.horizondb.model.core.iterators;
 
 import io.horizondb.model.core.Record;
-import io.horizondb.model.core.RecordIterator;
 import io.horizondb.model.core.RecordListBuilder;
+import io.horizondb.model.core.ResourceIterator;
 import io.horizondb.model.schema.TimeSeriesDefinition;
 
 import java.util.Iterator;
@@ -30,7 +30,7 @@ import static org.apache.commons.lang.Validate.notNull;
  * @author Benjamin
  * 
  */
-public class DefaultRecordIterator implements RecordIterator {
+public class DefaultRecordIterator implements ResourceIterator<Record> {
 
     /**
      * The records.

@@ -18,7 +18,8 @@ import io.horizondb.io.ByteWriter;
 import io.horizondb.io.serialization.Parser;
 import io.horizondb.model.core.Filter;
 import io.horizondb.model.core.Projection;
-import io.horizondb.model.core.RecordIterator;
+import io.horizondb.model.core.Record;
+import io.horizondb.model.core.ResourceIterator;
 import io.horizondb.model.core.filters.Filters;
 import io.horizondb.model.core.iterators.FieldFilteringIterator;
 import io.horizondb.model.core.records.FieldFilter;
@@ -187,7 +188,8 @@ public final class DefaultProjection implements Projection {
      * {@inheritDoc}
      */
     @Override
-    public RecordIterator filterFields(TimeSeriesDefinition timeSeriesDefinition, RecordIterator iterator) {
+    public ResourceIterator<Record> filterFields(TimeSeriesDefinition timeSeriesDefinition,
+                                                 ResourceIterator<? extends Record> iterator) {
 
         FieldFilter[] filters = new FieldFilter[timeSeriesDefinition.getNumberOfRecordTypes()];
         int type = 0;
@@ -202,22 +204,4 @@ public final class DefaultProjection implements Projection {
         }
         return new FieldFilteringIterator(iterator, filters);
     }
-    
-//    private static ListMultimap<String, String> convertToMultimap(List<String> expressions) {
-//        
-//        if (expressions.size() == 1 && ALL.equals(expressions.get(0))) {
-//            return ImmutableListMultimap.of(ALL, ALL);
-//        }
-//        
-//        ListMultimap<String, String> multimap = ArrayListMultimap.create();
-//        
-//        for (String expression : expressions) {
-//            String[] elements = expression.split("\\.");
-//            String record = elements[0];
-//            String field = elements.length > 1 ? elements[1] : ALL; 
-//            
-//            multimap.put(record, field);
-//        }
-//        return multimap;
-//    }
 }

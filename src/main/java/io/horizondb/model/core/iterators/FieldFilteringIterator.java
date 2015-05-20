@@ -13,21 +13,21 @@
  */
 package io.horizondb.model.core.iterators;
 
-import java.io.IOException;
-
 import io.horizondb.model.core.Record;
-import io.horizondb.model.core.RecordIterator;
+import io.horizondb.model.core.ResourceIterator;
 import io.horizondb.model.core.records.FieldFilter;
+
+import java.io.IOException;
 
 /**
  * <code>RecordFilter</code> decorator that filter the fields of the records returned by the decorated iterator.
  */
-public final class FieldFilteringIterator extends AbstractRecordIterator<Record> {
+public final class FieldFilteringIterator extends AbstractResourceIterator<Record> {
 
     /**
      * The decorated iterator.
      */
-    private final RecordIterator iterator;
+    private final ResourceIterator<? extends Record> iterator;
 
     /**
      * The record filters.
@@ -40,7 +40,7 @@ public final class FieldFilteringIterator extends AbstractRecordIterator<Record>
      * @param iterator the iterator for which the fields must be filtered
      * @param filters the field filters
      */
-    public FieldFilteringIterator(RecordIterator iterator, FieldFilter[] filters) {
+    public FieldFilteringIterator(ResourceIterator<? extends Record> iterator, FieldFilter[] filters) {
         this.iterator = iterator;
         this.filters = filters;
     }
