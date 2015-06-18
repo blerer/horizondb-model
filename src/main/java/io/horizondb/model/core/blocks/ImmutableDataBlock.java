@@ -13,9 +13,14 @@
  */
 package io.horizondb.model.core.blocks;
 
+import java.io.IOException;
+
+import io.horizondb.io.ByteWriter;
 import io.horizondb.io.ReadableBuffer;
 import io.horizondb.model.core.DataBlock;
 import io.horizondb.model.core.Record;
+import io.horizondb.model.core.RecordUtils;
+
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
@@ -43,7 +48,7 @@ public final class ImmutableDataBlock implements DataBlock {
      */
     public ImmutableDataBlock(Record header, ReadableBuffer data) {
         this.header = header;
-        this.data = data;
+        this.data = data.readerIndex(0);
     }
 
     /**
@@ -70,5 +75,23 @@ public final class ImmutableDataBlock implements DataBlock {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).append("header", this.header)
                                                                           .append("data", this.data)
                                                                           .toString();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int computeSerializedSize() throws IOException {
+        return RecordUtils.computeSerializedSize(this.header)
+                + this.data.readableBytes();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void writeTo(ByteWriter writer) throws IOException {
+        RecordUtils.writeRecord(writer, this.header);
+        writer.transfer(this.data);
     }
 }

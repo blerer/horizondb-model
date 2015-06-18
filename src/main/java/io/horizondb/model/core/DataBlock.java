@@ -14,12 +14,13 @@
 package io.horizondb.model.core;
 
 import io.horizondb.io.ReadableBuffer;
+import io.horizondb.io.serialization.Serializable;
 
 /**
  * A block of data (e.g. a set of records in binary format).
  *
  */
-public interface DataBlock {
+public interface DataBlock extends Serializable {
 
     /**
      * Returns the block header.
