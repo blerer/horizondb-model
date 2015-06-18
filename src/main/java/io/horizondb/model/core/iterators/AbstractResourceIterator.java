@@ -13,7 +13,6 @@
  */
 package io.horizondb.model.core.iterators;
 
-import io.horizondb.model.core.Record;
 import io.horizondb.model.core.ResourceIterator;
 
 import java.io.IOException;
@@ -23,7 +22,7 @@ import java.util.NoSuchElementException;
  * Base class for the <code>ResourceIterator</code> implementation.
  *
  */
-public abstract class AbstractResourceIterator<E extends Record> implements ResourceIterator<E> {
+public abstract class AbstractResourceIterator<E> implements ResourceIterator<E> {
 
     /**
      * The element to return on the call to next.
@@ -80,7 +79,7 @@ public abstract class AbstractResourceIterator<E extends Record> implements Reso
     protected final void setNext(E next) {
         this.next = next;
     }
-    
+
     /**
      * Marks the iterator has done.
      */
