@@ -33,7 +33,7 @@ import static org.junit.Assert.assertTrue;
 public class DefaultRecordIteratorTest {
 
     @Test
-    public void testWithOnlyOneRecord() throws ParseException {
+    public void testWithOnlyOneRecord() throws Exception {
 
         long time = getReferenceTime();
         
@@ -65,7 +65,7 @@ public class DefaultRecordIteratorTest {
     }
 
     @Test
-    public void testWithOnlyTwoRecordOfDifferentType() throws ParseException {
+    public void testWithOnlyTwoRecordOfDifferentType() throws Exception {
 
         long time = getReferenceTime();
 
@@ -129,7 +129,7 @@ public class DefaultRecordIteratorTest {
     }
 
     @Test
-    public void testWithTwoRecordsOfTheSameType() throws ParseException {
+    public void testWithTwoRecordsOfTheSameType() throws Exception {
 
         long time = getReferenceTime();
 
@@ -174,7 +174,7 @@ public class DefaultRecordIteratorTest {
     }
 
     @Test
-    public void testWithThreeRecordsOfSameType() throws ParseException {
+    public void testWithThreeRecordsOfSameType() throws Exception {
 
         long time = getReferenceTime();
 
@@ -233,7 +233,7 @@ public class DefaultRecordIteratorTest {
     }
 
     @Test
-    public void testWithThreeRecordsOfSameTypeInDisorder() throws ParseException {
+    public void testWithThreeRecordsOfSameTypeInDisorder() throws Exception {
 
         long time = getReferenceTime();
 
@@ -292,7 +292,7 @@ public class DefaultRecordIteratorTest {
     }
 
     @Test
-    public void testWithMultipleRecordsOfDifferentType() throws ParseException {
+    public void testWithMultipleRecordsOfDifferentType() throws Exception {
 
         long time = getReferenceTime();
 

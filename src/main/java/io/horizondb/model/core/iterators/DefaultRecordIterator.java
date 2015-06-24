@@ -17,10 +17,7 @@ package io.horizondb.model.core.iterators;
 
 import io.horizondb.model.core.Record;
 import io.horizondb.model.core.RecordListBuilder;
-import io.horizondb.model.core.ResourceIterator;
 import io.horizondb.model.schema.TimeSeriesDefinition;
-
-import java.util.Iterator;
 
 import static org.apache.commons.lang.Validate.notNull;
 
@@ -30,12 +27,7 @@ import static org.apache.commons.lang.Validate.notNull;
  * @author Benjamin
  * 
  */
-public class DefaultRecordIterator implements ResourceIterator<Record> {
-
-    /**
-     * The records.
-     */
-    private final Iterator<? extends Record> iterator;
+public class DefaultRecordIterator extends IteratorAdapter<Record> {
 
     /**
      * Creates a new <code>DefaultRecordIterator</code> that will iterate over the specified 
@@ -45,7 +37,7 @@ public class DefaultRecordIterator implements ResourceIterator<Record> {
      */
     public DefaultRecordIterator(Iterable<? extends Record> iterable) {
 
-        this.iterator = iterable.iterator();
+        super(iterable);
     }
 
     /**
@@ -58,31 +50,7 @@ public class DefaultRecordIterator implements ResourceIterator<Record> {
         
         return new Builder(definition);
     }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean hasNext() {
-        return this.iterator.hasNext();
-    }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Record next() {
-        return this.iterator.next();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void close() {
-
-    }
-    
     /**
      * Builder for <code>DefaultRecordIterator</code> instances.
      * 

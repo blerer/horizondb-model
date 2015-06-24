@@ -13,29 +13,33 @@
  */
 package io.horizondb.model.core.iterators;
 
+import io.horizondb.io.files.SeekableFileDataInput;
 import io.horizondb.model.core.DataBlock;
+import io.horizondb.model.core.blocks.BinaryDataBlock;
+import io.horizondb.model.schema.TimeSeriesDefinition;
 
 import java.io.IOException;
-import java.util.Iterator;
 
 /**
- * A <code>ResourceIterator</code> over a set of blocks.
+ * Utility to convert a <code>SeekableFileDataInput</code> into a <code>DataBlock</code> iterator.
  *
  */
-public final class DefaultDataBlockIterator extends AbstractResourceIterator<DataBlock> {
+class BinaryBlockIterator extends AbstractResourceIterator<DataBlock> {
 
     /**
-     * The block iterator.
+     * The block
      */
-    private final Iterator<DataBlock> iterator;
-    
+    private final BinaryDataBlock block;
+
     /**
-     * Creates a new <code>DefaultDataBlockIterator</code> to iterate over the specified set 
-     * of blocks.
-     * @param blocks the blocks to iterate above.
+     * The underlying input.
      */
-    public DefaultDataBlockIterator(Iterable<DataBlock> blocks) {
-        this.iterator = blocks.iterator();
+    private final SeekableFileDataInput input;
+
+    public BinaryBlockIterator(TimeSeriesDefinition definition, SeekableFileDataInput input) {
+
+        this.block = new BinaryDataBlock(definition.newBinaryBlockHeader());
+        this.input = input;
     }
 
     /**
@@ -43,7 +47,7 @@ public final class DefaultDataBlockIterator extends AbstractResourceIterator<Dat
      */
     @Override
     public void close() throws IOException {
-
+        this.input.close();
     }
 
     /**
@@ -51,10 +55,12 @@ public final class DefaultDataBlockIterator extends AbstractResourceIterator<Dat
      */
     @Override
     protected void computeNext() throws IOException {
-        if (this.iterator.hasNext()) {
-            setNext(this.iterator.next());
+        if (this.input.isReadable()) {
+            this.block.fill(this.input);
+            setNext(this.block);
         } else {
             done();
         }
     }
+
 }
