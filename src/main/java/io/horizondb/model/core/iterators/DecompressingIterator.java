@@ -15,29 +15,30 @@ package io.horizondb.model.core.iterators;
 
 import io.horizondb.io.ReadableBuffer;
 import io.horizondb.io.compression.CompressionType;
-import io.horizondb.io.compression.Compressor;
+import io.horizondb.io.compression.Decompressor;
 import io.horizondb.model.core.DataBlock;
 import io.horizondb.model.core.ResourceIterator;
 import io.horizondb.model.core.blocks.ImmutableDataBlock;
-import io.horizondb.model.core.records.BlockHeaderUtils;
 import io.horizondb.model.core.records.TimeSeriesRecord;
 
 import java.io.IOException;
 
+import static io.horizondb.model.core.records.BlockHeaderUtils.getCompressionType;
+import static io.horizondb.model.core.records.BlockHeaderUtils.getUncompressedBlockSize;
+
 import static io.horizondb.model.core.records.BlockHeaderUtils.setCompressedBlockSize;
 import static io.horizondb.model.core.records.BlockHeaderUtils.setCompressionType;
-import static io.horizondb.model.core.records.BlockHeaderUtils.setUncompressedBlockSize;
 
 /**
- * A {@link DataBlock} iterator that compress the data of the blocks. 
+ * A {@link DataBlock} iterator that uncompress the data of the blocks. 
  *
  */
-final class CompressingIterator extends ForwardingResourceIterator<DataBlock> {
+final class DecompressingIterator extends ForwardingResourceIterator<DataBlock> {
 
     /**
-     * The compressor used to compress the data.
+     * The decompressor used to uncompress the blocks.
      */
-    private final Compressor compressor;
+    private Decompressor decompressor;
 
     /**
      * The iterator to which are delegated the calls.
@@ -51,8 +52,7 @@ final class CompressingIterator extends ForwardingResourceIterator<DataBlock> {
      * @param compressionType the type of compression to use
      * @param delegate the decorated iterator 
      */
-    public CompressingIterator(CompressionType compressionType, ResourceIterator<DataBlock> delegate) {
-         this.compressor = compressionType.newCompressor();
+    public DecompressingIterator(ResourceIterator<DataBlock> delegate) {
          this.delegate = delegate;
     }
 
@@ -73,14 +73,41 @@ final class CompressingIterator extends ForwardingResourceIterator<DataBlock> {
         DataBlock block = this.delegate.next();
 
         TimeSeriesRecord header = block.getHeader().toTimeSeriesRecord();
-        int blockSize = BlockHeaderUtils.getCompressedBlockSize(header);
 
-        ReadableBuffer compressedData = this.compressor.compress(block.getData());
+        ReadableBuffer uncompressedData = decompress(header, block.getData());
 
-        setCompressionType(header, this.compressor.getType());
-        setCompressedBlockSize(header, compressedData.readableBytes());
-        setUncompressedBlockSize(header, blockSize);
+        setCompressionType(header, CompressionType.NONE);
+        setCompressedBlockSize(header, uncompressedData.readableBytes());
 
-        return new ImmutableDataBlock(header, compressedData);
+        return new ImmutableDataBlock(header, uncompressedData);
+    }
+    
+    /**
+     * Uncompress the specified block.
+     * 
+     * @param header the block header
+     * @param compressedBlock the compressed block
+     * @return the uncompressed data
+     * @throws IOException if an I/O problem occurs.
+     */
+    private ReadableBuffer decompress(TimeSeriesRecord header, ReadableBuffer compressedBlock) 
+            throws IOException {
+
+        createDecompressorIfNeeded(getCompressionType(header));
+        return this.decompressor.decompress(compressedBlock, 
+                                            getUncompressedBlockSize(header));
+    }
+
+    /**
+     * Creates the <code>Decompressor</code> needed to uncompress the blocks.
+     * 
+     * @throws IOException if an I/O problem occurs.
+     */
+    private void createDecompressorIfNeeded(CompressionType compressionType) throws IOException {
+
+        if (this.decompressor == null || this.decompressor.getType() != compressionType) {
+
+            this.decompressor = compressionType.newDecompressor();
+        }
     }
 }

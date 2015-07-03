@@ -224,8 +224,9 @@ public final class BlockHeaderUtils {
      * @param header the block header
      * @param type the record type
      * @return the number of record from the specified type within the block
+     * @throws IOException if an I/O problem occurs
      */
-    public static int getRecordCount(TimeSeriesRecord header, int type) {
+    public static int getRecordCount(Record header, int type) throws IOException {
         
         return header.getField(RECORD_COUNTERS_OFFSET + type).getInt();
     }

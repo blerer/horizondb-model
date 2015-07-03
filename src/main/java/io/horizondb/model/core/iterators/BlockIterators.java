@@ -13,13 +13,14 @@
  */
 package io.horizondb.model.core.iterators;
 
-import com.google.common.collect.RangeSet;
-
-import io.horizondb.io.files.SeekableFileDataInput;
+import io.horizondb.io.ByteReader;
+import io.horizondb.io.compression.CompressionType;
 import io.horizondb.model.core.DataBlock;
 import io.horizondb.model.core.Field;
 import io.horizondb.model.core.ResourceIterator;
 import io.horizondb.model.schema.TimeSeriesDefinition;
+
+import com.google.common.collect.RangeSet;
 
 /**
  * Utility methods to work with <code>DataBlock</code> iterators.
@@ -33,7 +34,7 @@ public final class BlockIterators {
      * @param input the input to read the blocks from.
      * @return a <code>ResourceIterator</code> to iterate over the blocks read from the specified input.
      */
-    public static ResourceIterator<DataBlock> iterator(TimeSeriesDefinition definition, SeekableFileDataInput input) {
+    public static ResourceIterator<DataBlock> iterator(TimeSeriesDefinition definition, ByteReader input) {
         return new BinaryBlockIterator(definition, input);
     }
 
@@ -45,6 +46,27 @@ public final class BlockIterators {
      */
     public static ResourceIterator<DataBlock> iterator(Iterable<DataBlock> blocks) {
         return new IteratorAdapter<DataBlock>(blocks);
+    }
+
+    /**
+     * Creates a <code>ResourceIterator</code> that compress the block returned by the specified iterator.
+     *
+     * @param blocks the blocks to compress
+     * @return a <code>ResourceIterator</code> that compress the block returned by the specified iterator.
+     */
+    public static ResourceIterator<DataBlock> compress(CompressionType compressionType,
+                                                       ResourceIterator<DataBlock> blocks) {
+        return new CompressingIterator(compressionType, blocks);
+    }
+
+    /**
+     * Creates a <code>ResourceIterator</code> that uncompress the block returned by the specified iterator.
+     *
+     * @param blocks the blocks to uncompress
+     * @return a <code>ResourceIterator</code> that uncompress the block returned by the specified iterator.
+     */
+    public static ResourceIterator<DataBlock> decompress(ResourceIterator<DataBlock> blocks) {
+        return new DecompressingIterator(blocks);
     }
 
     /**

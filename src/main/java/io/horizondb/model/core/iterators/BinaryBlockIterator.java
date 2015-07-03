@@ -13,18 +13,19 @@
  */
 package io.horizondb.model.core.iterators;
 
-import io.horizondb.io.files.SeekableFileDataInput;
+import io.horizondb.io.ByteReader;
 import io.horizondb.model.core.DataBlock;
 import io.horizondb.model.core.blocks.BinaryDataBlock;
 import io.horizondb.model.schema.TimeSeriesDefinition;
 
+import java.io.Closeable;
 import java.io.IOException;
 
 /**
  * Utility to convert a <code>SeekableFileDataInput</code> into a <code>DataBlock</code> iterator.
  *
  */
-class BinaryBlockIterator extends AbstractResourceIterator<DataBlock> {
+final class BinaryBlockIterator extends AbstractResourceIterator<DataBlock> {
 
     /**
      * The block
@@ -34,9 +35,9 @@ class BinaryBlockIterator extends AbstractResourceIterator<DataBlock> {
     /**
      * The underlying input.
      */
-    private final SeekableFileDataInput input;
+    private final ByteReader input;
 
-    public BinaryBlockIterator(TimeSeriesDefinition definition, SeekableFileDataInput input) {
+    public BinaryBlockIterator(TimeSeriesDefinition definition, ByteReader input) {
 
         this.block = new BinaryDataBlock(definition.newBinaryBlockHeader());
         this.input = input;
@@ -47,7 +48,9 @@ class BinaryBlockIterator extends AbstractResourceIterator<DataBlock> {
      */
     @Override
     public void close() throws IOException {
-        this.input.close();
+        if (this.input instanceof Closeable) {
+            ((Closeable) this.input).close();
+        }
     }
 
     /**

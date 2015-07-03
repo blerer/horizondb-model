@@ -18,9 +18,8 @@ import io.horizondb.io.ByteReader;
 import io.horizondb.io.ReadableBuffer;
 import io.horizondb.io.buffers.Buffers;
 import io.horizondb.io.buffers.CompositeBuffer;
-import io.horizondb.io.compression.CompressionType;
-import io.horizondb.io.compression.Decompressor;
 import io.horizondb.io.encoding.VarInts;
+import io.horizondb.model.core.DataBlock;
 import io.horizondb.model.core.Field;
 import io.horizondb.model.core.Filter;
 import io.horizondb.model.core.Record;
@@ -30,17 +29,16 @@ import io.horizondb.model.core.filters.Filters;
 import io.horizondb.model.core.records.BinaryTimeSeriesRecord;
 import io.horizondb.model.schema.TimeSeriesDefinition;
 
-import java.io.Closeable;
 import java.io.IOException;
 
-import com.google.common.collect.Range;
 import com.google.common.collect.RangeSet;
 
-import static io.horizondb.model.core.records.BlockHeaderUtils.getCompressedBlockSize;
-import static io.horizondb.model.core.records.BlockHeaderUtils.getCompressionType;
-import static io.horizondb.model.core.records.BlockHeaderUtils.getFirstTimestampField;
-import static io.horizondb.model.core.records.BlockHeaderUtils.getLastTimestampField;
-import static io.horizondb.model.core.records.BlockHeaderUtils.getUncompressedBlockSize;
+import static io.horizondb.model.core.iterators.BlockIterators.decompress;
+
+import static io.horizondb.model.core.iterators.BlockIterators.filter;
+
+import static io.horizondb.model.core.iterators.BlockIterators.iterator;
+
 import static org.apache.commons.lang.Validate.notNull;
 
 /**
@@ -50,11 +48,6 @@ import static org.apache.commons.lang.Validate.notNull;
  * 
  */
 public final class BinaryTimeSeriesRecordIterator extends AbstractResourceIterator<BinaryTimeSeriesRecord> {
-
-    /**
-     * The block header record.
-     */
-    private final BinaryTimeSeriesRecord blockHeader;
     
     /**
      * The records per type.
@@ -62,24 +55,14 @@ public final class BinaryTimeSeriesRecordIterator extends AbstractResourceIterat
     private final BinaryTimeSeriesRecord[] records;
 
     /**
-     * The ByteReader reader containing the records data.
+     * The <code>DataBlock</code> iterator.
      */
-    private final ByteReader reader;
-    
-    /**
-     * The timestamp ranges for which data must be returned.
-     */
-    private final RangeSet<Field> rangeSet;
-    
-    /**
-     * The decompressor used to uncompress the blocks.
-     */
-    private Decompressor decompressor;
+    private final ResourceIterator<DataBlock> iterator;
     
     /**
      * The buffer used to store the compressed block.
      */
-    private ReadableBuffer blockBuffer;
+    private ReadableBuffer buffer = Buffers.EMPTY_BUFFER;
 
     public BinaryTimeSeriesRecordIterator(TimeSeriesDefinition definition, ByteReader reader) {
         
@@ -96,12 +79,9 @@ public final class BinaryTimeSeriesRecordIterator extends AbstractResourceIterat
                                           RangeSet<Field> rangeSet, 
                                           Filter<String> filter) {
         
-        this.blockHeader = definition.newBinaryBlockHeader();
         this.records = definition.newBinaryRecords(filter);
-        this.reader = reader;
-        this.rangeSet = rangeSet;
+        this.iterator = decompress(filter(rangeSet, iterator(definition, reader)));
     }
-
 
     /**    
      * {@inheritDoc}
@@ -109,104 +89,28 @@ public final class BinaryTimeSeriesRecordIterator extends AbstractResourceIterat
     @Override
     protected void computeNext() throws IOException {
         
-        while (this.reader.isReadable() || isBlockBufferReadable()) {
+        while (this.iterator.hasNext() || this.buffer.isReadable()) {
 
-            ByteReader in = getCurrentInput();
+            while (this.buffer.isReadable()) {
 
-            while (in.isReadable()) {
+                int type = this.buffer.readByte();
+                int length = VarInts.readUnsignedInt(this.buffer);
+                ReadableBuffer slice = this.buffer.slice(length);
 
-                int type = in.readByte();
-                int length = VarInts.readUnsignedInt(in);
-
-                ReadableBuffer slice = in.slice(length);
-
-                if (isBlockHeader(type)) {
-
-                    this.blockHeader.fill(slice.duplicate());
-
-                    ReadableBuffer compressedBlock = this.reader.slice(getCompressedBlockSize(this.blockHeader));
-                   
-                    Range<Field> range = Range.closed(getFirstTimestampField(this.blockHeader),
-                                                      getLastTimestampField(this.blockHeader));
-                    
-                    if (this.rangeSet.subRangeSet(range).isEmpty()) {
-                        this.blockBuffer = Buffers.EMPTY_BUFFER;
-                        continue;
-                    }
-                    
-                    this.blockBuffer = decompress(compressedBlock, getUncompressedBlockSize(this.blockHeader));
-
-                    in = getCurrentInput();
-                    
-                } else {
-
-                    BinaryTimeSeriesRecord record = this.records[type];
-                    
-                    if (record != null) {
-                        setNext(record.fill(slice));
-                        return;
-                    }
+                BinaryTimeSeriesRecord record = this.records[type];
+                if (record != null) {
+                    setNext(record.fill(slice));
+                    return;
                 }
             }
-        }
 
+            if (this.iterator.hasNext()) {
+                
+                DataBlock block = this.iterator.next();
+                this.buffer = block.getData();
+            }
+        }
         done();
-    }
-
-    /**
-     * Returns <code>true</code> if the specified type is the one of a block header, <code>false</code> otherwise.
-     * 
-     * @param type the record type
-     * @return <code>true</code> if the specified type is the one of a block header, <code>false</code> otherwise.
-     */
-    private static boolean isBlockHeader(int type) {
-        return type == Record.BLOCK_HEADER_TYPE;
-    }
-    
-    /**
-     * Uncompress the specified block.
-     * 
-     * @param compressedBlock the compressed block
-     * @param uncompressedBlockSize the size of the block once uncompressed
-     * @return the uncompressed data
-     * @throws IOException if an I/O problem occurs.
-     */
-    private ReadableBuffer decompress(ReadableBuffer compressedBlock, int uncompressedBlockSize) 
-            throws IOException {
-        
-        createDecompressorIfNeeded();
-        return this.decompressor.decompress(compressedBlock, 
-                                            getUncompressedBlockSize(this.blockHeader));
-    }
-    
-    /**
-     * Creates the <code>Decompressor</code> needed to uncompress the blocks if needed.
-     * 
-     * @throws IOException if an I/O problem occurs.
-     */
-    private void createDecompressorIfNeeded() throws IOException {
-        
-        CompressionType compressionType = getCompressionType(this.blockHeader);
-        
-        if (this.decompressor == null || this.decompressor.getType() != compressionType) {
-
-            this.decompressor = compressionType.newDecompressor();
-        }
-    }
-
-    /**
-     * Returns the <code>ByteReader</code> to read from.
-     * 
-     * @return the <code>ByteReader</code> to read from.
-     * @throws IOException if an I/O problem occurs
-     */
-    private ByteReader getCurrentInput() throws IOException {
-
-        if (isBlockBufferReadable()) {
-            return this.blockBuffer;
-        } 
-        
-        return this.reader;
     }
 
     /**
@@ -214,22 +118,9 @@ public final class BinaryTimeSeriesRecordIterator extends AbstractResourceIterat
      */
     @Override
     public void close() throws IOException {
-
-        if (this.reader instanceof Closeable) {
-            ((Closeable) this.reader).close();
-        }
+        this.iterator.close();
     }
 
-    /**
-     * Returns <code>true</code> if the block buffer is readable, <code>false</code> otherwise.
-     *  
-     * @return <code>true</code> if the block buffer is readable, <code>false</code> otherwise.
-     * @throws IOException if an I/O problem occurs.
-     */
-    private boolean isBlockBufferReadable() throws IOException {
-        return this.blockBuffer != null && this.blockBuffer.isReadable();
-    }
-    
     /**
      * Creates a new <code>Builder</code> to build instances of <code>BinaryTimeSeriesRecordIterator</code>.
      * 

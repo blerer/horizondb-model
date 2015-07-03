@@ -16,6 +16,7 @@ package io.horizondb.model.core.blocks;
 import io.horizondb.io.ByteReader;
 import io.horizondb.io.ByteWriter;
 import io.horizondb.io.ReadableBuffer;
+import io.horizondb.io.encoding.VarInts;
 import io.horizondb.model.core.DataBlock;
 import io.horizondb.model.core.Record;
 import io.horizondb.model.core.RecordUtils;
@@ -62,7 +63,7 @@ public final class BinaryDataBlock implements DataBlock {
         isTrue(reader.readByte() == Record.BLOCK_HEADER_TYPE,
                 "The first record should be a block header but was not.");
 
-        int length = (int) reader.readUnsignedInt();
+        int length = VarInts.readUnsignedInt(reader);
         ReadableBuffer headerBytes = reader.slice(length).duplicate();
         this.header.fill(headerBytes);
 
