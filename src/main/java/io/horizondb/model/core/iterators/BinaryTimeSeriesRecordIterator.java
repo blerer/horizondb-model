@@ -73,16 +73,28 @@ public final class BinaryTimeSeriesRecordIterator extends AbstractResourceIterat
         
         this(definition, reader, rangeSet, Filters.<String>noop());
     }
-    
+
+    public BinaryTimeSeriesRecordIterator(TimeSeriesDefinition definition, ResourceIterator<DataBlock> iterator) {
+        
+        this(definition, iterator, Filters.<String>noop());
+    }
+
     public BinaryTimeSeriesRecordIterator(TimeSeriesDefinition definition, 
                                           ByteReader reader, 
                                           RangeSet<Field> rangeSet, 
                                           Filter<String> filter) {
-        
-        this.records = definition.newBinaryRecords(filter);
-        this.iterator = decompress(filter(rangeSet, iterator(definition, reader)));
+
+        this(definition, filter(rangeSet, iterator(definition, reader)), filter);
     }
 
+    public BinaryTimeSeriesRecordIterator(TimeSeriesDefinition definition, 
+                                          ResourceIterator<DataBlock> iterator, 
+                                          Filter<String> filter) {
+
+        this.records = definition.newBinaryRecords(filter);
+        this.iterator = decompress(iterator);
+    }
+    
     /**    
      * {@inheritDoc}
      */
