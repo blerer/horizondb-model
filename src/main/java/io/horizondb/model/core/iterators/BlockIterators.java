@@ -18,6 +18,7 @@ import io.horizondb.io.compression.CompressionType;
 import io.horizondb.model.core.DataBlock;
 import io.horizondb.model.core.Field;
 import io.horizondb.model.core.ResourceIterator;
+import io.horizondb.model.core.fields.TimestampField;
 import io.horizondb.model.schema.TimeSeriesDefinition;
 
 import com.google.common.collect.RangeSet;
@@ -77,6 +78,10 @@ public final class BlockIterators {
      * @return an iterator that return only the block containing records within the specified time ranges.
      */
     public static ResourceIterator<DataBlock> filter(RangeSet<Field> rangeSet, ResourceIterator<DataBlock> iterator) {
+        if (rangeSet == TimestampField.ALL)
+        {
+            return iterator;
+        }
         return new BlockFilteringIterator(rangeSet, iterator);
     }
 

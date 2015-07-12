@@ -89,6 +89,14 @@ public final class TimestampField extends AbstractField {
     }
 
     /**
+     * Returns the time unit.
+     * @return the time unit
+     */
+    public TimeUnit getTimeUnit() {
+        return this.sourceUnit;
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override

@@ -93,8 +93,8 @@ public class BinaryTimeSeriesRecordIteratorTest {
 
         int serializedSize = RecordUtils.computeSerializedSize(records);
         
-        TimeSeriesRecord blockHeader = new BlockHeaderBuilder(def).firstTimestampInNanos(TIME_IN_NANOS + 12000700)
-                                                                  .lastTimestampInNanos(TIME_IN_NANOS + 13004400)
+        TimeSeriesRecord blockHeader = new BlockHeaderBuilder(def).firstTimestamp(TIME_IN_NANOS + 12000700)
+                                                                  .lastTimestamp(TIME_IN_NANOS + 13004400)
                                                                   .compressedBlockSize(serializedSize)
                                                                   .uncompressedBlockSize(serializedSize)
                                                                   .recordCount(0, 3)
@@ -183,8 +183,8 @@ public class BinaryTimeSeriesRecordIteratorTest {
 
         int serializedSize = RecordUtils.computeSerializedSize(records);
         
-        TimeSeriesRecord blockHeader = new BlockHeaderBuilder(def).firstTimestampInNanos(TIME_IN_NANOS + 12000700)
-                                                                  .lastTimestampInNanos(TIME_IN_NANOS + 13004400)
+        TimeSeriesRecord blockHeader = new BlockHeaderBuilder(def).firstTimestamp(TIME_IN_NANOS + 12000700)
+                                                                  .lastTimestamp(TIME_IN_NANOS + 13004400)
                                                                   .compressedBlockSize(serializedSize)
                                                                   .uncompressedBlockSize(serializedSize)
                                                                   .recordCount(0, 5)
@@ -262,8 +262,8 @@ public class BinaryTimeSeriesRecordIteratorTest {
 
         int serializedSizeFirstBlock = RecordUtils.computeSerializedSize(firstBlock);
         
-        TimeSeriesRecord firstBlockHeader = new BlockHeaderBuilder(def).firstTimestampInNanos(TIME_IN_NANOS + 12000700)
-                                                                       .lastTimestampInNanos(TIME_IN_NANOS + 13004400)
+        TimeSeriesRecord firstBlockHeader = new BlockHeaderBuilder(def).firstTimestamp(TIME_IN_NANOS + 12000700)
+                                                                       .lastTimestamp(TIME_IN_NANOS + 13004400)
                                                                        .compressedBlockSize(serializedSizeFirstBlock)
                                                                        .uncompressedBlockSize(serializedSizeFirstBlock)
                                                                        .recordCount(0, 3)
@@ -277,8 +277,8 @@ public class BinaryTimeSeriesRecordIteratorTest {
 
         int serializedSizeSecondBlock = RecordUtils.computeSerializedSize(secondBlock);
         
-        TimeSeriesRecord secondBlockHeader = new BlockHeaderBuilder(def).firstTimestampInNanos(TIME_IN_NANOS + 14000000)
-                                                                        .lastTimestampInNanos(TIME_IN_NANOS + 14000000)
+        TimeSeriesRecord secondBlockHeader = new BlockHeaderBuilder(def).firstTimestamp(TIME_IN_NANOS + 14000000)
+                                                                        .lastTimestamp(TIME_IN_NANOS + 14000000)
                                                                         .compressedBlockSize(serializedSizeSecondBlock)
                                                                         .uncompressedBlockSize(serializedSizeSecondBlock)
                                                                         .recordCount(0, 1)
@@ -366,8 +366,8 @@ public class BinaryTimeSeriesRecordIteratorTest {
 
         int serializedSizeFirstBlock = RecordUtils.computeSerializedSize(firstBlock);
         
-        TimeSeriesRecord firstBlockHeader = new BlockHeaderBuilder(def).firstTimestampInNanos(TIME_IN_NANOS + 12000700)
-                                                                       .lastTimestampInNanos(TIME_IN_NANOS + 13004400)
+        TimeSeriesRecord firstBlockHeader = new BlockHeaderBuilder(def).firstTimestamp(TIME_IN_NANOS + 12000700)
+                                                                       .lastTimestamp(TIME_IN_NANOS + 13004400)
                                                                        .compressedBlockSize(serializedSizeFirstBlock)
                                                                        .uncompressedBlockSize(serializedSizeFirstBlock)
                                                                        .recordCount(0, 3)
@@ -381,8 +381,8 @@ public class BinaryTimeSeriesRecordIteratorTest {
 
         int serializedSizeSecondBlock = RecordUtils.computeSerializedSize(secondBlock);
         
-        TimeSeriesRecord secondBlockHeader = new BlockHeaderBuilder(def).firstTimestampInNanos(TIME_IN_NANOS + 14000000)
-                                                                        .lastTimestampInNanos(TIME_IN_NANOS + 14000000)
+        TimeSeriesRecord secondBlockHeader = new BlockHeaderBuilder(def).firstTimestamp(TIME_IN_NANOS + 14000000)
+                                                                        .lastTimestamp(TIME_IN_NANOS + 14000000)
                                                                         .compressedBlockSize(serializedSizeSecondBlock)
                                                                         .uncompressedBlockSize(serializedSizeSecondBlock)
                                                                         .recordCount(0, 1)
@@ -451,8 +451,8 @@ public class BinaryTimeSeriesRecordIteratorTest {
 
         int serializedSizeFirstBlock = RecordUtils.computeSerializedSize(firstBlock);
         
-        TimeSeriesRecord firstBlockHeader = new BlockHeaderBuilder(def).firstTimestampInNanos(TIME_IN_NANOS + 12000700)
-                                                                       .lastTimestampInNanos(TIME_IN_NANOS + 13004400)
+        TimeSeriesRecord firstBlockHeader = new BlockHeaderBuilder(def).firstTimestamp(TIME_IN_NANOS + 12000700)
+                                                                       .lastTimestamp(TIME_IN_NANOS + 13004400)
                                                                        .compressedBlockSize(serializedSizeFirstBlock)
                                                                        .uncompressedBlockSize(serializedSizeFirstBlock)
                                                                        .recordCount(0, 3)
@@ -466,8 +466,8 @@ public class BinaryTimeSeriesRecordIteratorTest {
 
         int serializedSizeSecondBlock = RecordUtils.computeSerializedSize(secondBlock);
         
-        TimeSeriesRecord secondBlockHeader = new BlockHeaderBuilder(def).firstTimestampInNanos(TIME_IN_NANOS + 14000000)
-                                                                        .lastTimestampInNanos(TIME_IN_NANOS + 14000000)
+        TimeSeriesRecord secondBlockHeader = new BlockHeaderBuilder(def).firstTimestamp(TIME_IN_NANOS + 14000000)
+                                                                        .lastTimestamp(TIME_IN_NANOS + 14000000)
                                                                         .compressedBlockSize(serializedSizeSecondBlock)
                                                                         .uncompressedBlockSize(serializedSizeSecondBlock)
                                                                         .recordCount(0, 1)
@@ -552,8 +552,8 @@ public class BinaryTimeSeriesRecordIteratorTest {
 
         int serializedSizeFirstBlock = RecordUtils.computeSerializedSize(firstBlock);
         
-        TimeSeriesRecord firstBlockHeader = new BlockHeaderBuilder(def).firstTimestampInNanos(TIME_IN_NANOS + 12000700)
-                                                                       .lastTimestampInNanos(TIME_IN_NANOS + 13004400)
+        TimeSeriesRecord firstBlockHeader = new BlockHeaderBuilder(def).firstTimestamp(TIME_IN_NANOS + 12000700)
+                                                                       .lastTimestamp(TIME_IN_NANOS + 13004400)
                                                                        .compressedBlockSize(serializedSizeFirstBlock)
                                                                        .uncompressedBlockSize(serializedSizeFirstBlock)
                                                                        .recordCount(0, 3)
@@ -567,8 +567,8 @@ public class BinaryTimeSeriesRecordIteratorTest {
 
         int serializedSizeSecondBlock = RecordUtils.computeSerializedSize(secondBlock);
         
-        TimeSeriesRecord secondBlockHeader = new BlockHeaderBuilder(def).firstTimestampInNanos(TIME_IN_NANOS + 14000000)
-                                                                        .lastTimestampInNanos(TIME_IN_NANOS + 14000000)
+        TimeSeriesRecord secondBlockHeader = new BlockHeaderBuilder(def).firstTimestamp(TIME_IN_NANOS + 14000000)
+                                                                        .lastTimestamp(TIME_IN_NANOS + 14000000)
                                                                         .compressedBlockSize(serializedSizeSecondBlock)
                                                                         .uncompressedBlockSize(serializedSizeSecondBlock)
                                                                         .recordCount(0, 1)
@@ -634,8 +634,8 @@ public class BinaryTimeSeriesRecordIteratorTest {
         
         ReadableBuffer compressedFirstBlock = CompressionType.LZ4.newCompressor().compress(uncompressedFirstBlock);
         
-        TimeSeriesRecord firstBlockHeader = new BlockHeaderBuilder(def).firstTimestampInNanos(TIME_IN_NANOS + 12000700)
-                                                                       .lastTimestampInNanos(TIME_IN_NANOS + 13004400)
+        TimeSeriesRecord firstBlockHeader = new BlockHeaderBuilder(def).firstTimestamp(TIME_IN_NANOS + 12000700)
+                                                                       .lastTimestamp(TIME_IN_NANOS + 13004400)
                                                                        .compressionType(CompressionType.LZ4)
                                                                        .compressedBlockSize(compressedFirstBlock.readableBytes())
                                                                        .uncompressedBlockSize(serializedSizeFirstBlock)
@@ -655,8 +655,8 @@ public class BinaryTimeSeriesRecordIteratorTest {
         
         ReadableBuffer compressedSecondBlock = CompressionType.LZ4.newCompressor().compress(uncompressedSecondBlock);
         
-        TimeSeriesRecord secondBlockHeader = new BlockHeaderBuilder(def).firstTimestampInNanos(TIME_IN_NANOS + 14000000)
-                                                                        .lastTimestampInNanos(TIME_IN_NANOS + 14000000)
+        TimeSeriesRecord secondBlockHeader = new BlockHeaderBuilder(def).firstTimestamp(TIME_IN_NANOS + 14000000)
+                                                                        .lastTimestamp(TIME_IN_NANOS + 14000000)
                                                                         .compressionType(CompressionType.LZ4)
                                                                         .compressedBlockSize(compressedSecondBlock.readableBytes())
                                                                         .uncompressedBlockSize(serializedSizeSecondBlock)

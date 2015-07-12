@@ -14,13 +14,13 @@
 package io.horizondb.model.core.iterators;
 
 import io.horizondb.io.Buffer;
+import io.horizondb.io.ReadableBuffer;
 import io.horizondb.io.buffers.Buffers;
-import io.horizondb.io.encoding.VarInts;
-import io.horizondb.model.core.Predicate;
 import io.horizondb.model.core.Filter;
+import io.horizondb.model.core.Predicate;
 import io.horizondb.model.core.Record;
-import io.horizondb.model.core.iterators.BinaryTimeSeriesRecordIterator;
-import io.horizondb.model.core.iterators.FilteringRecordIterator;
+import io.horizondb.model.core.RecordUtils;
+import io.horizondb.model.core.records.BlockHeaderBuilder;
 import io.horizondb.model.core.records.TimeSeriesRecord;
 import io.horizondb.model.core.util.TimeUtils;
 import io.horizondb.model.schema.DatabaseDefinition;
@@ -33,8 +33,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static io.horizondb.model.core.predicates.Predicates.*;
+import static io.horizondb.model.core.RecordUtils.writeRecord;
 import static io.horizondb.model.core.predicates.FieldUtils.toMillisecondField;
+import static io.horizondb.model.core.predicates.Predicates.and;
+import static io.horizondb.model.core.predicates.Predicates.ge;
+import static io.horizondb.model.core.predicates.Predicates.le;
+import static io.horizondb.model.core.predicates.Predicates.lt;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -76,7 +80,7 @@ public class FilteringRecordIteratorTest {
 
         long timestamp = TimeUtils.parseDateTime("2013-11-14 11:46:00.000");
 
-        Buffer buffer = createBufferWithDeltas(this.seriesDefinition, timestamp);
+        ReadableBuffer buffer = createBufferWithDeltas(this.seriesDefinition, timestamp);
 
         BinaryTimeSeriesRecordIterator iterator = new BinaryTimeSeriesRecordIterator(this.seriesDefinition, buffer);
 
@@ -131,7 +135,7 @@ public class FilteringRecordIteratorTest {
 
         long timestamp = TimeUtils.parseDateTime("2013-11-14 11:46:00.000");
 
-        Buffer buffer = createBufferWithDeltas(this.seriesDefinition, timestamp);
+        ReadableBuffer buffer = createBufferWithDeltas(this.seriesDefinition, timestamp);
 
         BinaryTimeSeriesRecordIterator iterator = new BinaryTimeSeriesRecordIterator(this.seriesDefinition, buffer);
 
@@ -171,7 +175,7 @@ public class FilteringRecordIteratorTest {
 
         long timestamp = TimeUtils.parseDateTime("2013-11-14 11:46:00.000");
 
-        Buffer buffer = createBufferWithTwoRecordTypes(this.seriesDefinition, timestamp);
+        ReadableBuffer buffer = createBufferWithTwoRecordTypes(this.seriesDefinition, timestamp);
 
         BinaryTimeSeriesRecordIterator iterator = new BinaryTimeSeriesRecordIterator(this.seriesDefinition, buffer);
 
@@ -260,7 +264,7 @@ public class FilteringRecordIteratorTest {
 
         long timestamp = TimeUtils.parseDateTime("2013-11-14 11:46:00.000");
 
-        Buffer buffer = createBufferWithTwoRecordTypes(this.seriesDefinition, timestamp);
+        ReadableBuffer buffer = createBufferWithTwoRecordTypes(this.seriesDefinition, timestamp);
 
         BinaryTimeSeriesRecordIterator iterator = new BinaryTimeSeriesRecordIterator(this.seriesDefinition, buffer);
 
@@ -302,7 +306,7 @@ public class FilteringRecordIteratorTest {
 
         long timestamp = TimeUtils.parseDateTime("2013-11-14 11:46:00.000");
 
-        Buffer buffer = createBufferWithDeltasAndFullRecords(this.seriesDefinition, timestamp);
+        ReadableBuffer buffer = createBufferWithDeltasAndFullRecords(this.seriesDefinition, timestamp);
 
         BinaryTimeSeriesRecordIterator iterator = new BinaryTimeSeriesRecordIterator(this.seriesDefinition, buffer);
 
@@ -349,7 +353,7 @@ public class FilteringRecordIteratorTest {
 
         long timestamp = TimeUtils.parseDateTime("2013-11-14 11:46:00.000");
 
-        Buffer buffer = createBufferWithOnlyFullRecords(this.seriesDefinition, timestamp);
+        ReadableBuffer buffer = createBufferWithOnlyFullRecords(this.seriesDefinition, timestamp);
 
         BinaryTimeSeriesRecordIterator iterator = new BinaryTimeSeriesRecordIterator(this.seriesDefinition, buffer);
 
@@ -403,7 +407,7 @@ public class FilteringRecordIteratorTest {
 
         long timestamp = TimeUtils.parseDateTime("2013-11-14 11:46:00.000");
 
-        Buffer buffer = createBufferWithOnlyFullRecords(this.seriesDefinition, timestamp);
+        ReadableBuffer buffer = createBufferWithOnlyFullRecords(this.seriesDefinition, timestamp);
 
         BinaryTimeSeriesRecordIterator iterator = new BinaryTimeSeriesRecordIterator(this.seriesDefinition, buffer);
 
@@ -457,7 +461,7 @@ public class FilteringRecordIteratorTest {
 
         long timestamp = TimeUtils.parseDateTime("2013-11-14 11:46:00.000");
 
-        Buffer buffer = createBufferWithOnlyFullRecords(this.seriesDefinition, timestamp);
+        ReadableBuffer buffer = createBufferWithOnlyFullRecords(this.seriesDefinition, timestamp);
 
         BinaryTimeSeriesRecordIterator iterator = new BinaryTimeSeriesRecordIterator(this.seriesDefinition, buffer);
 
@@ -466,6 +470,8 @@ public class FilteringRecordIteratorTest {
 
         Filter<Record> filter = expression.toFilter(this.seriesDefinition);
 
+        assertTrue(iterator.hasNext());
+        
         try (FilteringRecordIterator rangeIterator = new FilteringRecordIterator(this.seriesDefinition,
                                                                                  iterator,
                                                                                  filter)) {
@@ -487,7 +493,7 @@ public class FilteringRecordIteratorTest {
 
         long timestamp = TimeUtils.parseDateTime("2013-11-14 11:46:00.000");
 
-        Buffer buffer = createBufferWithOnlyFullRecords(this.seriesDefinition, timestamp);
+        ReadableBuffer buffer = createBufferWithOnlyFullRecords(this.seriesDefinition, timestamp);
 
         BinaryTimeSeriesRecordIterator iterator = new BinaryTimeSeriesRecordIterator(this.seriesDefinition, buffer);
 
@@ -528,7 +534,8 @@ public class FilteringRecordIteratorTest {
      * @return the buffer containing only full records.
      * @throws IOException if an I/O problem occurs.
      */
-    private static Buffer createBufferWithOnlyFullRecords(TimeSeriesDefinition seriesDefinition, long timestamp) throws IOException {
+    private static ReadableBuffer createBufferWithOnlyFullRecords(TimeSeriesDefinition seriesDefinition,
+                                                                  long timestamp) throws IOException {
 
         TimeSeriesRecord[] records = seriesDefinition.newRecords();
 
@@ -538,26 +545,37 @@ public class FilteringRecordIteratorTest {
         records[0].setTimestampInMillis(1, timestamp);
         records[0].setByte(2, 10);
 
-        writeRecord(records[0], buffer);
+        writeRecord(buffer, records[0]);
 
         records[0].setTimestampInMillis(0, timestamp + 100);
         records[0].setTimestampInMillis(1, timestamp + 100);
         records[0].setByte(2, 5);
 
-        writeRecord(records[0], buffer);
+        writeRecord(buffer, records[0]);
 
         records[0].setTimestampInMillis(0, timestamp + 350);
         records[0].setTimestampInMillis(1, timestamp + 350);
         records[0].setByte(2, 10);
 
-        writeRecord(records[0], buffer);
+        writeRecord(buffer, records[0]);
 
         records[0].setTimestampInMillis(0, timestamp + 450);
         records[0].setTimestampInMillis(1, timestamp + 450);
         records[0].setByte(2, 6);
 
-        writeRecord(records[0], buffer);
-        return buffer;
+        writeRecord(buffer, records[0]);
+
+        Record header = new BlockHeaderBuilder(seriesDefinition).firstTimestamp(timestamp)
+                                                                .lastTimestamp(timestamp + 450)
+                                                                .compressedBlockSize(buffer.readableBytes())
+                                                                .uncompressedBlockSize(buffer.readableBytes())
+                                                                .recordCount(0, 4)
+                                                                .build();
+
+        Buffer headerBuffer = Buffers.allocate(RecordUtils.computeSerializedSize(header));
+        writeRecord(headerBuffer, header);
+
+        return Buffers.composite(headerBuffer, buffer);
     }
 
     /**
@@ -568,7 +586,8 @@ public class FilteringRecordIteratorTest {
      * @return the buffer containing deltas.
      * @throws IOException if an I/O problem occurs.
      */
-    private static Buffer createBufferWithDeltas(TimeSeriesDefinition seriesDefinition, long timestamp) throws IOException {
+    private static ReadableBuffer createBufferWithDeltas(TimeSeriesDefinition seriesDefinition,
+                                                         long timestamp) throws IOException {
 
         TimeSeriesRecord[] records = seriesDefinition.newRecords();
 
@@ -578,29 +597,40 @@ public class FilteringRecordIteratorTest {
         records[0].setTimestampInMillis(1, timestamp);
         records[0].setByte(2, 10);
 
-        writeRecord(records[0], buffer);
+        writeRecord(buffer, records[0]);
 
         records[0].setDelta(true);
         records[0].setTimestampInMillis(0, 100);
         records[0].setTimestampInMillis(1, 100);
         records[0].setByte(2, -5);
 
-        writeRecord(records[0], buffer);
+        writeRecord(buffer, records[0]);
 
         records[0].setDelta(true);
         records[0].setTimestampInMillis(0, 250);
         records[0].setTimestampInMillis(1, 250);
         records[0].setByte(2, 5);
 
-        writeRecord(records[0], buffer);
+        writeRecord(buffer, records[0]);
 
         records[0].setDelta(true);
         records[0].setTimestampInMillis(0, 100);
         records[0].setTimestampInMillis(1, 100);
         records[0].setByte(2, -4);
 
-        writeRecord(records[0], buffer);
-        return buffer;
+        writeRecord(buffer, records[0]);
+
+        Record header = new BlockHeaderBuilder(seriesDefinition).firstTimestamp(timestamp)
+                                                                .lastTimestamp(timestamp + 450)
+                                                                .compressedBlockSize(buffer.readableBytes())
+                                                                .uncompressedBlockSize(buffer.readableBytes())
+                                                                .recordCount(0, 4)
+                                                                .build();
+
+        Buffer headerBuffer = Buffers.allocate(RecordUtils.computeSerializedSize(header));
+        writeRecord(headerBuffer, header);
+
+        return Buffers.composite(headerBuffer, buffer);
     }
 
     /**
@@ -611,7 +641,8 @@ public class FilteringRecordIteratorTest {
      * @return the buffer containing deltas.
      * @throws IOException if an I/O problem occurs.
      */
-    private static Buffer createBufferWithDeltasAndFullRecords(TimeSeriesDefinition seriesDefinition, long timestamp) throws IOException {
+    private static ReadableBuffer createBufferWithDeltasAndFullRecords(TimeSeriesDefinition seriesDefinition,
+                                                                       long timestamp) throws IOException {
 
         TimeSeriesRecord[] records = seriesDefinition.newRecords();
 
@@ -621,29 +652,39 @@ public class FilteringRecordIteratorTest {
         records[0].setTimestampInMillis(1, timestamp);
         records[0].setByte(2, 10);
 
-        writeRecord(records[0], buffer);
+        writeRecord(buffer, records[0]);
 
         records[0].setDelta(true);
         records[0].setTimestampInMillis(0, 100);
         records[0].setTimestampInMillis(1, 100);
         records[0].setByte(2, -5);
 
-        writeRecord(records[0], buffer);
+        writeRecord(buffer, records[0]);
 
         records[0].setDelta(false);
         records[0].setTimestampInMillis(0, timestamp + 350);
         records[0].setTimestampInMillis(1, timestamp + 350);
         records[0].setByte(2, 10);
 
-        writeRecord(records[0], buffer);
+        writeRecord(buffer, records[0]);
 
         records[0].setDelta(true);
         records[0].setTimestampInMillis(0, 100);
         records[0].setTimestampInMillis(1, 100);
         records[0].setByte(2, -4);
 
-        writeRecord(records[0], buffer);
-        return buffer;
+        writeRecord(buffer, records[0]);
+        Record header = new BlockHeaderBuilder(seriesDefinition).firstTimestamp(timestamp)
+                                                                .lastTimestamp(timestamp + 450)
+                                                                .compressedBlockSize(buffer.readableBytes())
+                                                                .uncompressedBlockSize(buffer.readableBytes())
+                                                                .recordCount(0, 4)
+                                                                .build();
+
+        Buffer headerBuffer = Buffers.allocate(RecordUtils.computeSerializedSize(header));
+        writeRecord(headerBuffer, header);
+
+        return Buffers.composite(headerBuffer, buffer);
     }
 
     /**
@@ -654,7 +695,8 @@ public class FilteringRecordIteratorTest {
      * @return the buffer containing deltas.
      * @throws IOException if an I/O problem occurs.
      */
-    private static Buffer createBufferWithTwoRecordTypes(TimeSeriesDefinition seriesDefinition, long timestamp) throws IOException {
+    private static ReadableBuffer createBufferWithTwoRecordTypes(TimeSeriesDefinition seriesDefinition,
+                                                                 long timestamp) throws IOException {
 
         TimeSeriesRecord[] records = seriesDefinition.newRecords();
 
@@ -664,28 +706,28 @@ public class FilteringRecordIteratorTest {
         records[0].setTimestampInMillis(1, timestamp);
         records[0].setByte(2, 10);
 
-        writeRecord(records[0], buffer);
+        writeRecord(buffer, records[0]);
 
         records[1].setTimestampInMillis(0, timestamp);
         records[1].setTimestampInMillis(1, timestamp);
         records[1].setDecimal(2, 12, 0);
         records[1].setLong(3, 6);
 
-        writeRecord(records[1], buffer);
+        writeRecord(buffer, records[1]);
 
         records[0].setDelta(true);
         records[0].setTimestampInMillis(0, 100);
         records[0].setTimestampInMillis(1, 100);
         records[0].setByte(2, -5);
 
-        writeRecord(records[0], buffer);
+        writeRecord(buffer, records[0]);
 
         records[0].setDelta(true);
         records[0].setTimestampInMillis(0, 250);
         records[0].setTimestampInMillis(1, 250);
         records[0].setByte(2, 5);
 
-        writeRecord(records[0], buffer);
+        writeRecord(buffer, records[0]);
 
         records[1].setDelta(true);
         records[1].setTimestampInMillis(0, 360);
@@ -693,14 +735,14 @@ public class FilteringRecordIteratorTest {
         records[1].setDecimal(2, 5, -1);
         records[1].setLong(3, -2);
 
-        writeRecord(records[1], buffer);
+        writeRecord(buffer, records[1]);
 
         records[0].setDelta(true);
         records[0].setTimestampInMillis(0, 100);
         records[0].setTimestampInMillis(1, 100);
         records[0].setByte(2, -4);
 
-        writeRecord(records[0], buffer);
+        writeRecord(buffer, records[0]);
 
         records[1].setDelta(true);
         records[1].setTimestampInMillis(0, 240);
@@ -708,21 +750,18 @@ public class FilteringRecordIteratorTest {
         records[1].setDecimal(2, 5, -1);
         records[1].setLong(3, 5);
 
-        writeRecord(records[1], buffer);
-        return buffer;
-    }
+        writeRecord(buffer, records[1]);
+        Record header = new BlockHeaderBuilder(seriesDefinition).firstTimestamp(timestamp)
+                                                                .lastTimestamp(timestamp + 600)
+                                                                .compressedBlockSize(buffer.readableBytes())
+                                                                .uncompressedBlockSize(buffer.readableBytes())
+                                                                .recordCount(0, 4)
+                                                                .recordCount(1, 3)
+                                                                .build();
 
-    /**
-     * Writes the specified record to the specified buffer.
-     * 
-     * @param recordsthe records
-     * @param buffer the buffer to write to
-     * @throws IOException if an I/O problem occurs
-     */
-    private static void writeRecord(TimeSeriesRecord record, Buffer buffer) throws IOException {
+        Buffer headerBuffer = Buffers.allocate(RecordUtils.computeSerializedSize(header));
+        writeRecord(headerBuffer, header);
 
-        buffer.writeByte(record.getType());
-        VarInts.writeUnsignedLong(buffer, record.computeSerializedSize());
-        record.writeTo(buffer);
+        return Buffers.composite(headerBuffer, buffer);
     }
 }

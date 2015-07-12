@@ -18,9 +18,9 @@ import io.horizondb.model.core.Counter;
 import io.horizondb.model.core.Field;
 import io.horizondb.model.core.Record;
 import io.horizondb.model.core.fields.ImmutableField;
+import io.horizondb.model.core.fields.TimestampField;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 import com.google.common.collect.Range;
 
@@ -28,9 +28,6 @@ import static io.horizondb.model.core.Record.TIMESTAMP_FIELD_INDEX;
 
 /**
  * Utility methods to work with block header. 
- * 
- * @author Benjamin
- *
  */
 public final class BlockHeaderUtils {
     
@@ -71,24 +68,26 @@ public final class BlockHeaderUtils {
     }
     
     /**
-     * Returns the first timestamp of the block.
+     * Sets the first timestamp of the block.
      * 
      * @param header the block header 
-     * @param timestampInNanos the time stamp in nanoseconds
+     * @param timestamp the time stamp
      * @throws IOException if an I/O problem occurs
      */
-    public static void setFirstTimestampInNanos(TimeSeriesRecord header, long timestampInNanos) {
-        header.setTimestamp(TIMESTAMP_FIELD_INDEX, timestampInNanos, TimeUnit.NANOSECONDS);
+    public static void setFirstTimestamp(TimeSeriesRecord header, long timestamp) {
+        TimestampField field = (TimestampField) header.getField(TIMESTAMP_FIELD_INDEX);
+        field.setTimestamp(timestamp, field.getTimeUnit());
     }
-    
+
     /**
      * Gets the first timestamp of the block.
      * 
      * @param header the block header 
      * @throws IOException if an I/O problem occurs
      */
-    public static long getFirstTimestampInNanos(Record header) throws IOException {
-        return header.getTimestampInNanos(TIMESTAMP_FIELD_INDEX);
+    public static long getFirstTimestamp(Record header) throws IOException {
+        TimestampField field = (TimestampField) header.getField(TIMESTAMP_FIELD_INDEX);
+        return field.getTimestampIn(field.getTimeUnit());
     }
     
     /**
@@ -145,12 +144,13 @@ public final class BlockHeaderUtils {
      * Sets the last timestamp of the block. This method must be called after the first timestamp has been set.
      * 
      * @param header the block header 
-     * @param timestampInNanos the last in nanoseconds of the block
+     * @param timestamp the last timestamp of the block
      * @throws IOException if an I/O problem occurs
      */
-    public static void setLastTimestampInNanos(TimeSeriesRecord header, long timestampInNanos) throws IOException {
-        long delta = timestampInNanos - getFirstTimestampInNanos(header);
-        header.setTimestamp(LAST_TIMESTAMP_INDEX, delta, TimeUnit.NANOSECONDS);
+    public static void setLastTimestamp(TimeSeriesRecord header, long timestamp) throws IOException {
+        TimestampField field = (TimestampField) header.getField(TIMESTAMP_FIELD_INDEX);
+        long delta = timestamp - getFirstTimestamp(header);
+        header.setTimestamp(LAST_TIMESTAMP_INDEX, delta, field.getTimeUnit());
     }
     
     /**
@@ -160,8 +160,9 @@ public final class BlockHeaderUtils {
      * @return the last timestamp of the block
      * @throws IOException if an I/O problem occurs
      */
-    public static long getLastTimestampInNanos(Record header) throws IOException {
-        return getFirstTimestampInNanos(header) + header.getTimestampInNanos(LAST_TIMESTAMP_INDEX);
+    public static long getLastTimestamp(Record header) throws IOException {
+        TimestampField field = (TimestampField) header.getField(LAST_TIMESTAMP_INDEX);
+        return getFirstTimestamp(header) + field.getTimestampIn(field.getTimeUnit());
     }
     
     /**

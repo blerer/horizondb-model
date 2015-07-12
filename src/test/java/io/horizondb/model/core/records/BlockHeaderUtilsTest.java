@@ -85,8 +85,8 @@ public class BlockHeaderUtilsTest {
         int compressedBlockSize = compressedBlock.readableBytes();
 
         TimeSeriesRecord blockHeader = def.newBlockHeader();
-        BlockHeaderUtils.setFirstTimestampInNanos(blockHeader, TIME_IN_NANOS + 12000700);
-        BlockHeaderUtils.setLastTimestampInNanos(blockHeader, TIME_IN_NANOS + 13004400);
+        BlockHeaderUtils.setFirstTimestamp(blockHeader, TIME_IN_NANOS + 12000700);
+        BlockHeaderUtils.setLastTimestamp(blockHeader, TIME_IN_NANOS + 13004400);
         BlockHeaderUtils.setCompressionType(blockHeader, CompressionType.LZ4);
         BlockHeaderUtils.setCompressedBlockSize(blockHeader, compressedBlockSize);
         BlockHeaderUtils.setUncompressedBlockSize(blockHeader, blockSize);
@@ -98,8 +98,8 @@ public class BlockHeaderUtilsTest {
         BinaryTimeSeriesRecord newBlockHeader = def.newBinaryBlockHeader();
         newBlockHeader.fill(buffer);
         
-        assertEquals(TIME_IN_NANOS + 12000700, BlockHeaderUtils.getFirstTimestampInNanos(newBlockHeader));
-        assertEquals(TIME_IN_NANOS + 13004400, BlockHeaderUtils.getLastTimestampInNanos(newBlockHeader));
+        assertEquals(TIME_IN_NANOS + 12000700, BlockHeaderUtils.getFirstTimestamp(newBlockHeader));
+        assertEquals(TIME_IN_NANOS + 13004400, BlockHeaderUtils.getLastTimestamp(newBlockHeader));
         assertEquals(CompressionType.LZ4, BlockHeaderUtils.getCompressionType(newBlockHeader));
         assertEquals(compressedBlockSize, BlockHeaderUtils.getCompressedBlockSize(newBlockHeader));
         assertEquals(blockSize, BlockHeaderUtils.getUncompressedBlockSize(newBlockHeader));

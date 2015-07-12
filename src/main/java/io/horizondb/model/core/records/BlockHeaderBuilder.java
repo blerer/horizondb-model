@@ -42,27 +42,27 @@ public final class BlockHeaderBuilder {
     }
     
     /**
-     * Sets the first timestamp of the block in nanoseconds. 
+     * Sets the first timestamp of the block. 
      *     
-     * @param timestampInNanos the first timestamp of the block in nanoseconds
+     * @param timestamp the first timestamp of the block
      * @return this <code>BlockHeaderBuilder</code>.
      */
-    public BlockHeaderBuilder firstTimestampInNanos(long timestampInNanos) {
-        
-        BlockHeaderUtils.setFirstTimestampInNanos(this.header, timestampInNanos);
+    public BlockHeaderBuilder firstTimestamp(long timestamp) {
+
+        BlockHeaderUtils.setFirstTimestamp(this.header, timestamp);
         return this;
     }
-    
+
     /**
-     * Sets the last timestamp of the block in nanoseconds. 
+     * Sets the last timestamp of the block. 
      *     
-     * @param timestampInNanos the last timestamp of the block in nanoseconds
+     * @param timestamp the last timestamp of the block
      * @return this <code>BlockHeaderBuilder</code>.
      * @throws IOException if an I/O problem occurs
      */
-    public BlockHeaderBuilder lastTimestampInNanos(long timestampInNanos) throws IOException {
+    public BlockHeaderBuilder lastTimestamp(long timestamp) throws IOException {
         
-        BlockHeaderUtils.setLastTimestampInNanos(this.header, timestampInNanos);
+        BlockHeaderUtils.setLastTimestamp(this.header, timestamp);
         return this;
     }
     

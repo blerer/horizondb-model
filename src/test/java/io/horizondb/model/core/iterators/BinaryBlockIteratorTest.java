@@ -97,8 +97,8 @@ public class BinaryBlockIteratorTest {
 
         int serializedSize = RecordUtils.computeSerializedSize(records);
 
-        TimeSeriesRecord blockHeader = new BlockHeaderBuilder(def).firstTimestampInNanos(TIME_IN_NANOS + 12000700)
-                                                                  .lastTimestampInNanos(TIME_IN_NANOS + 13004400)
+        TimeSeriesRecord blockHeader = new BlockHeaderBuilder(def).firstTimestamp(TIME_IN_NANOS + 12000700)
+                                                                  .lastTimestamp(TIME_IN_NANOS + 13004400)
                                                                   .compressedBlockSize(serializedSize)
                                                                   .uncompressedBlockSize(serializedSize)
                                                                   .recordCount(0, 5)
@@ -118,8 +118,8 @@ public class BinaryBlockIteratorTest {
             DataBlock block = iterator.next();
 
             Record header = block.getHeader();
-            assertEquals(TIME_IN_NANOS + 12000700, BlockHeaderUtils.getFirstTimestampInNanos(header));
-            assertEquals(TIME_IN_NANOS + 13004400, BlockHeaderUtils.getLastTimestampInNanos(header));
+            assertEquals(TIME_IN_NANOS + 12000700, BlockHeaderUtils.getFirstTimestamp(header));
+            assertEquals(TIME_IN_NANOS + 13004400, BlockHeaderUtils.getLastTimestamp(header));
             assertEquals(serializedSize, BlockHeaderUtils.getCompressedBlockSize(header));
             assertEquals(serializedSize, BlockHeaderUtils.getUncompressedBlockSize(header));
             assertEquals(5, BlockHeaderUtils.getRecordCount(header, 0));
