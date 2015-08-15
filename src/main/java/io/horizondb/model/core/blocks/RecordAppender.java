@@ -127,9 +127,9 @@ public final class RecordAppender {
             this.lastRecords[type] = record.toTimeSeriesRecord();
             return doAppend(record);
         }
-        
+
         Record delta = toDelta(record);
-        this.lastRecords[type] = record.toTimeSeriesRecord();
+        this.lastRecords[type].add(delta);
         return doAppend(delta);
     }
 
