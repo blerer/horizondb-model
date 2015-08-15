@@ -45,8 +45,28 @@ public final class BlockIterators {
      * @param blocks the blocks to iterate above.
      * @return a <code>ResourceIterator</code> to iterate over the blocks
      */
+    public static ResourceIterator<DataBlock> iterator(DataBlock... blocks) {
+        return new IteratorAdapter<DataBlock>(blocks);
+    }
+
+    /**
+     * Creates a <code>ResourceIterator</code> to iterate over the specified blocks.
+     *
+     * @param blocks the blocks to iterate above.
+     * @return a <code>ResourceIterator</code> to iterate over the blocks
+     */
     public static ResourceIterator<DataBlock> iterator(Iterable<DataBlock> blocks) {
         return new IteratorAdapter<DataBlock>(blocks);
+    }
+
+    /**
+     * Creates a <code>ResourceIterator</code> containing only the specified block.
+     *
+     * @param block the data block
+     * @return a <code>ResourceIterator</code> containing only the specified block
+     */
+    public static ResourceIterator<DataBlock> singleton(DataBlock block) {
+        return new IteratorAdapter<DataBlock>(block);
     }
 
     /**
