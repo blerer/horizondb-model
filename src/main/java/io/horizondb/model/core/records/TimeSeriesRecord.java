@@ -447,7 +447,7 @@ public class TimeSeriesRecord extends AbstractTimeSeriesRecord implements Compar
      */
     @Override
     public TimeSeriesRecord toTimeSeriesRecord() {
-        return this;
+        return newInstance();
     }
     
     /**
