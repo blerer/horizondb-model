@@ -13,6 +13,12 @@
  */
 package io.horizondb.model.core;
 
+import io.horizondb.io.Buffer;
+import io.horizondb.io.ReadableBuffer;
+import io.horizondb.io.buffers.Buffers;
+import io.horizondb.io.buffers.CompositeBuffer;
+import io.horizondb.io.serialization.Serializable;
+
 import java.io.IOException;
 import java.util.NoSuchElementException;
 
@@ -46,6 +52,23 @@ public final class ResourceIteratorUtils {
     @SuppressWarnings("unchecked")
     public static <E> ResourceIterator<E> emptyIterator() {
         return (ResourceIterator<E>) EMPTY_RESOURCE_ITERATOR;
+    }
+
+    /**
+     * Serializes the object returned by the specified iterator.
+     *
+     * @param iterator the iterator
+     * @return a buffer containing the serialized objects
+     * @throws IOException
+     */
+    public static ReadableBuffer toBytes(ResourceIterator<? extends Serializable> iterator) throws IOException {
+
+        CompositeBuffer composite = new CompositeBuffer();
+        while(iterator.hasNext()) {
+            Buffer buffer = Buffers.toBytes(iterator.next());
+            composite.addBytes(buffer);
+        }
+        return composite;
     }
 
     /**
