@@ -16,12 +16,12 @@ package io.horizondb.model.core.iterators;
 import io.horizondb.io.Buffer;
 import io.horizondb.io.ReadableBuffer;
 import io.horizondb.io.buffers.Buffers;
-import io.horizondb.io.buffers.CompositeBuffer;
 import io.horizondb.io.compression.CompressionType;
 import io.horizondb.model.core.DataBlock;
 import io.horizondb.model.core.Field;
 import io.horizondb.model.core.Record;
 import io.horizondb.model.core.ResourceIterator;
+import io.horizondb.model.core.ResourceIteratorUtils;
 import io.horizondb.model.core.blocks.DataBlockBuilder;
 import io.horizondb.model.core.fields.TimestampField;
 import io.horizondb.model.core.filters.Filters;
@@ -48,7 +48,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
- * @author Benjamin
  *
  */
 public class BinaryTimeSeriesRecordIteratorTest {
@@ -487,49 +486,44 @@ public class BinaryTimeSeriesRecordIteratorTest {
                                                          .setByte(2, 1)
                                                          .build();
 
-        
-        ResourceIterator<DataBlock> iterator = iterator(def, serialize(compress(CompressionType.LZ4, iterator(firstBlock, secondBlock))));
-        
-        while (iterator.hasNext()) {
-            iterator.next();
+        ReadableBuffer buffer = ResourceIteratorUtils.toBytes(compress(CompressionType.LZ4, iterator(firstBlock, secondBlock)));
+
+        try (ResourceIterator<BinaryTimeSeriesRecord> readIterator = new BinaryTimeSeriesRecordIterator(def, buffer)) {
+
+            assertTrue(readIterator.hasNext());
+            Record actual = readIterator.next();
+            
+            assertFalse(actual.isDelta());
+            assertEquals(TIME_IN_NANOS + 12000700L, actual.getTimestampInNanos(0));
+            assertEquals(TIME_IN_MILLIS + 12, actual.getTimestampInMillis(1));
+            assertEquals(3, actual.getByte(2));
+
+            assertTrue(readIterator.hasNext());
+            actual = readIterator.next();
+
+            assertTrue(actual.isDelta());
+            assertEquals(1000200, actual.getTimestampInNanos(0));
+            assertEquals(1, actual.getTimestampInMillis(1));
+            assertEquals(0, actual.getByte(2));
+
+            assertTrue(readIterator.hasNext());
+            actual = readIterator.next();
+
+            assertTrue(actual.isDelta());
+            assertEquals(3500, actual.getTimestampInNanos(0));
+            assertEquals(0, actual.getTimestampInMillis(1));
+            assertEquals(-2, actual.getByte(2));
+
+            assertTrue(readIterator.hasNext());
+            actual = readIterator.next();
+            
+            assertFalse(actual.isDelta());
+            assertEquals(TIME_IN_NANOS + 14000000L, actual.getTimestampInNanos(0));
+            assertEquals(TIME_IN_MILLIS + 14, actual.getTimestampInMillis(1));
+            assertEquals(1, actual.getByte(2));
+            
+            assertFalse(readIterator.hasNext());
         }
-        
-//        try (ResourceIterator<BinaryTimeSeriesRecord> readIterator = new BinaryTimeSeriesRecordIterator(def, buffer)) {
-//
-//            assertTrue(readIterator.hasNext());
-//            Record actual = readIterator.next();
-//            
-//            assertFalse(actual.isDelta());
-//            assertEquals(TIME_IN_NANOS + 12000700L, actual.getTimestampInNanos(0));
-//            assertEquals(TIME_IN_MILLIS + 12, actual.getTimestampInMillis(1));
-//            assertEquals(3, actual.getByte(2));
-//
-//            assertTrue(readIterator.hasNext());
-//            actual = readIterator.next();
-//
-//            assertTrue(actual.isDelta());
-//            assertEquals(1000200, actual.getTimestampInNanos(0));
-//            assertEquals(1, actual.getTimestampInMillis(1));
-//            assertEquals(0, actual.getByte(2));
-//
-//            assertTrue(readIterator.hasNext());
-//            actual = readIterator.next();
-//
-//            assertTrue(actual.isDelta());
-//            assertEquals(3500, actual.getTimestampInNanos(0));
-//            assertEquals(0, actual.getTimestampInMillis(1));
-//            assertEquals(-2, actual.getByte(2));
-//
-//            assertTrue(readIterator.hasNext());
-//            actual = readIterator.next();
-//            
-//            assertFalse(actual.isDelta());
-//            assertEquals(TIME_IN_NANOS + 14000000L, actual.getTimestampInNanos(0));
-//            assertEquals(TIME_IN_MILLIS + 14, actual.getTimestampInMillis(1));
-//            assertEquals(1, actual.getByte(2));
-//            
-//            assertFalse(readIterator.hasNext());
-//        }
     }
     
     @Test
@@ -550,20 +544,6 @@ public class BinaryTimeSeriesRecordIteratorTest {
 
             assertFalse(readIterator.hasNext());
         }
-    }
-
-    private static ReadableBuffer serialize(ResourceIterator<DataBlock> iterator) throws IOException {
-
-        CompositeBuffer composite = new CompositeBuffer();
-
-        while (iterator.hasNext()) {
-            DataBlock block = iterator.next();
-            Buffer buffer = Buffers.allocate(block.computeSerializedSize());
-            block.writeTo(buffer);
-            composite.addBytes(buffer);
-        }
-
-        return composite;
     }
     
     private static Buffer serialize(DataBlock... blocks) throws IOException {
