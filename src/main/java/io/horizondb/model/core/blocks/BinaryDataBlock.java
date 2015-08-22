@@ -17,7 +17,6 @@ import io.horizondb.io.ByteReader;
 import io.horizondb.io.ByteWriter;
 import io.horizondb.io.ReadableBuffer;
 import io.horizondb.io.encoding.VarInts;
-import io.horizondb.model.core.DataBlock;
 import io.horizondb.model.core.Record;
 import io.horizondb.model.core.RecordUtils;
 import io.horizondb.model.core.records.BinaryTimeSeriesRecord;
@@ -30,7 +29,7 @@ import static org.apache.commons.lang.Validate.isTrue;
 /**
  *
  */
-public final class BinaryDataBlock implements DataBlock {
+public final class BinaryDataBlock extends AbstractDataBlock {
 
     /**
      * The block header.

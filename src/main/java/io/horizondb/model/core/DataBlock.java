@@ -13,8 +13,13 @@
  */
 package io.horizondb.model.core;
 
+import java.io.IOException;
+
+import com.google.common.collect.RangeMap;
+
 import io.horizondb.io.ReadableBuffer;
 import io.horizondb.io.serialization.Serializable;
+import io.horizondb.model.schema.TimeSeriesDefinition;
 
 /**
  * A block of data (e.g. a set of records in binary format).
@@ -33,4 +38,13 @@ public interface DataBlock extends Serializable {
      * @return the data in a binary format
      */
     ReadableBuffer getData();
+
+    /**
+     * Splits this block in multiple block matching the time series partitions.
+     *
+     * @param definition the time series definition
+     * @return the blocks matching the time series partition
+     * @throws IOException if an I/O problem occurs
+     */
+    RangeMap<Field, DataBlock> split(TimeSeriesDefinition definition) throws IOException;
 }

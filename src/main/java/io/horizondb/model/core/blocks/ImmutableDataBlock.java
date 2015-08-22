@@ -13,13 +13,13 @@
  */
 package io.horizondb.model.core.blocks;
 
-import java.io.IOException;
-
 import io.horizondb.io.ByteWriter;
 import io.horizondb.io.ReadableBuffer;
 import io.horizondb.model.core.DataBlock;
 import io.horizondb.model.core.Record;
 import io.horizondb.model.core.RecordUtils;
+
+import java.io.IOException;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
@@ -28,7 +28,7 @@ import org.apache.commons.lang.builder.ToStringStyle;
  * A {@link DataBlock} that always return a copy of the header and of the buffer.
  *
  */
-public final class ImmutableDataBlock implements DataBlock {
+public final class ImmutableDataBlock extends AbstractDataBlock {
 
     /**
      * The block header.
