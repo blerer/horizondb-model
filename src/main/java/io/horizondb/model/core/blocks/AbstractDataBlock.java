@@ -13,16 +13,22 @@
  */
 package io.horizondb.model.core.blocks;
 
+import io.horizondb.io.buffers.Buffers;
+import io.horizondb.model.core.DataBlock;
+import io.horizondb.model.core.Field;
+import io.horizondb.model.core.Record;
+import io.horizondb.model.core.iterators.BinaryTimeSeriesRecordIterator;
+import io.horizondb.model.core.records.BlockHeaderUtils;
+import io.horizondb.model.core.records.TimeSeriesRecord;
+import io.horizondb.model.schema.TimeSeriesDefinition;
+
 import java.io.IOException;
 
 import com.google.common.collect.ImmutableRangeMap;
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeMap;
 
-import io.horizondb.model.core.DataBlock;
-import io.horizondb.model.core.Field;
-import io.horizondb.model.core.records.BlockHeaderUtils;
-import io.horizondb.model.schema.TimeSeriesDefinition;
+import static io.horizondb.model.core.iterators.BlockIterators.singleton;
 
 public abstract class AbstractDataBlock implements DataBlock {
 
@@ -33,6 +39,47 @@ public abstract class AbstractDataBlock implements DataBlock {
     public RangeMap<Field, DataBlock> split(TimeSeriesDefinition definition) throws IOException {
 
         Range<Field> range = BlockHeaderUtils.getRange(getHeader());
-        return ImmutableRangeMap.<Field, DataBlock>of(range, this);
+
+        Range<Field> partitionRange = definition.getPartitionTimeRange(range.lowerEndpoint());
+
+        if (partitionRange.contains(range.upperEndpoint())) {
+            return ImmutableRangeMap.<Field, DataBlock> of(partitionRange, this);
+        }
+
+        TimeSeriesRecord[] records = definition.newRecords();
+
+        ImmutableRangeMap.Builder<Field, DataBlock> builder = ImmutableRangeMap.builder();
+
+        RecordAppender appender = new RecordAppender(definition, Buffers.getDefaultAllocator(), records);
+
+        Field[] timestamps = new Field[records.length];
+        for (int i = 0; i < timestamps.length; i++) {
+            timestamps[i] = definition.newField(Record.TIMESTAMP_FIELD_NAME);
+        }
+
+        try (BinaryTimeSeriesRecordIterator iterator = new BinaryTimeSeriesRecordIterator(definition, singleton(this))) {
+
+            while (iterator.hasNext()) {
+
+                Record record = iterator.next();
+                Field timestamp = timestamps[record.getType()];
+                if (record.isDelta()) {
+                    timestamp.add(record.getField(Record.TIMESTAMP_FIELD_INDEX));
+                } else {
+                    record.getField(Record.TIMESTAMP_FIELD_INDEX).copyTo(timestamp);
+                }
+
+                if (!partitionRange.contains(timestamp)) {
+
+                    builder.put(partitionRange, appender.getDataBlock());
+                    partitionRange = definition.getPartitionTimeRange(timestamp);
+                    appender = new RecordAppender(definition, Buffers.getDefaultAllocator(), records);
+                }
+                appender.append(record);
+            }
+            builder.put(partitionRange, appender.getDataBlock());
+        }
+
+        return builder.build();
     }
 }
