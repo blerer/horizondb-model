@@ -31,6 +31,7 @@ import static io.horizondb.model.core.records.BlockHeaderUtils.getRecordCount;
 import static io.horizondb.model.core.records.BlockHeaderUtils.incrementRecordCount;
 import static io.horizondb.model.core.records.BlockHeaderUtils.setCompressedBlockSize;
 import static io.horizondb.model.core.records.BlockHeaderUtils.setFirstTimestamp;
+import static io.horizondb.model.core.records.BlockHeaderUtils.getFirstTimestamp;
 import static io.horizondb.model.core.records.BlockHeaderUtils.setLastTimestamp;
 
 /**
@@ -122,8 +123,6 @@ public final class RecordAppender {
         int type = record.getType();
 
         if (getRecordCount(this.header, type) == 0) {
-
-            setFirstTimestamp(this.header, record);
             this.lastRecords[type] = record.toTimeSeriesRecord();
             return doAppend(record);
         }
@@ -146,7 +145,6 @@ public final class RecordAppender {
         this.lastRecords[type].add(record);
 
         if (getRecordCount(this.header, type) == 0) {
-            setFirstTimestamp(this.header, this.lastRecords[type]);
             return doAppend(this.lastRecords[type]);
         }
         return doAppend(record);
@@ -192,8 +190,14 @@ public final class RecordAppender {
 
         Buffer bytes = serializeRecord(this.allocator.allocate(totalSize), record, recordSize);
 
-        setLastTimestamp(this.header, this.lastRecords[record.getType()]);
-        incrementRecordCount(this.header, record.getType());
+        int type = record.getType();
+
+        if (getFirstTimestamp(this.header) == 0) {
+            setFirstTimestamp(this.header, this.lastRecords[type]);
+        }
+
+        setLastTimestamp(this.header, this.lastRecords[type]);
+        incrementRecordCount(this.header, type);
 
         this.buffer.addBytes(bytes);
 
@@ -210,7 +214,7 @@ public final class RecordAppender {
      * @throws IOException if an I/O problem occurs
      */
     private static Buffer serializeRecord(Buffer buffer,
-                                          Record record, 
+                                          Record record,
                                           int recordSize) throws IOException {
 
         writeByte(buffer, record.getType());
