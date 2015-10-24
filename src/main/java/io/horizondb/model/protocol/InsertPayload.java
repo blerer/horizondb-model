@@ -22,6 +22,8 @@ import io.horizondb.io.encoding.VarInts;
 import io.horizondb.io.serialization.Parser;
 
 import java.io.IOException;
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
 
 /**
  */
@@ -146,7 +148,7 @@ public final class InsertPayload implements Payload {
         VarInts.writeUnsignedInt(writer, this.buffer.readableBytes());
         writer.transfer(this.buffer.readerIndex(0));
     }
-    
+
     /**
      * Creates a new <code>InsertPayload</code> by reading the data from the specified reader.
      * 
@@ -165,5 +167,17 @@ public final class InsertPayload implements Payload {
     public static Parser<InsertPayload> getParser() {
 
         return PARSER;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).append("database", this.database)
+                                                                          .append("series", this.series)
+                                                                          .append("recordType", this.recordType)
+                                                                          .append("buffer", this.buffer)
+                                                                          .toString();
     }
 }
