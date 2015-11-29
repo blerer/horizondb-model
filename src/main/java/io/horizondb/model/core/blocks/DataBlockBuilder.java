@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static java.lang.String.format;
+
 import static org.apache.commons.lang.Validate.notNull;
 
 /**
@@ -328,7 +330,10 @@ public final class DataBlockBuilder {
                                                      this.definition.newRecords());
 
         for (TimeSeriesRecord record : this.records){
-            appender.append(record);
+            if (!appender.append(record)) {
+                throw new BlockOverflowException(format("The record %s cannot be appended to the block as it is full.",
+                                                        record));
+            }
         }
 
         return appender.getDataBlock();

@@ -491,9 +491,9 @@ public final class TimeSeriesDefinition extends ForwardingRecordSetDefinition {
          * @param blockSizeInBytes the size of the block used by the time series.
          * @return this <code>Builder</code>.
          */
-        public Builder blockSize(int blockSize) {
+        public Builder blockSize(int blockSizeInBytes) {
 
-            this.blockSize = blockSize;
+            this.blockSize = blockSizeInBytes;
             return this;
         }
         
