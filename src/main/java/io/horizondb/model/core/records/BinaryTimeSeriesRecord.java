@@ -24,6 +24,8 @@ import io.horizondb.model.schema.FieldType;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
 
 /**
  * @author Benjamin
@@ -319,5 +321,13 @@ public class BinaryTimeSeriesRecord extends AbstractTimeSeriesRecord {
     private boolean isBitSetDeserialized() {
 
         return this.bitSetDeserialized;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).append("buffer", this.buffer).toString();
     }
 }

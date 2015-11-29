@@ -25,6 +25,8 @@ import java.io.IOException;
 
 import static io.horizondb.model.core.records.BlockHeaderUtils.getCompressedBlockSize;
 import static org.apache.commons.lang.Validate.isTrue;
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
 
 /**
  *
@@ -103,5 +105,15 @@ public final class BinaryDataBlock extends AbstractDataBlock {
     @Override
     public ReadableBuffer getData() {
         return this.buffer;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).append("header", this.header)
+                                                                          .append("buffer", this.buffer)
+                                                                          .toString();
     }
 }
