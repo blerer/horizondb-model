@@ -155,7 +155,7 @@ public final class RecordAppender {
      * @return the data block to which the delta have been appended.
      */
     public DataBlock getDataBlock() {
-        return new ImmutableDataBlock(this.header, this.buffer);
+        return new DefaultDataBlock(this.header, this.buffer);
     }
 
     /**

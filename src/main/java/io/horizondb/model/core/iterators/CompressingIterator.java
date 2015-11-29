@@ -18,7 +18,7 @@ import io.horizondb.io.compression.CompressionType;
 import io.horizondb.io.compression.Compressor;
 import io.horizondb.model.core.DataBlock;
 import io.horizondb.model.core.ResourceIterator;
-import io.horizondb.model.core.blocks.ImmutableDataBlock;
+import io.horizondb.model.core.blocks.DefaultDataBlock;
 import io.horizondb.model.core.records.BlockHeaderUtils;
 import io.horizondb.model.core.records.TimeSeriesRecord;
 
@@ -81,6 +81,6 @@ final class CompressingIterator extends ForwardingResourceIterator<DataBlock> {
         setCompressedBlockSize(header, compressedData.readableBytes());
         setUncompressedBlockSize(header, blockSize);
 
-        return new ImmutableDataBlock(header, compressedData);
+        return new DefaultDataBlock(header, compressedData);
     }
 }

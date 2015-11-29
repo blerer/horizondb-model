@@ -28,7 +28,7 @@ import org.apache.commons.lang.builder.ToStringStyle;
  * A {@link DataBlock} that always return a copy of the header and of the buffer.
  *
  */
-public final class ImmutableDataBlock extends AbstractDataBlock {
+public final class DefaultDataBlock extends AbstractDataBlock {
 
     /**
      * The block header.
@@ -46,7 +46,7 @@ public final class ImmutableDataBlock extends AbstractDataBlock {
      * @param header the block header
      * @param data the block data
      */
-    public ImmutableDataBlock(Record header, ReadableBuffer data) {
+    public DefaultDataBlock(Record header, ReadableBuffer data) {
         this.header = header;
         this.data = data.readerIndex(0);
     }
@@ -91,7 +91,7 @@ public final class ImmutableDataBlock extends AbstractDataBlock {
      */
     @Override
     public void writeTo(ByteWriter writer) throws IOException {
-        RecordUtils.writeRecord(writer, this.header);
-        writer.transfer(this.data);
+        RecordUtils.writeRecord(writer, getHeader());
+        writer.transfer(getData());
     }
 }
