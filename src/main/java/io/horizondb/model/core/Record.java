@@ -246,4 +246,13 @@ public interface Record extends Serializable {
      * @param writer the writer to write to
      */
     void writeFieldTo(int index, ByteWriter writer) throws IOException;
+
+    /**
+     * Inflates this <code>Record</code>.
+     *
+     * @param previous the previous record of the same type
+     * @return the inflated record
+     * @throws IOException if an I/O problem occurs
+     */
+    Record inflate(TimeSeriesRecord previous) throws IOException;
 }

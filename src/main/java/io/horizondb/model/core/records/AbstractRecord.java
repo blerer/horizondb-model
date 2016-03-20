@@ -24,8 +24,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 
 /**
- * @author Benjamin
- * 
+ *
  */
 abstract class AbstractRecord implements Record {
 
@@ -180,5 +179,19 @@ abstract class AbstractRecord implements Record {
         }
 
         return copy;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Record inflate(TimeSeriesRecord previous) throws IOException {
+
+        if (isDelta()) {
+            return previous.add(this);
+        }
+
+        copyTo(previous);
+        return previous;
     }
 }

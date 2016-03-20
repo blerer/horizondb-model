@@ -533,7 +533,20 @@ public class TimeSeriesRecord extends AbstractTimeSeriesRecord implements Compar
     public int compareTo(TimeSeriesRecord o) {
         return Long.compare(this.getTimestampInNanos(0), o.getTimestampInNanos(0));
     }
+
+    /**
+     * Deflates this <code>Record</code>.
+     *
+     * @param previous the previous record of the same time
+     * @return the deflated record
+     * @throws IOException if an I/O problem occurs
+     */
+    public Record deflate(TimeSeriesRecord previous) throws IOException {
+        this.subtract(previous);
+        return this;
+    }
     
+
     /**
      * Converts this records into a buffer. 
      * 
