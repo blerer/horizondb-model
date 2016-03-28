@@ -28,7 +28,11 @@ import io.horizondb.model.schema.TimeSeriesDefinition;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
+
+import static io.horizondb.model.core.iterators.BlockIterators.iterator;
 
 import static org.junit.Assert.assertFalse;
 
@@ -50,87 +54,116 @@ public class MergingRecordIteratorTest {
      */
     private static long TIME_IN_NANOS = TimeUnit.MILLISECONDS.toNanos(TIME_IN_MILLIS);
 
+    /**
+     * The time series definition used by the tests
+     */
+    private TimeSeriesDefinition def;
+
+    @Before
+    public void setup() {
+
+        RecordTypeDefinition exchangeStateDef = RecordTypeDefinition.newBuilder("exchangeState")
+                                                                    .addField("timestampInMillis",
+                                                                              FieldType.MILLISECONDS_TIMESTAMP)
+                                                                    .addField("status", FieldType.BYTE)
+                                                                    .build();
+
+        RecordTypeDefinition tradeDef = RecordTypeDefinition.newBuilder("trade")
+                                                            .addField("timestampInMillis",
+                                                                      FieldType.MILLISECONDS_TIMESTAMP)
+                                                            .addField("price", FieldType.DECIMAL)
+                                                            .addField("volume", FieldType.INTEGER)
+                                                            .build();
+
+        this.def = TimeSeriesDefinition.newBuilder("test")
+                                       .timeUnit(TimeUnit.NANOSECONDS)
+                                       .addRecordType(exchangeStateDef)
+                                       .addRecordType(tradeDef)
+                                       .build();
+    }
+
+    @After
+    public void teardown() {
+        this.def = null;
+    }
+
     @Test
     public void testMergeWithOverlappingBlocks() throws Exception {
 
-        RecordTypeDefinition recordTypeDefinition = RecordTypeDefinition.newBuilder("exchangeState")
-                                                                        .addField("timestampInMillis",
-                                                                                  FieldType.MILLISECONDS_TIMESTAMP)
-                                                                        .addField("status", FieldType.BYTE)
-                                                                        .build();
+        DataBlock block1 = new DataBlockBuilder(this.def).newRecord("exchangeState")
+                                                         .setTimestampInNanos(0, TIME_IN_NANOS + 12000700)
+                                                         .setTimestampInMillis(1, TIME_IN_MILLIS + 12)
+                                                         .setByte(2, 3)
+                                                         .newRecord("exchangeState")
+                                                         .setTimestampInNanos(0, TIME_IN_NANOS + 13000900)
+                                                         .setTimestampInMillis(1, TIME_IN_MILLIS + 13)
+                                                         .setByte(2, 3)
+                                                         .newRecord("trade")
+                                                         .setTimestampInNanos(0, TIME_IN_NANOS + 13001200)
+                                                         .setTimestampInMillis(1, TIME_IN_MILLIS + 13)
+                                                         .setDecimal(2, 123, -1)
+                                                         .setInt(3, 200)
+                                                         .newRecord("trade")
+                                                         .setTimestampInNanos(0, TIME_IN_NANOS + 13003200)
+                                                         .setTimestampInMillis(1, TIME_IN_MILLIS + 13)
+                                                         .setDecimal(2, 125, -1)
+                                                         .setInt(3, 500)
+                                                         .newRecord("exchangeState")
+                                                         .setTimestampInNanos(0, TIME_IN_NANOS + 13004400)
+                                                         .setTimestampInMillis(1, TIME_IN_MILLIS + 13)
+                                                         .setByte(2, 1)
+                                                         .build();
 
-        TimeSeriesDefinition def = TimeSeriesDefinition.newBuilder("test")
-                                                       .timeUnit(TimeUnit.NANOSECONDS)
-                                                       .addRecordType(recordTypeDefinition)
-                                                       .blockSize(40)
-                                                       .build();
-
-        DataBlock block1 = new DataBlockBuilder(def).newRecord("exchangeState")
-                                                    .setTimestampInNanos(0, TIME_IN_NANOS + 12000700)
-                                                    .setTimestampInMillis(1, TIME_IN_MILLIS + 12)
-                                                    .setByte(2, 3)
-                                                    .newRecord("exchangeState")
-                                                    .setTimestampInNanos(0, TIME_IN_NANOS + 13000900)
-                                                    .setTimestampInMillis(1, TIME_IN_MILLIS + 13)
-                                                    .setByte(2, 3)
-                                                    .newRecord("exchangeState")
-                                                    .setTimestampInNanos(0, TIME_IN_NANOS + 13004400)
-                                                    .setTimestampInMillis(1, TIME_IN_MILLIS + 13)
-                                                    .setByte(2, 1)
-                                                    .build();
-
-        DataBlock block2 = new DataBlockBuilder(def).newRecord("exchangeState")
-                                                    .setTimestampInNanos(0, TIME_IN_NANOS + 14000000)
-                                                    .setTimestampInMillis(1, TIME_IN_MILLIS + 14)
-                                                    .setByte(2, 3)
-                                                    .newRecord("exchangeState")
-                                                    .setTimestampInNanos(0, TIME_IN_NANOS + 16000000)
-                                                    .setTimestampInMillis(1, TIME_IN_MILLIS + 16)
-                                                    .setByte(2, 1)
-                                                    .build();
+        DataBlock block2 = new DataBlockBuilder(this.def).newRecord("exchangeState")
+                                                         .setTimestampInNanos(0, TIME_IN_NANOS + 14000000)
+                                                         .setTimestampInMillis(1, TIME_IN_MILLIS + 14)
+                                                         .setByte(2, 3)
+                                                         .newRecord("trade")
+                                                         .setTimestampInNanos(0, TIME_IN_NANOS + 14200000) 
+                                                         .setTimestampInMillis(1, TIME_IN_MILLIS + 14)
+                                                         .setDecimal(2, 122, -1)
+                                                         .setInt(3, 150)
+                                                         .newRecord("exchangeState")
+                                                         .setTimestampInNanos(0, TIME_IN_NANOS + 16000000)
+                                                         .setTimestampInMillis(1, TIME_IN_MILLIS + 16)
+                                                         .setByte(2, 1)
+                                                         .build();
 
         ResourceIterator<BinaryTimeSeriesRecord> firstIterator = 
-                new BinaryTimeSeriesRecordIterator(def, BlockIterators.iterator(def, serialize(block1, block2)));
+                new BinaryTimeSeriesRecordIterator(this.def, iterator(this.def, serialize(block1, block2)));
 
-        DataBlock block3 = new DataBlockBuilder(def).newRecord("exchangeState")
-                                                    .setTimestampInNanos(0, TIME_IN_NANOS + 15000000)
-                                                    .setTimestampInMillis(1, TIME_IN_MILLIS + 15)
-                                                    .setByte(2, 3)
-                                                    .newRecord("exchangeState")
-                                                    .setTimestampInNanos(0, TIME_IN_NANOS + 17000000)
-                                                    .setTimestampInMillis(1, TIME_IN_MILLIS + 17)
-                                                    .setByte(2, 3)
-                                                    .build();
+        DataBlock block3 = new DataBlockBuilder(this.def).newRecord("exchangeState")
+                                                         .setTimestampInNanos(0, TIME_IN_NANOS + 15000000)
+                                                         .setTimestampInMillis(1, TIME_IN_MILLIS + 15)
+                                                         .setByte(2, 3)
+                                                         .newRecord("trade")
+                                                         .setTimestampInNanos(0, TIME_IN_NANOS + 16000500)
+                                                         .setTimestampInMillis(1, TIME_IN_MILLIS + 16)
+                                                         .setDecimal(2, 12, 0)
+                                                         .setInt(3, 50)
+                                                         .newRecord("exchangeState")
+                                                         .setTimestampInNanos(0, TIME_IN_NANOS + 17000000)
+                                                         .setTimestampInMillis(1, TIME_IN_MILLIS + 17)
+                                                         .setByte(2, 3)
+                                                         .build();
 
         ResourceIterator<BinaryTimeSeriesRecord> secondIterator = 
-                new BinaryTimeSeriesRecordIterator(def, BlockIterators.iterator(def, serialize(block3)));
+                new BinaryTimeSeriesRecordIterator(this.def, iterator(this.def, serialize(block3)));
 
-        validateMergedOutput(def, firstIterator, secondIterator);
+        validateMergedOutput(this.def, firstIterator, secondIterator);
 
-        firstIterator = new BinaryTimeSeriesRecordIterator(def, BlockIterators.iterator(def, serialize(block3)));
-        secondIterator = new BinaryTimeSeriesRecordIterator(def, BlockIterators.iterator(def, serialize(block1, block2)));
-        validateMergedOutput(def, firstIterator, secondIterator);
-        firstIterator = new BinaryTimeSeriesRecordIterator(def, BlockIterators.iterator(def, serialize(block1, block3)));
-        secondIterator = new BinaryTimeSeriesRecordIterator(def, BlockIterators.iterator(def, serialize(block2)));
-        validateMergedOutput(def, firstIterator, secondIterator);
+        firstIterator = new BinaryTimeSeriesRecordIterator(this.def, iterator(this.def, serialize(block3)));
+        secondIterator = new BinaryTimeSeriesRecordIterator(this.def, iterator(this.def, serialize(block1, block2)));
+        validateMergedOutput(this.def, firstIterator, secondIterator);
+        firstIterator = new BinaryTimeSeriesRecordIterator(this.def, iterator(this.def, serialize(block1, block3)));
+        secondIterator = new BinaryTimeSeriesRecordIterator(this.def, iterator(this.def, serialize(block2)));
+        validateMergedOutput(this.def, firstIterator, secondIterator);
     }
 
     @Test
     public void testMergeWithoutOverlappingBlocks() throws Exception {
 
-        RecordTypeDefinition recordTypeDefinition = RecordTypeDefinition.newBuilder("exchangeState")
-                                                                        .addField("timestampInMillis",
-                                                                                  FieldType.MILLISECONDS_TIMESTAMP)
-                                                                        .addField("status", FieldType.BYTE)
-                                                                        .build();
-
-        TimeSeriesDefinition def = TimeSeriesDefinition.newBuilder("test")
-                                                       .timeUnit(TimeUnit.NANOSECONDS)
-                                                       .addRecordType(recordTypeDefinition)
-                                                       .blockSize(40)
-                                                       .build();
-
-        DataBlock block1 = new DataBlockBuilder(def).newRecord("exchangeState")
+        DataBlock block1 = new DataBlockBuilder(this.def).newRecord("exchangeState")
                                                     .setTimestampInNanos(0, TIME_IN_NANOS + 12000700)
                                                     .setTimestampInMillis(1, TIME_IN_MILLIS + 12)
                                                     .setByte(2, 3)
@@ -138,16 +171,31 @@ public class MergingRecordIteratorTest {
                                                     .setTimestampInNanos(0, TIME_IN_NANOS + 13000900)
                                                     .setTimestampInMillis(1, TIME_IN_MILLIS + 13)
                                                     .setByte(2, 3)
+                                                    .newRecord("trade")
+                                                    .setTimestampInNanos(0, TIME_IN_NANOS + 13001200)
+                                                    .setTimestampInMillis(1, TIME_IN_MILLIS + 13)
+                                                    .setDecimal(2, 123, -1)
+                                                    .setInt(3, 200)
+                                                    .newRecord("trade")
+                                                    .setTimestampInNanos(0, TIME_IN_NANOS + 13003200)
+                                                    .setTimestampInMillis(1, TIME_IN_MILLIS + 13)
+                                                    .setDecimal(2, 125, -1)
+                                                    .setInt(3, 500)
                                                     .newRecord("exchangeState")
                                                     .setTimestampInNanos(0, TIME_IN_NANOS + 13004400)
                                                     .setTimestampInMillis(1, TIME_IN_MILLIS + 13)
                                                     .setByte(2, 1)
                                                     .build();
 
-        DataBlock block2 = new DataBlockBuilder(def).newRecord("exchangeState")
+        DataBlock block2 = new DataBlockBuilder(this.def).newRecord("exchangeState")
                                                     .setTimestampInNanos(0, TIME_IN_NANOS + 14000000)
                                                     .setTimestampInMillis(1, TIME_IN_MILLIS + 14)
                                                     .setByte(2, 3)
+                                                    .newRecord("trade")
+                                                    .setTimestampInNanos(0, TIME_IN_NANOS + 14200000)
+                                                    .setTimestampInMillis(1, TIME_IN_MILLIS + 14)
+                                                    .setDecimal(2, 122, -1)
+                                                    .setInt(3, 150)
                                                     .newRecord("exchangeState")
                                                     .setTimestampInNanos(0, TIME_IN_NANOS + 15000000)
                                                     .setTimestampInMillis(1, TIME_IN_MILLIS + 15)
@@ -155,12 +203,17 @@ public class MergingRecordIteratorTest {
                                                     .build();
 
         ResourceIterator<BinaryTimeSeriesRecord> firstIterator = 
-                new BinaryTimeSeriesRecordIterator(def, BlockIterators.iterator(def, serialize(block1, block2)));
+                new BinaryTimeSeriesRecordIterator(this.def, BlockIterators.iterator(this.def, serialize(block1, block2)));
 
-        DataBlock block3 = new DataBlockBuilder(def).newRecord("exchangeState")
+        DataBlock block3 = new DataBlockBuilder(this.def).newRecord("exchangeState")
                                                     .setTimestampInNanos(0, TIME_IN_NANOS + 16000000)
                                                     .setTimestampInMillis(1, TIME_IN_MILLIS + 16)
                                                     .setByte(2, 1)
+                                                    .newRecord("trade")
+                                                    .setTimestampInNanos(0, TIME_IN_NANOS + 16000500)
+                                                    .setTimestampInMillis(1, TIME_IN_MILLIS + 16)
+                                                    .setDecimal(2, 12, 0)
+                                                    .setInt(3, 50)
                                                     .newRecord("exchangeState")
                                                     .setTimestampInNanos(0, TIME_IN_NANOS + 17000000)
                                                     .setTimestampInMillis(1, TIME_IN_MILLIS + 17)
@@ -168,18 +221,18 @@ public class MergingRecordIteratorTest {
                                                     .build();
 
         ResourceIterator<BinaryTimeSeriesRecord> secondIterator = 
-                new BinaryTimeSeriesRecordIterator(def, BlockIterators.iterator(def, serialize(block3)));
+                new BinaryTimeSeriesRecordIterator(this.def, iterator(this.def, serialize(block3)));
 
-        validateMergedOutput(def, firstIterator, secondIterator);
+        validateMergedOutput(this.def, firstIterator, secondIterator);
 
-        firstIterator = new BinaryTimeSeriesRecordIterator(def, BlockIterators.iterator(def, serialize(block3)));
-        secondIterator = new BinaryTimeSeriesRecordIterator(def, BlockIterators.iterator(def, serialize(block1, block2)));
-        validateMergedOutput(def, firstIterator, secondIterator);
+        firstIterator = new BinaryTimeSeriesRecordIterator(this.def, iterator(this.def, serialize(block3)));
+        secondIterator = new BinaryTimeSeriesRecordIterator(this.def, iterator(this.def, serialize(block1, block2)));
+        validateMergedOutput(this.def, firstIterator, secondIterator);
 
-        firstIterator = new BinaryTimeSeriesRecordIterator(def, BlockIterators.iterator(def, serialize(block1, block3)));
-        secondIterator = new BinaryTimeSeriesRecordIterator(def, BlockIterators.iterator(def, serialize(block2)));
+        firstIterator = new BinaryTimeSeriesRecordIterator(this.def, iterator(this.def, serialize(block1, block3)));
+        secondIterator = new BinaryTimeSeriesRecordIterator(this.def, iterator(this.def, serialize(block2)));
 
-        validateMergedOutput(def, firstIterator, secondIterator);
+        validateMergedOutput(this.def, firstIterator, secondIterator);
     }
 
     protected void validateMergedOutput(TimeSeriesDefinition def,
@@ -191,6 +244,7 @@ public class MergingRecordIteratorTest {
             assertTrue(readIterator.hasNext());
             Record actual = readIterator.next();
 
+            assertEquals(0, actual.getType());
             assertFalse(actual.isDelta());
             assertEquals(TIME_IN_NANOS + 12000700L, actual.getTimestampInNanos(0));
             assertEquals(TIME_IN_MILLIS + 12, actual.getTimestampInMillis(1));
@@ -199,6 +253,7 @@ public class MergingRecordIteratorTest {
             assertTrue(readIterator.hasNext());
             actual = readIterator.next();
 
+            assertEquals(0, actual.getType());
             assertTrue(actual.isDelta());
             assertEquals(1000200L, actual.getTimestampInNanos(0));
             assertEquals(1, actual.getTimestampInMillis(1));
@@ -207,14 +262,36 @@ public class MergingRecordIteratorTest {
             assertTrue(readIterator.hasNext());
             actual = readIterator.next();
 
+            assertEquals(1, actual.getType());
+            assertFalse(actual.isDelta());
+            assertEquals(TIME_IN_NANOS + 13001200, actual.getTimestampInNanos(0));
+            assertEquals(TIME_IN_MILLIS + 13, actual.getTimestampInMillis(1));
+            assertEquals(12.3, actual.getDouble(2), 0.0);
+            assertEquals(200, actual.getInt(3));
+
+            assertTrue(readIterator.hasNext());
+            actual = readIterator.next();
+
+            assertEquals(1, actual.getType());
             assertTrue(actual.isDelta());
-            assertEquals(3500L, actual.getTimestampInNanos(0));
+            assertEquals(2000, actual.getTimestampInNanos(0));
+            assertEquals(0, actual.getTimestampInMillis(1));
+            assertEquals(0.2, actual.getDouble(2), 0.0);
+            assertEquals(300, actual.getInt(3));
+
+            assertTrue(readIterator.hasNext());
+            actual = readIterator.next();
+
+            assertEquals(0, actual.getType());
+            assertTrue(actual.isDelta());
+            assertEquals(3500, actual.getTimestampInNanos(0));
             assertEquals(0, actual.getTimestampInMillis(1));
             assertEquals(-2, actual.getByte(2));
 
             assertTrue(readIterator.hasNext());
             actual = readIterator.next();
 
+            assertEquals(0, actual.getType());
             assertTrue(actual.isDelta());
             assertEquals(995600, actual.getTimestampInNanos(0));
             assertEquals(1, actual.getTimestampInMillis(1));
@@ -223,6 +300,17 @@ public class MergingRecordIteratorTest {
             assertTrue(readIterator.hasNext());
             actual = readIterator.next();
 
+            assertEquals(1, actual.getType());
+            assertTrue(actual.isDelta());
+            assertEquals(1196800L, actual.getTimestampInNanos(0));
+            assertEquals(1, actual.getTimestampInMillis(1));
+            assertEquals(-0.3, actual.getDouble(2), 0.0);
+            assertEquals(-350, actual.getInt(3));
+
+            assertTrue(readIterator.hasNext());
+            actual = readIterator.next();
+
+            assertEquals(0, actual.getType());
             assertTrue(actual.isDelta());
             assertEquals(1000000L, actual.getTimestampInNanos(0));
             assertEquals(1, actual.getTimestampInMillis(1));
@@ -231,6 +319,7 @@ public class MergingRecordIteratorTest {
             assertTrue(readIterator.hasNext());
             actual = readIterator.next();
 
+            assertEquals(0, actual.getType());
             assertTrue(actual.isDelta());
             assertEquals(1000000L, actual.getTimestampInNanos(0));
             assertEquals(1, actual.getTimestampInMillis(1));
@@ -239,6 +328,17 @@ public class MergingRecordIteratorTest {
             assertTrue(readIterator.hasNext());
             actual = readIterator.next();
 
+            assertEquals(1, actual.getType());
+            assertTrue(actual.isDelta());
+            assertEquals(1800500L, actual.getTimestampInNanos(0));
+            assertEquals(2, actual.getTimestampInMillis(1));
+            assertEquals(-0.2, actual.getDouble(2), 0.0);
+            assertEquals(-100, actual.getInt(3));
+
+            assertTrue(readIterator.hasNext());
+            actual = readIterator.next();
+
+            assertEquals(0, actual.getType());
             assertTrue(actual.isDelta());
             assertEquals(1000000L, actual.getTimestampInNanos(0));
             assertEquals(1, actual.getTimestampInMillis(1));

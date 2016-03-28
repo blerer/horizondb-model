@@ -23,17 +23,7 @@ import java.io.IOException;
 /**
  * A <code>ResourceIterator</code> that merge the result of two <code>Record</code> iterators.
  */
-public final class MergingRecordIterator extends AbstractResourceIterator<Record> {
-
-    /**
-     * The left side iterator. 
-     */
-    private final ResourceIterator<? extends Record> left;
-
-    /**
-     * The right side iterator.
-     */
-    private final ResourceIterator<? extends Record> right;
+final class MergingRecordIterator extends AbstractMergingResourceIterator<Record> {
 
     /**
      * The last full records for the left iterator.
@@ -46,73 +36,32 @@ public final class MergingRecordIterator extends AbstractResourceIterator<Record
     private TimeSeriesRecord[] lastRecordsFromRight;
 
     /**
-     * The next record from the left iterator.
-     */
-    private Record nextFromLeft;
-
-    /**
-     * The next record from the right iterator.
-     */
-    private Record nextFromRight;
-
-    /**
      * The last records returned by this iterator.
      */
     private TimeSeriesRecord[] lastRecordsReturned;
 
     /**
-     * <code>true</code> if at least one record has been returned, false otherwise.
-     */
-    private boolean hasReturnedRecords;
-
-    /**
      * Specifies if the last record returned was from the left iterator.
      */
-    private boolean previousWasFromLeft;
+    private boolean[] previousWasFromLeft;
 
     /**
      * Creates a <code>MergingRecordIterator</code> that will merge the records returned by the two specified
      * iterators.
      * @param definition the time series definition
      * @param left the left iterator
-     * @param right the righ iterator
+     * @param right the right iterator
      */
     public MergingRecordIterator(TimeSeriesDefinition definition,
                                  ResourceIterator<? extends Record> left,
                                  ResourceIterator<? extends Record> right) {
 
-        this.left = left;
-        this.right = right;
+        super(left, right);
         this.lastRecordsFromLeft = definition.newRecords();
         this.lastRecordsFromRight = definition.newRecords();
-        this.lastRecordsReturned = definition.newRecords();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void close() throws IOException {
-
-        IOException ioe = null;
-
-        try {
-            this.left.close();
-        } catch (IOException e) {
-            ioe = e;
-        }
-
-        try {
-            this.right.close();
-        } catch (IOException e) {
-            if (ioe != null) {
-                ioe = e;
-            }
-        }
-
-        if (ioe != null) {
-            throw ioe;
-        }
+        int numberOfRecordTypes = definition.getNumberOfRecordTypes();
+        this.lastRecordsReturned = new TimeSeriesRecord[numberOfRecordTypes];
+        this.previousWasFromLeft = new boolean[numberOfRecordTypes];
     }
 
     /**
@@ -145,7 +94,6 @@ public final class MergingRecordIterator extends AbstractResourceIterator<Record
                 setRightAsNext();
             }
         }
-        this.hasReturnedRecords = true;
     }
 
     /**
@@ -164,15 +112,22 @@ public final class MergingRecordIterator extends AbstractResourceIterator<Record
      * @throws IOException if an I/O problem occurs
      */
     private void setRightAsNext() throws IOException {
+
         int type = this.nextFromRight.getType();
-        if ((!this.previousWasFromLeft && this.nextFromRight.isDelta()) || !this.hasReturnedRecords) {
+
+        if ((!this.previousWasFromLeft[type] && this.nextFromRight.isDelta()) || this.lastRecordsReturned[type] == null) {
             setNext(this.nextFromRight);
         } else {
             setNext(this.lastRecordsFromRight[type].newInstance().deflate(this.lastRecordsReturned[type]));
         }
-        this.lastRecordsFromRight[type].copyTo(this.lastRecordsReturned[type]);
+
+        if (this.lastRecordsReturned[type] == null) {
+            this.lastRecordsReturned[type] = this.lastRecordsFromRight[type].newInstance();
+        } else {
+            this.lastRecordsFromRight[type].copyTo(this.lastRecordsReturned[type]);
+        }
         this.nextFromRight = null;
-        this.previousWasFromLeft = false;
+        this.previousWasFromLeft[type] = false;
     }
 
     /**
@@ -180,14 +135,21 @@ public final class MergingRecordIterator extends AbstractResourceIterator<Record
      * @throws IOException if an I/O problem occurs
      */
     private void setLeftAsNext() throws IOException {
+
         int type = this.nextFromLeft.getType();
-        if ((this.previousWasFromLeft && this.nextFromLeft.isDelta()) || !this.hasReturnedRecords) {
+
+        if ((this.previousWasFromLeft[type] && this.nextFromLeft.isDelta()) || this.lastRecordsReturned[type] == null) {
             setNext(this.nextFromLeft);
         } else {
             setNext(this.lastRecordsFromLeft[type].newInstance().deflate(this.lastRecordsReturned[type]));
         }
-        this.lastRecordsFromLeft[type].copyTo(this.lastRecordsReturned[type]);
+
+        if (this.lastRecordsReturned[type] == null) {
+            this.lastRecordsReturned[type] = this.lastRecordsFromLeft[type].newInstance();
+        } else {
+            this.lastRecordsFromLeft[type].copyTo(this.lastRecordsReturned[type]);
+        }
         this.nextFromLeft = null;
-        this.previousWasFromLeft = true;
+        this.previousWasFromLeft[type] = true;
     }
 }
