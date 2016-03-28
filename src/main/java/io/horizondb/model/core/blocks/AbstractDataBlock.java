@@ -30,13 +30,17 @@ import com.google.common.collect.RangeMap;
 
 import static io.horizondb.model.core.iterators.BlockIterators.singleton;
 
+/**
+ * Base class for the <code>DataBlock</code> implementations.
+ *
+ */
 public abstract class AbstractDataBlock implements DataBlock {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public RangeMap<Field, DataBlock> split(TimeSeriesDefinition definition) throws IOException {
+    public final RangeMap<Field, DataBlock> split(TimeSeriesDefinition definition) throws IOException {
 
         Range<Field> range = BlockHeaderUtils.getRange(getHeader());
 
@@ -81,5 +85,72 @@ public abstract class AbstractDataBlock implements DataBlock {
         }
 
         return builder.build();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public long getFirstTimestamp() throws IOException {
+        return BlockHeaderUtils.getFirstTimestamp(getHeader());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public long getLastTimestamp() throws IOException {
+        return BlockHeaderUtils.getLastTimestamp(getHeader());
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final boolean isAfter(DataBlock block) throws IOException {
+        return getFirstTimestamp() > block.getLastTimestamp();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final boolean overlap(DataBlock block) throws IOException {
+
+        long timestamp = getFirstTimestamp();
+        long otherTimestamp = block.getFirstTimestamp();
+
+        if (timestamp < otherTimestamp) {
+            return otherTimestamp <= getLastTimestamp();
+        }
+        return timestamp <= block.getLastTimestamp();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final boolean hasSpaceAvailable(TimeSeriesDefinition definition) throws IOException {
+
+        long blockSize = BlockHeaderUtils.getUncompressedBlockSize(getHeader());
+        long averageRecordSize = blockSize / getNumberOfRecords(definition);
+        // If we have at least twice the space of an average record we should be able 
+        // to add an extra one.
+        return (blockSize + (2 * averageRecordSize)) <= definition.getBlockSizeInBytes();
+    }
+
+    /**
+     * Returns the total number of records within this block.
+     *
+     * @return the total number of records within this block.
+     * @throws IOException if an I/O problem occurs
+     */
+    private long getNumberOfRecords(TimeSeriesDefinition definition) throws IOException {
+        int numberOfRecords = 0; 
+        for (int i = 0; i < definition.getNumberOfRecordTypes(); i++)
+        {
+            numberOfRecords += BlockHeaderUtils.getRecordCount(getHeader(), i);
+        }
+        return numberOfRecords;
     }
 }

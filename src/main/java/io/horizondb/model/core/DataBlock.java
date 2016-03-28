@@ -47,4 +47,47 @@ public interface DataBlock extends Serializable {
      * @throws IOException if an I/O problem occurs
      */
     RangeMap<Field, DataBlock> split(TimeSeriesDefinition definition) throws IOException;
+
+    /**
+     * Returns the first time stamp of the block.
+     *
+     * @return the first time stamp of the block
+     * @throws IOException if an I/O problem occurs
+     */
+    long getFirstTimestamp() throws IOException;
+
+    /**
+     * Returns the last time stamp of the block.
+     *
+     * @return the last time stamp of the block
+     * @throws IOException if an I/O problem occurs
+     */
+    long getLastTimestamp() throws IOException;
+
+    /**
+     * Checks if this block is after the specified one.
+     *
+     * @param block the block to compare to
+     * @return <code>true</code> if this block is after the specified one, <code>false</code> otherwise.
+     * @throws IOException if an I/O problem occurs
+     */
+    boolean isAfter(DataBlock block) throws IOException;
+
+    /**
+     * Checks if this block and the specified one overlap.
+     *
+     * @param block the block to compare to
+     * @return <code>true</code> if this block and the specified one overlap, <code>false</code> otherwise.
+     * @throws IOException if an I/O problem occurs
+     */
+    boolean overlap(DataBlock block) throws IOException;
+
+    /**
+     * Checks if this block has still some space available.
+     *
+     * @param definition the time series definition
+     * @return <code>true</code> if this block has some space available, <code>false</code> otherwise.
+     * @throws IOException if an I/O problem occurs
+     */
+    boolean hasSpaceAvailable(TimeSeriesDefinition definition) throws IOException;
 }
